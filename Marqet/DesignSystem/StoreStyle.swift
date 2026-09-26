@@ -76,8 +76,6 @@ enum StorePalette {
 
 /// The rounded, opaque card surface (opaque for legibility in bright stores, KONZEPT §7.7).
 struct CardSurface: ViewModifier {
-    var isFocused = false
-    var focusColor: Color = .accentColor
     /// Soft glow in the store color below the card; it shows through the glass controls.
     var glowColor: Color?
     @Environment(\.colorScheme) private var colorScheme
@@ -86,10 +84,6 @@ struct CardSurface: ViewModifier {
         content
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(.rect(cornerRadius: 30, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 30, style: .continuous)
-                    .strokeBorder(focusColor.opacity(isFocused ? 0.9 : 0), lineWidth: 3)
-            }
             .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
             .background(alignment: .bottom) {
                 if let glowColor {
@@ -108,8 +102,8 @@ struct CardSurface: ViewModifier {
 }
 
 extension View {
-    func cardSurface(isFocused: Bool = false, focusColor: Color = .accentColor, glowColor: Color? = nil) -> some View {
-        modifier(CardSurface(isFocused: isFocused, focusColor: focusColor, glowColor: glowColor))
+    func cardSurface(glowColor: Color? = nil) -> some View {
+        modifier(CardSurface(glowColor: glowColor))
     }
 
     /// iPhone Duo / iPad: sheets open on the leading half so the active card stays visible

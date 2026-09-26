@@ -16,8 +16,6 @@ struct ShoppingScreen: View {
     @Namespace private var cardZoom
     @State private var hinge: HingeState = .none
 
-    /// Duo inside: the composer is a sheet on one half instead of a bar across the crease.
-    private var composerAsSheet: Bool { hinge.isUnfolded }
     /// Height of large title + briefing card; the pager moves down by it.
     @State private var briefingHeight: CGFloat = 0
 
@@ -29,89 +27,80 @@ struct ShoppingScreen: View {
     }
 
     var body: some View {
-        NavigationStack {
-            StorePager()
-                .environment(\.cardZoomNamespace, cardZoom)
-                // The inbox slides down under the briefing and comes back up as the user swipes on.
-                .offset(y: briefingAmount * briefingHeight)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemGroupedBackground).ignoresSafeArea())
-                .overlay(alignment: .bottom) {
-                    if model.composerTarget == nil {
-                        bottomControls
+        GeometryReader { _ in
+            NavigationStack {
+                StorePager(isComposerFocused: $isComposerFocused, showsAddStore: $showsAddStore)
+                    .environment(\.cardZoomNamespace, cardZoom)
+                    // The inbox slides down under the briefing and comes back up as the user swipes on.
+                    .offset(y: briefingAmount * briefingHeight)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemGroupedBackground).ignoresSafeArea())
+                    .overlay(alignment: .bottom) {
+                        if model.composerTarget == nil {
+                            bottomControls
+                        }
                     }
-                }
-                .safeAreaInset(edge: .bottom) {
-                    // Full screen, the focus screen has its own composer.
-                    if model.composerTarget != nil, model.focusedPage == nil, !composerAsSheet {
-                        ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .animation(.snappy, value: model.composerTarget == nil)
+                    .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
+                    .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
+                    .navigationTitle("")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar { toolbar }
+                    .toolbarVerticalCompressionPreferringItems()
+                    .tint(.primary)
+                    .sheet(isPresented: $showsAddStore) {
+                        AddStoreSheet()
+                            .leadingSheetPlacement()
                     }
-                }
-                .animation(.snappy, value: model.composerTarget == nil)
-                .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
-                .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
-                .navigationTitle("")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { toolbar }
-                .toolbarVerticalCompressionPreferringItems()
-                .tint(.primary)
-                .sheet(isPresented: $showsAddStore) {
-                    AddStoreSheet()
-                        .leadingSheetPlacement()
-                }
-                .sheet(isPresented: $showsSettings) {
-                    SettingsView()
-                }
-                .sheet(isPresented: $showsStoreOrder) {
-                    StoreOrderSheet().leadingSheetPlacement()
-                }
-                // Duo inside: like a sheet on the leading half (the active card stays visible on the
-                // right), the cards behind it stay usable. Sheets avoid the crease on their own.
-                .sheet(isPresented: composerSheetBinding) {
-                    ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
-                        .presentationDetents([.height(150)])
-                        .presentationBackgroundInteraction(.enabled)
-                        .presentationDragIndicator(.hidden)
-                        .interactiveDismissDisabled(false)
-                        .leadingSheetPlacement()
-                        .sheet(isPresented: $showsAddStore) { AddStoreSheet() }
-                }
-                .observeHinge($hinge)
-                .sheet(isPresented: $showsMap) {
-                    MapScreen()
-                }
-                .fullScreenCover(isPresented: triageBinding) {
-                    TriageScreen()
-                }
-                .fullScreenCover(item: focusBinding) { focused in
-                    StoreFocusScreen(page: focused.page)
-                        .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
-                }
-                .overlay(alignment: .top) { briefingBlock }
-                .overlay(alignment: .top) {
-                    if model.autoAssignReport != nil { AutoAssignToast() }
-                }
-                .animation(.snappy, value: model.autoAssignReport)
-                .onChange(of: model.activePage) { _, page in
-                    if page != .unsorted, model.briefing != nil {
-                        withAnimation(.snappy) { model.dismissBriefing() }
+                    .sheet(isPresented: $showsSettings) {
+                        SettingsView()
                     }
-                }
-                .onChange(of: model.briefing != nil, initial: true) { _, shown in
-                    if shown, sizeClass == .regular { model.dismissBriefing() }
-                }
-                .onChange(of: model.composerTarget) { _, target in
-                    if target != nil, model.focusedPage == nil { isComposerFocused = true }
-                    if target == nil { isComposerFocused = false }
-                }
-                .onChange(of: model.hasLoadedItems) { _, loaded in
-                    #if DEBUG
-                    if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
-                        model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
+                    .sheet(isPresented: $showsStoreOrder) {
+                        StoreOrderSheet().leadingSheetPlacement()
                     }
-                    #endif
-                }
+                    .observeHinge($hinge)
+                    .sheet(isPresented: $showsMap) {
+                        MapScreen()
+                    }
+                    .fullScreenCover(isPresented: triageBinding) {
+                        TriageScreen()
+                    }
+                    .fullScreenCover(item: focusBinding) { focused in
+                        StoreFocusScreen(page: focused.page)
+                            .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
+                    }
+                    .overlay(alignment: .top) { briefingBlock }
+                    .overlay(alignment: .top) {
+                        if model.autoAssignReport != nil { AutoAssignToast() }
+                    }
+                    .animation(.snappy, value: model.autoAssignReport)
+                    .onChange(of: model.activePage) { _, page in
+                        // The open composer follows the page reached by swiping the cards behind it.
+                        if model.composerTarget != nil,
+                           model.composerTarget != page,
+                           page == .unsorted || page.storeID != nil,
+                           model.deck.pages.contains(page) {
+                            model.startComposer(on: page)
+                        }
+                        if page != .unsorted, model.briefing != nil {
+                            withAnimation(.snappy) { model.dismissBriefing() }
+                        }
+                    }
+                    .onChange(of: model.briefing != nil, initial: true) { _, shown in
+                        if shown, sizeClass == .regular { model.dismissBriefing() }
+                    }
+                    .onChange(of: model.composerTarget) { _, target in
+                        if target != nil, model.focusedPage == nil { isComposerFocused = true }
+                        if target == nil { isComposerFocused = false }
+                    }
+                    .onChange(of: model.hasLoadedItems) { _, loaded in
+                        #if DEBUG
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
+                            model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
+                        }
+                        #endif
+                    }
+            }
         }
     }
 
@@ -184,6 +173,7 @@ struct ShoppingScreen: View {
                 }
                 .menuStyle(.button)
                 .buttonStyle(.plain)
+                .tint(.primary)
                 .accessibilityLabel("Eintrag hinzufügen")
     }
 
@@ -203,6 +193,7 @@ struct ShoppingScreen: View {
             addFeedback += 1
             model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
         }
+        .tint(.primary)
     }
 
     // System navigation and settings items remain available in the iPhone Duo vertical bar.
@@ -248,6 +239,7 @@ struct ShoppingScreen: View {
             } label: {
                 Label("Anzeigeoptionen", systemImage: "line.3.horizontal.decrease")
             }
+            .tint(.primary)
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button("Karte", systemImage: "map") { showsMap = true }
@@ -266,14 +258,6 @@ extension ShoppingScreen {
 
     private var focusBinding: Binding<FocusedPage?> {
         Binding(get: { model.focusedPage.map(FocusedPage.init) }, set: { model.focusedPage = $0?.page })
-    }
-
-    /// Triage started from the full-screen card is presented there, so closing it returns there.
-    private var composerSheetBinding: Binding<Bool> {
-        Binding(
-            get: { composerAsSheet && model.composerTarget != nil && model.focusedPage == nil },
-            set: { if !$0, model.composerTarget != nil { model.endComposer() } }
-        )
     }
 
     private var triageBinding: Binding<Bool> {

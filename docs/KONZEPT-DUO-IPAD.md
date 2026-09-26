@@ -50,21 +50,30 @@ Stand: 26.09.2026 · Ergänzt [KONZEPT.md](KONZEPT.md) · Grundlage: DuoDemo (HI
 
 ---
 
-## 2. Das Spread-Modell (Kern des Konzepts)
+## 2. Der Home-Pager und der Zoom-Detailview
 
 ### 2.1 Seiten und Plätze
 
-Der Pager aus KONZEPT §7.2 bleibt die einzige Struktur. Er zeigt je nach Breite **1 bis 4 Plätze** gleichzeitig:
+Der Home-Pager bleibt eine Folge normaler Karten. Seine Reihenfolge ist:
 
 ```
-Seiten:  [Unsortiert] [Rewe] [Aldi] [dm] [Weitere Läden]
-Plätze:  compact = 1 · regular = 2 bis 4
+Seiten:  [Prospekte] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]
+Home:    compact = 1 · iPad = bis zu 4 · Duo am Falz = 2
 ```
 
+Auf dem Home-Screen wird keine Laden-Detailansicht in eine Nachbarkarte gelegt. Die vorherige und nächste Karte bleiben echte Seiten des Pagers. „Weitere Läden“ mit ausgeblendeten Läden, Katalogvorschlägen und „Laden hinzufügen“ bleibt immer die letzte Seite.
+
+Erst wenn eine Ladenkarte per Zoom geöffnet wird, wechselt die breite Ansicht in zwei Bereiche:
+
 ```
-plätze = clamp(⌊nutzbareBreite / 300 pt⌋, 1, 4)
-Mit Falz (Duo innen): auf eine gerade Zahl abrunden (2), damit der Falz zwischen zwei Cards liegt.
+┌ Laden-Detail ────────────┐  ┌ Einkaufsliste ────────────┐
+│ roter Ladenkopf          │  │ Einträge dieses Ladens    │
+│ Filialkarte und Route    │  │ Kategorien und Häkchen    │
+│ offizieller Prospekt     │  │                            │
+└──────────────────────────┘  └────────────────────────────┘
 ```
+
+Die Kontextspalte links und die Liste rechts sind nur im Zoom-Detailview sichtbar – auf dem iPhone Duo ebenso wie auf dem iPad. Auf schmalen Displays bleibt der bisherige einzelne Vollbild-Detailview.
 
 | Kontext | Breite | Plätze |
 |---|---|---|
@@ -72,10 +81,9 @@ Mit Falz (Duo innen): auf eine gerade Zahl abrunden (2), damit der Falz zwischen
 | Duo innen quer 951 | regular | 2 (je eine Falzseite) |
 | Duo innen hoch 669 | regular | 2 (≈ 310 pt je Card) |
 | iPad mini / 11″ hoch | 744–834 | 2 |
-| iPad 11″ quer | ~1194 | 3 |
-| iPad 13″ quer | ~1376 | 4 |
+| iPad 11″ / 13″ quer | ~1194–1376 | Home: bis zu 4 Karten · Detail: Kontext + Liste |
 
-Die Plätze werden aus der **Container-Breite** berechnet, nicht aus Geräte-Typen. Damit funktionieren auch Stage Manager, frei skalierbare iPad-Fenster und künftige Geräte ohne Sonderfall.
+Die Plätze werden aus der **Container-Breite** berechnet, nicht aus Geräte-Typen. Nur der Detail-Zoom begrenzt sich auf zwei Spalten.
 
 ### 2.2 Der Anker – deine Anforderung, verallgemeinert
 
@@ -83,54 +91,61 @@ Die Plätze werden aus der **Container-Breite** berechnet, nicht aus Geräte-Typ
 
 | Kontext | Anker | Begründung |
 |---|---|---|
-| **iPhone Duo** (Scharnier vorhanden) | **rechte Hälfte** (Hardware-Seite, `layoutDirectionBehavior: .fixed`) | Das Außendisplay liegt über der rechten Innenhälfte. Die aktive Card bleibt beim Aufklappen *physisch an derselben Stelle*, die neue Fläche klappt links dazu |
-| **iPad** und alles ohne Scharnier | **links** (leading, in RTL gespiegelt) | Lesefluss: die aktive Card zuerst, die folgenden Läden rechts daneben |
+| **iPhone Duo** (Scharnier vorhanden) | **rechte Hälfte** (Hardware-Seite, `layoutDirectionBehavior: .fixed`) | Das Außendisplay liegt über der rechten Innenhälfte. Die aktive Liste bleibt beim Aufklappen *physisch an derselben Stelle*, die neue Fläche klappt links dazu |
+| **iPad Home-Pager** | **links** | Die Karten behalten ihre Reihenfolge; die aktive Karte bleibt links, weitere echte Seiten erscheinen rechts |
+| **iPad Laden-Detail** | Kontext links, Liste rechts | Der Detail-Zoom zeigt links Ladenkopf, Filiale, Karte, Prospekt und Infos; rechts bleibt die aktive Liste |
+| **compact** ohne Scharnier | einziger Platz | Einspaltiger Einkaufsfluss |
 
 > ⚠️ Annahme laut deiner Beschreibung: Das Außendisplay entspricht der **rechten** Innenhälfte. Wird im Spike am Device Hub bzw. auf echter Hardware verifiziert. Die Seite ist **eine Konstante** im Code und schnell umstellbar.
 
-Die Anker-Regel bei 2 Plätzen auf dem Duo:
+Die Home-Kartenfolge und der Detail-Zoom sind getrennte Ansichten:
 
 ```
-aktive Seite i  →  [ Seite i−1 | Seite i ]
-aktive Seite 0  →  [ Weitere Läden | Seite 0 ]     ← deine Regel: links davon die Laden-hinzufügen-Card
+Home, Duo aktiv Inbox       →  [ Prospekte | Inbox ]
+Home, Duo aktiv Rewe        →  [ Inbox | Rewe ]
+Home, letzte Seite          →  [ letzte Ladenkarte | Weitere Läden ]
+Zoom, Rewe auf Duo/iPad     →  [ Rewe: Karte + Prospekt | Rewe-Liste ]
 ```
 
-Beispiel mit `[Unsortiert] [Rewe] [Aldi] [dm] [Weitere Läden]`:
+Beispiel mit `[Prospekte] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]`:
 
 | Zugeklappt aktiv | Aufgeklappt links | Aufgeklappt rechts (Anker) |
 |---|---|---|
-| Unsortiert | Weitere Läden | Unsortiert |
-| Aldi | Rewe | Aldi |
-| Weitere Läden | dm | Weitere Läden |
+| Inbox | Prospekte | Inbox |
+| Rewe im Home-Pager | Inbox | Rewe |
+| Rewe im Zoom-Detail | Rewe-Kopf, Karte, Route, Prospekt | Rewe-Liste |
+| Weitere Läden | letzter Laden | Weitere Läden |
 
-**Wischen im aufgeklappten Zustand** bewegt um **eine** Card: Die rechte Card rutscht nach links, die nächste kommt rechts herein. Damit gilt immer „rechts = aktiv“, und beim Zuklappen steht außen genau die Card, die vorher rechts war.
+**Wischen im Home-Pager** bewegt um **eine echte Seite**. Im Detail-Zoom gibt es keine zweite Home-Karte: links bleiben Kontextinformationen zum geöffneten Laden, rechts dessen Liste. Beim Schließen landet man wieder auf der zuletzt aktiven Ladenkarte.
 
-**„Der Fokus folgt der Hand“:** Tippt, hakt ab oder scrollt man in der **linken** Card, wird sie aktiv. Beim Zuklappen erscheint außen die Card, mit der man zuletzt gearbeitet hat. Beim nächsten Aufklappen rutscht sie auf den Anker, links steht ihre Vorgängerin. Die aktive Card bekommt einen dezenten Fokusrahmen in Laden-Farbe.
+**„Der Fokus folgt der Hand“:** Auf dem Home-Pager wird eine angetippte Karte aktiv. Erst der Zoom auf eine Ladenkarte öffnet den Detailview mit deren Karte, Filiale, Route, offiziellem Prospekt und weiteren Infos links sowie der Liste rechts. Die aktive Card erhält keinen zusätzlichen Umriss.
 
 ### 2.3 Übergänge
 
 | Übergang | Verhalten |
 |---|---|
-| **Aufklappen** (außen → innen) | Die aktive Card bleibt an Ort und Stelle (rechte Hälfte). Die linke Card fährt vom Falz aus herein (Verschieben + Einblenden, 0,35 s, bei Reduce Motion nur Einblenden) – wie eine Seite, die aufschlägt |
+| **Laden-Zoom auf Duo/iPad** | Die normale Karte zoomt in den Detailview: links kommen Ladeninfos hinzu, rechts bleibt die Liste |
+| **Aufklappen** (außen → innen) | Der Home-Pager behält seine Seitenfolge; auf dem Duo liegt die aktive Seite rechts, links steht ihre echte Vorgängerseite |
 | **Zuklappen** (innen → außen) | Die aktive Card füllt das Außendisplay. Eingabetext, Tastaturfokus und Scrollposition bleiben erhalten |
 | **Drehen innen** (quer ↔ hoch) | Die Plätze bleiben bei 2, die aktive Card bleibt auf dem Anker |
-| **iPad-Fenster verkleinern** (regular → compact) | Die Card auf dem Anker (links) wird die einzige Card |
+| **iPad-Fenster verkleinern** (regular → compact) | Der Home-Pager zeigt eine Card; der Laden-Zoom wechselt von zwei Bereichen zum Vollbild-Detailview |
 | **Anwinkeln** innen quer (Buchhaltung) | Keine Layoutänderung, denn die Lücke lag schon auf dem Falz (§2.4). „Beim Falten nur bewegen, was nötig ist“ |
 | **Anwinkeln** innen hoch (Laptop-/Tischhaltung) | Wechsel in den **Küchenmodus** (§4.3) |
 
 ### 2.4 Falz-Ausrichtung
 
 - Liegt eine senkrechte `division`-Region im Container (auch **inaktiv**, `options: .includeInactive`), wird die Lücke zwischen den beiden Cards **exakt** auf `region.frame` gelegt, und jede Card füllt genau eine Hälfte. Weil die Ausrichtung auch im flachen Zustand gilt, springt das Layout beim Anwinkeln nicht.
-- Die Kamera-Verdeckungen (`occlusion`) übernimmt der Safe-Area-Abstand. Card-Header mit `backgroundExtensionEffect()`, damit die Laden-Farbe bis unter die senkrechte Leiste reicht.
-- Ohne Falz (iPad, iOS 26) werden die Plätze gleich breit, mit 16 pt Abstand.
+- Die Kamera-Verdeckungen (`occlusion`) übernimmt der Safe-Area-Abstand. Im Zoom-Detailview liegt der farbige Header-Hintergrund als durchgehende Fläche über Kontext- und Listenspalte und läuft mit `backgroundExtensionEffect()` bis unter die senkrechte Leiste; Titel und Bedienelemente bleiben links in der Safe Area. Safe-Area-Einzüge werden für jede Seite getrennt behandelt ([Apple: iPhone Duo](https://developer.apple.com/videos/play/tech-talks/111461/), [SwiftUI: Background Extension Effect](https://developer.apple.com/documentation/swiftui/view/backgroundextensioneffect%28%29)).
+- Ohne Falz (iPad) bleiben Home-Karten in Pager-Reihenfolge und stehen mit 16 pt Abstand nebeneinander. Der separate Zoom-Detailview zeigt auf breiten Fenstern Ladenkontext links und die aktive Liste rechts.
 
 ### 2.5 Technische Umsetzung
 
-- **`SpreadLayout` in MarqetCore** (pure Logik, getestet): Seiten + aktive Seite + Plätze + Anker → sichtbares Fenster, inklusive der Regel „links von der ersten Seite = Weitere Läden“.
-- **`StorePager` (SwiftUI):** `ScrollView(.horizontal)` + `LazyHStack` + `.scrollTargetBehavior(.viewAligned)` + `.scrollPosition(id:)`. Jeder Platz ist `containerWidth / plätze` breit (bzw. an den Falz gebunden). Mit Anker rechts und 2 Plätzen bekommt der Inhalt eine **Geisterseite** vorne: `[Weitere Läden (Geist)] [Unsortiert] [Rewe] …`. So kann Seite 0 auf dem rechten Platz stehen, und das native Scroll-Verhalten bleibt erhalten, ohne eigene Gesten-Physik.
-- **Aktive Seite** in `@SceneStorage("activePage")` als stabile ID (`unsorted`, Store-UUID, `more`). Jede iPad-Fensterszene hat so ihre eigene aktive Card.
+- **`SpreadLayout` in MarqetCore** (pure Logik): Seiten + aktive Seite + Plätze + Anker → sichtbares Fenster, inklusive der Regel „links von der Inbox = Prospekte“.
+- **`StorePager` (SwiftUI):** `ScrollView(.horizontal)` + `HStack` + `.scrollTargetBehavior(.viewAligned)` + `.scrollPosition(id:)`. Home-Reihenfolge: `[Prospekte] [Inbox] [Läden …] [Weitere Läden]`. Das Duo verankert die aktive Home-Card rechts; auf dem iPad bleiben Karten linksbündig in Pager-Reihenfolge. Keine Ladeninfos ersetzen eine Nachbarkarte.
+- **`StoreFocusScreen` (Zoom-Detail):** Bei breitem Container und aktivem Laden spannt der farbige Header beide Spalten, während Titel und Aktionen links bleiben. Darunter scrollen Prospekt und Filialkontext gemeinsam links; rechts erscheint dieselbe Ladenliste ohne doppelten Header. „Route“ übergibt die offenen Läden mit bekannten Filialen in Entfernungsreihenfolge als Zwischenstopps an Apple Karten. Auf schmalen Displays bleibt das Vollbild-Detail einspaltig.
+- **Aktive Seite** in `@SceneStorage("selectedPageV2")` als stabile ID (`brochures`, `unsorted`, Store-UUID, `more`). Jede iPad-Fensterszene hat so ihre eigene aktive Card.
 - **Eingabetext, Fokus-Ziel und Zuordnen-Fortschritt** liegen im `AppModel`, nicht in View-`@State`. Wird eine View beim Displaywechsel neu erzeugt, geht nichts verloren.
-- **Anker-Erkennung:** `onHingeChange` liefert `DeviceHingeContext.hinge != nil` → Scharnier vorhanden → Anker rechts. Ist das nicht verfügbar (< 27.1, iPad), gilt Anker leading.
+- **Anker-Erkennung:** Ein Falz verankert die aktive Home-Card rechts auf dem Hardware-Display; der iPad-Home-Pager bleibt linksbündig. Der Zoom-Detailview hat davon unabhängig Kontext links und Liste rechts.
 - **Mindestversion bleibt iOS 26.** Alle 27.1-APIs (`ReservedRegion`, `ArrangementView`, `onHingeChange`, senkrechte Leiste) stecken hinter `if #available(iOS 27.1, *)` in kleinen Wrappern (`FoldGeometry`, `AdaptiveSplit`, `HingeObserver`). Das Duo wird mit 27.1 ausgeliefert und hat sie also immer. Das iPad bekommt den Spread auch unter iOS 26, denn der braucht keine 27er-APIs.
 
 ---
@@ -215,8 +230,8 @@ Das Gerät steht wie ein kleiner Laptop auf der Küchenarbeitsplatte, man prüft
 
 | Kontext | Darstellung |
 |---|---|
-| compact (iPhone, Duo außen) | wie KONZEPT §7.4: Vollbild-Sheet, Einzeln \| Board |
-| regular (Duo innen, iPad) | **Zweiseitig** mit `ArrangementView(.split)`: **links** die unsortierten Items (Einzeln = großes Item, Board = Liste), **rechts** die Laden-Ziele als großes Raster mit Anzahl. Auf dem Duo liegt die Teilung automatisch auf dem Falz |
+| compact (iPhone, Duo außen) | wie KONZEPT (Entscheidung 4): Vollbild-Sheet, Nacheinander \| Übersicht |
+| regular (Duo innen, iPad) | **Nacheinander:** zweiseitig mit `ArrangementView(.split)`, **links** das große Item mit Fortschritt, **rechts** die Laden-Kacheln mit „Später“ und „Laden hinzufügen“. Auf dem Duo liegt die Teilung automatisch auf dem Falz. **Übersicht:** die Tabelle über die volle Breite mit bis zu 8 Laden-Spalten (ohne Ziehen auf Kacheln) |
 | Duo innen, Buchhaltung | wie regular. Zuordnen per Tipp ist bevorzugt, weil das Ziehen über einen angewinkelten Falz unbequem ist. Drag bleibt möglich |
 
 ```
@@ -227,7 +242,7 @@ Das Gerät steht wie ein kleiner Laptop auf der Küchenarbeitsplatte, man prüft
 │  │      laktosefrei       │  ││  ┌──────────┐ ┌──────────┐   │
 │  └────────────────────────┘  ││  │   dm 1   │ │  MARKT   │   │
 │  Als Nächstes: Zahnpasta,    ││  └──────────┘ └──────────┘   │
-│  Tomaten, Batterien          ││  [ + Laden ]  [Überspringen] │
+│  Tomaten, Batterien          ││  [ Später ]  [ + Laden ]    │
 └──────────────────────────────┴┴──────────────────────────────┘
 ```
 
@@ -239,7 +254,7 @@ Das Raster rechts hat eine **gerade Spaltenzahl** (2 bzw. 4), damit der Falz in 
 
 | Thema | Umsetzung | Version |
 |---|---|---|
-| **Spread** mit 2–4 Plätzen, Anker links | §2 | v1.0 |
+| **Home-Pager** mit 1–4 echten Karten; im Zoom-Detailview Kontext links und Ladenliste rechts | §2 | v1.0 |
 | **Frei skalierbare Fenster / Stage Manager** | Plätze aus der Container-Breite, schmal = compact = 1 Card | v1.0 |
 | **Mehrere Fenster** | eine Szene je Fenster, aktive Card per `@SceneStorage`. Daten kommen aus Erinnerungen und sind überall gleich | v1.0 |
 | **Items zwischen Läden ziehen** | wie Duo §4.2 | v1.0 |
@@ -262,7 +277,7 @@ Ein Sonderweg für iPad nach `userInterfaceIdiom` gibt es nicht. Alles läuft ü
 | **Items zwischen Läden ziehen** | Umsortieren ohne Menü | ✅ v1.0 |
 | **Linke Seite anheften** | Zuordnen und Vergleichen im Buch-Layout | ✅ v1.1 |
 | **Küchenmodus** (Tischhaltung) | freihändig ergänzen, Vorschläge „wieder kaufen?“ | ✅ v1.1 |
-| **Karte + Card nebeneinander** (v1.2 „Orte“): links die Karte mit Filialen, rechts die aktive Card | Planen mit Ortsbezug, der Anker bleibt die Card | ✅ v1.2 |
+| **Laden-Detailview im breiten Zoom**: links Filialkarte, Route, offizieller Prospekt; rechts die aktive Ladenliste | Details bleiben aus dem Home-Pager heraus | ✅ v1.0 |
 | **Einkaufsrunde im Buch-Layout** (v1.3): links Route und Stopps, rechts die Card des aktuellen Stopps | Routenplanung erst mit dem großen Display wirklich komfortabel | ✅ v1.3 |
 | **Live Activity beim Zuklappen** während einer aktiven Einkaufsrunde | bleibt auf dem Außendisplay präsent | v1.3 (mit Live Activity) |
 | **Scharnier-Winkel als Geste** (z. B. halb zuklappen = abhaken) | Spielerei, Gefahr von Fehlauslösung | ❌ bewusst nicht |
@@ -275,8 +290,8 @@ Ein Sonderweg für iPad nach `userInterfaceIdiom` gibt es nicht. Alles läuft ü
 
 | Baustein | Ort | Zweck |
 |---|---|---|
-| `PageID` (`unsorted`, `store(UUID)`, `more`) | MarqetCore | stabile Seiten-IDs für SceneStorage und Pager |
-| `SpreadLayout` | MarqetCore | Plätze aus Breite und Falz, sichtbares Fenster mit Anker- und Geisterseiten-Regel, Wischschritt, „Fokus folgt der Hand“ |
+| `PageID` (`brochures`, `unsorted`, `store(UUID)`, `more`) | MarqetCore | stabile Seiten-IDs für SceneStorage und Pager |
+| `SpreadLayout` | MarqetCore | Plätze aus Breite und Falz, sichtbares Fenster mit Anker- und Leerplatz-Regel, Wischschritt, „Fokus folgt der Hand“ |
 | `FoldGeometry` | App/DesignSystem | Wrapper um `reservedRegions`, ab iOS 27.1, sonst `nil` |
 | `HingeObserver` | App | Wrapper um `onHingeChange`; liefert `hasHinge` und `isTabletop` |
 | `AdaptiveSplit` | App/DesignSystem | `ArrangementView` ab 27.1, sonst `HStack`/`VStack` |
@@ -288,15 +303,16 @@ Build-Einstellungen: `TARGETED_DEVICE_FAMILY = 1,2` (iPhone + iPad), Deployment 
 
 ---
 
-## 8. Tests
+## 8. Prüfpunkte
 
 **Unit (MarqetCore):** `SpreadLayout`
 - Plätze je Breite, gerade Anzahl bei Falz
-- Anker rechts: `[i−1 | i]` und `[Weitere Läden | 0]`
-- Anker links auf dem iPad
+- Duo Home: `[Prospekte | Inbox]`; die letzte echte Seite bleibt `[Weitere Läden]`
+- Zoom-Detail auf Duo/iPad: `[Ladeninfos | aktive Liste]`; keine Kontextkarte im Home-Pager
+- iPad Home mit zwei bis vier Plätzen: echte Karten bleiben linksbündig in ihrer Reihenfolge
 - Wischschritt 1
 - Fokuswechsel auf die linke Card
-- nur eine Seite vorhanden (rechts Weitere Läden, links leer bzw. gestreckt)
+- nur eine Seite vorhanden (Prospekte stehen links von der Inbox)
 - RTL gespiegelt auf dem iPad, nicht auf dem Duo
 
 **UI-Matrix** (Duo-Simulator per Device Hub, iPad-Simulatoren):
@@ -304,11 +320,11 @@ Build-Einstellungen: `TARGETED_DEVICE_FAMILY = 1,2` (iPhone + iPad), Deployment 
 | Pose / Gerät | prüfen |
 |---|---|
 | Duo außen hoch/quer | Toolbar senkrecht, Plus am Daumen, eine Card |
-| Duo innen quer flach/Buch | Anker rechts, Lücke auf dem Falz, Sheets links, Drag zwischen Cards |
+| Duo innen quer flach/Buch | Home: Anker rechts und echte Vorgängerkarte links. Laden-Zoom: Kontext links, Liste rechts. Falzlücke bleibt frei |
 | Duo innen hoch flach / angewinkelt | 2 Cards bzw. Küchenmodus (v1.1) |
 | Auf-/Zuklappen mit offener Tastatur | Text, Fokus und Ziel-Laden bleiben erhalten |
 | Auf-/Zuklappen mit offenem Zuordnen | Fortschritt bleibt erhalten |
-| iPad mini hoch, 13″ quer, Stage-Manager-Fenster schmal ↔ breit | 1–4 Plätze, Anker links, keine Sprünge |
+| iPad mini hoch, 13″ quer, Stage-Manager-Fenster schmal ↔ breit | Home: 1–4 Karten. Laden-Zoom: Kontext links/Liste rechts, bei schmalem Fenster einspaltig |
 | iPad mit Tastatur | alle Kurzbefehle |
 
 ---
@@ -317,7 +333,7 @@ Build-Einstellungen: `TARGETED_DEVICE_FAMILY = 1,2` (iPhone + iPad), Deployment 
 
 1. **Anker-Seite:** Entspricht das Außendisplay der rechten Innenhälfte? (Device Hub bzw. Hardware)
 2. **Falz-Region innen quer:** Frame flach (inaktiv) und angewinkelt (aktiv). Liegt sie bei x ≈ 475?
-3. **`ScrollView` mit 2 Plätzen, Geisterseite und Falz-Lücke:** Einrasten sauber, keine Sprünge bei Größenwechsel
+3. **`ScrollView` mit 2 Plätzen, Leerplatz vor der ersten Seite und Falz-Lücke:** Prospekte steht vor Inbox; „Weitere Läden“ bleibt nur die letzte echte Seite
 4. **`presentationPlacement(.leading)`** innen quer. Was passiert mit einem offenen Sheet beim Zuklappen?
 5. **`onHingeChange`** im Simulator: Liefert der Device Hub Winkel und Status?
 6. **Tastatur und Fokus über das Falten:** Bleibt die Tastatur offen, bleibt die Eingabezeile sichtbar?

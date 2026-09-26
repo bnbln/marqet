@@ -3,8 +3,6 @@ import SwiftUI
 
 /// Last page: hidden own stores, catalog suggestions, "add store" (KONZEPT §7.8).
 struct MoreStoresCard: View {
-    var isFocused = false
-
     @Environment(AppModel.self) private var model
     @State private var showsAddStore = false
     @State private var isSelecting = false
@@ -18,33 +16,52 @@ struct MoreStoresCard: View {
     var body: some View {
         GeometryReader { proxy in
             let columnCount = max(1, Int((proxy.size.width - 40 + 12) / 104))
-            let rowCount = max(1, Int((proxy.size.height - 40 - 52 + 12) / 126))
-            let storeCapacity = max(0, columnCount * rowCount - 1)
-            let ownCount = min(model.hiddenStores.count, storeCapacity)
-            let suggestionCount = max(0, storeCapacity - ownCount)
+            let availableGridHeight = max(120, proxy.size.height - 40 - 42 - 54 - 24)
+            let rowsThatFit = max(1, Int((availableGridHeight + 12) / 116))
+            let hidden = distanceSorted(model.hiddenStores) { distance(for: $0.id) }
+            let suggestions = distanceSorted(model.catalogSuggestions) { distance(forCatalogKey: $0.key) }
+            let tiles = hidden.map { Tile.own($0.id) } + suggestions.map { Tile.catalog($0.key) }
+            let rows = stride(from: 0, to: tiles.count, by: columnCount).map {
+                Array(tiles[$0..<min($0 + columnCount, tiles.count)])
+            }
+            let rowSpacing = rows.count > 1 && rows.count <= rowsThatFit
+                ? min(42, max(12, (availableGridHeight - CGFloat(rows.count * 104)) / CGFloat(rows.count - 1)))
+                : 12
 
             VStack(alignment: .leading, spacing: 12) {
                 header
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount), spacing: 12) {
-                    ForEach(model.hiddenStores.prefix(ownCount)) { store in
-                        tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
-                    }
-                    ForEach(model.catalogSuggestions.prefix(suggestionCount)) { entry in
-                        tile(.catalog(entry.key), name: entry.name) {
-                            StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
+                if rows.isEmpty {
+                    ContentUnavailableView(
+                        "Keine weiteren Läden",
+                        systemImage: "storefront",
+                        description: Text("Füge einen Laden hinzu, um hier eine weitere Liste zu starten.")
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        VStack(spacing: rowSpacing) {
+                            ForEach(rows.indices, id: \.self) { index in
+                                tileRow(rows[index], columns: columnCount)
+                            }
                         }
+                        .frame(minHeight: availableGridHeight, alignment: .center)
+                        .frame(maxWidth: .infinity)
                     }
-                    addStoreTile
+                    .scrollIndicators(.visible)
                 }
+                addStoreButton
             }
             .padding(20)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .cardSurface(isFocused: isFocused)
+        .cardSurface()
         .sheet(isPresented: $showsAddStore) {
             AddStoreSheet()
                 .leadingSheetPlacement()
+        }
+        .task {
+            await model.refreshNearbyCatalogDistancesIfNeeded()
         }
     }
 
@@ -81,8 +98,15 @@ struct MoreStoresCard: View {
         }
     }
 
-    private var addStoreTile: some View {
-        Button { showsAddStore = true } label: { AddStoreTile() }
+    private var addStoreButton: some View {
+        Button { showsAddStore = true } label: {
+            Label("Laden hinzufügen", systemImage: "plus")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, minHeight: 54)
+                .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 18))
+                .contentShape(.rect(cornerRadius: 18))
+        }
             .buttonStyle(.plain)
     }
 
@@ -99,6 +123,61 @@ struct MoreStoresCard: View {
             StoreTile(name: name, isSelected: isSelecting ? isSelected : nil) { badge }
         }
         .buttonStyle(.plain)
+    }
+
+    private func tileRow(_ tiles: [Tile], columns: Int) -> some View {
+        HStack(spacing: 12) {
+            ForEach(tiles, id: \.self) { tile in
+                tileView(tile)
+                    .frame(maxWidth: .infinity)
+            }
+            if tiles.count < columns {
+                Spacer(minLength: 0)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func tileView(_ selectionTile: Tile) -> some View {
+        switch selectionTile {
+        case .own(let id):
+            if let store = model.store(id) {
+                tile(.own(id), name: store.name) { StoreBadge(store: store, size: 48) }
+            }
+        case .catalog(let key):
+            if let entry = model.catalog?.entry(forKey: key) {
+                tile(.catalog(key), name: entry.name) { StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48) }
+            }
+        }
+    }
+
+    private func distance(for storeID: Store.ID) -> Double? {
+        guard let origin = model.userLocation,
+              let location = model.relevantLocation(of: storeID) else { return nil }
+        return location.coordinate.distance(to: origin)
+    }
+
+    private func distance(forCatalogKey key: String) -> Double? {
+        if let origin = model.userLocation,
+           let store = model.stores.first(where: { $0.catalogKey == key }),
+           let location = model.relevantLocation(of: store.id) {
+            return location.coordinate.distance(to: origin)
+        }
+        return model.nearbyCatalogDistances[key]
+    }
+
+    private func distanceSorted<Element>(_ values: [Element], distance: (Element) -> Double?) -> [Element] {
+        guard model.userLocation != nil else { return values }
+        return values.enumerated().sorted { lhs, rhs in
+            let left = distance(lhs.element)
+            let right = distance(rhs.element)
+            switch (left, right) {
+            case let (left?, right?) where left != right: return left < right
+            case (_?, nil): return true
+            case (nil, _?): return false
+            default: return lhs.offset < rhs.offset
+            }
+        }.map(\.element)
     }
 
     private func open(_ tile: Tile) {

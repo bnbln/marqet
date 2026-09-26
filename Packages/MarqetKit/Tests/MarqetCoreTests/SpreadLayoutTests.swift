@@ -8,7 +8,7 @@ struct SpreadLayoutTests {
     let aldi = PageID.store(UUID())
     let dm = PageID.store(UUID())
 
-    var pages: [PageID] { [.unsorted, rewe, aldi, dm, .more] }
+    var pages: [PageID] { [.brochures, .unsorted, rewe, aldi, dm, .more] }
 
     @Test(arguments: [
         (390.0, false, 1),   // iPhone
@@ -27,11 +27,11 @@ struct SpreadLayoutTests {
 
     // MARK: Trailing anchor (Duo)
 
-    @Test func trailingAnchorPrependsMoreGhost() {
+    @Test func trailingAnchorPrependsBlankSlot() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
-        #expect(content.map(\.id).first == "ghost:more")
-        #expect(content.first?.page == .more)
-        #expect(content.first?.isGhost == true)
+        #expect(content.map(\.id).first == "filler:0")
+        #expect(content.first?.page == nil)
+        #expect(content.first?.isGhost == false)
         #expect(content.count == pages.count + 1)
     }
 
@@ -42,10 +42,10 @@ struct SpreadLayoutTests {
         #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) == aldi)
     }
 
-    @Test func firstPageGetsMoreOnTheLeft() {
+    @Test func inboxKeepsBrochuresOnTheLeft() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
         let leading = SpreadLayout.leadingIndex(forActive: .unsorted, pages: pages, slots: 2, anchor: .trailing)
-        #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [.more, .unsorted])
+        #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [.brochures, .unsorted])
     }
 
     @Test func lastPageStillReachesTheAnchor() {
@@ -62,7 +62,7 @@ struct SpreadLayoutTests {
         #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) == dm)
     }
 
-    @Test func onlyMorePageHasNoGhost() {
+    @Test func onePageKeepsItsBlankAnchorSlot() {
         let content = SpreadLayout.contentSlots(pages: [.more], slots: 2, anchor: .trailing)
         #expect(content.map(\.page) == [nil, .more])
         #expect(!content[0].isGhost)

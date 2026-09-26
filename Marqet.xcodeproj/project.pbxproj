@@ -41,6 +41,8 @@
 		69FBBFE5522A433B53A97EA0 /* StoreFocusScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */; };
 		6CE122BF46C50E69135ED788 /* PlacesModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */; };
 		71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */; };
+		7A6C4C9E4038BEF31209AB71 /* StoreContextPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6C4C9E4038BEF31209AB72 /* StoreContextPane.swift */; };
+		A8B7C6D5E4F3A29180706051 /* BrochuresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C7D6E5F4A3B29180706052 /* BrochuresCard.swift */; };
 		77F6CC97D3364C5E8DDB8166 /* BriefingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E317B9F6CBC0892FCE76E7E2 /* BriefingCard.swift */; };
 		88167E848566A767ED3889AC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3044CC8DBA6E48095569D /* RootView.swift */; };
 		913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B92F2AB1F42A1299049632 /* StoreBadge.swift */; };
@@ -102,6 +104,7 @@
 		6C36556FC45F2FFF3189F223 /* TriageScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriageScreen.swift; sourceTree = "<group>"; };
 		6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */ = {isa = PBXFileReference; path = Marqet.icon; sourceTree = "<group>"; };
 		79A664A8D158899340160E9D /* AppAccentPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAccentPalette.swift; sourceTree = "<group>"; };
+		7A6C4C9E4038BEF31209AB72 /* StoreContextPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreContextPane.swift; sourceTree = "<group>"; };
 		7DC6E5A5E8513D483B2A0259 /* AppModel+Places.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Places.swift"; sourceTree = "<group>"; };
 		81FD1AA7953B020E2F971793 /* StoreStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreStyle.swift; sourceTree = "<group>"; };
 		8662B64170332932ED37FE06 /* StorePager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePager.swift; sourceTree = "<group>"; };
@@ -115,6 +118,7 @@
 		A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreSheet.swift; sourceTree = "<group>"; };
 		A555236677087D1E17AECE59 /* PlacesStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacesStrings.swift; sourceTree = "<group>"; };
 		A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionOrderSheet.swift; sourceTree = "<group>"; };
+		B8C7D6E5F4A3B29180706052 /* BrochuresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrochuresCard.swift; sourceTree = "<group>"; };
 		A87358243D9ADFF22154E6EF /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		B307E22CA868870A6E3000A8 /* MarqetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetApp.swift; sourceTree = "<group>"; };
 		B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -327,12 +331,14 @@
 			isa = PBXGroup;
 			children = (
 				E317B9F6CBC0892FCE76E7E2 /* BriefingCard.swift */,
+				B8C7D6E5F4A3B29180706052 /* BrochuresCard.swift */,
 				C843D403846165703592E11F /* ComposerBar.swift */,
 				EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */,
 				F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */,
 				A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */,
 				3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */,
 				56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */,
+				7A6C4C9E4038BEF31209AB72 /* StoreContextPane.swift */,
 				BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */,
 				36EB610271AC41550A76CFD4 /* StoreOrderSheet.swift */,
 				8662B64170332932ED37FE06 /* StorePager.swift */,
@@ -508,6 +514,7 @@
 				B7560C024A6A0AF82F652812 /* MapScreen.swift in Sources */,
 				2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */,
 				F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */,
+				A8B7C6D5E4F3A29180706051 /* BrochuresCard.swift in Sources */,
 				1894910664A05EB40EFBD368 /* OnboardingFlow.swift in Sources */,
 				0F02B258C95A18D427FE79E7 /* PaywallView.swift in Sources */,
 				F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */,
@@ -520,6 +527,7 @@
 				0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */,
 				913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */,
 				64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */,
+				7A6C4C9E4038BEF31209AB71 /* StoreContextPane.swift in Sources */,
 				69FBBFE5522A433B53A97EA0 /* StoreFocusScreen.swift in Sources */,
 				67B40B5BD20A6C9B73086212 /* StoreOrderSheet.swift in Sources */,
 				11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */,

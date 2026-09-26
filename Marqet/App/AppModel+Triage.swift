@@ -3,24 +3,28 @@ import MarqetCore
 
 /// A running "Zuordnen" session (KONZEPT §7.4). Survives folding because it lives in the model.
 struct TriageSession: Equatable {
+    /// `single` = "Nacheinander", `board` = "Übersicht" (raw values stay for the stored preference).
     enum Mode: String, CaseIterable {
         case single, board
     }
 
-    /// Items the session started with, in list order.
-    let itemIDs: [ShoppingItem.ID]
+    /// One step of the session, for "Rückgängig" and the last-step line.
+    enum Step: Equatable {
+        case assigned(ShoppingItem.ID, Store.ID)
+        case skipped(ShoppingItem.ID)
+    }
+
+    /// Items of the current pass, in list order. A second pass holds only the skipped ones.
+    var itemIDs: [ShoppingItem.ID]
     var mode: Mode
     var skipped: Set<ShoppingItem.ID> = []
-    /// Assignments made in this session, newest last – for "Rückgängig".
-    var history: [(itemID: ShoppingItem.ID, storeID: Store.ID)] = []
+    /// Steps of this session, newest last.
+    var history: [Step] = []
     /// How many of the assigned items Pro would have assigned automatically (upsell line).
     var autoAssignable = 0
-    /// Board mode: items selected for tap-to-assign.
-    var selection: Set<ShoppingItem.ID> = []
 
-    static func == (lhs: TriageSession, rhs: TriageSession) -> Bool {
-        lhs.itemIDs == rhs.itemIDs && lhs.mode == rhs.mode && lhs.skipped == rhs.skipped
-            && lhs.history.map(\.itemID) == rhs.history.map(\.itemID) && lhs.selection == rhs.selection
+    var assignedCount: Int {
+        history.count { if case .assigned = $0 { true } else { false } }
     }
 }
 
@@ -91,31 +95,57 @@ extension AppModel {
         return triage.itemIDs.compactMap { unsorted[$0] }.filter { !triage.skipped.contains($0.id) }
     }
 
-    func triageAssign(_ item: ShoppingItem, to store: Store) async {
-        if suggestion(for: item)?.allowsAutoAssign == true { triage?.autoAssignable += 1 }
-        triage?.history.append((item.id, store.id))
-        triage?.selection.remove(item.id)
-        await assign(item, to: store)
+    /// "2 von 12" in the current pass.
+    var triageProgress: (position: Int, total: Int) {
+        let total = triage?.itemIDs.count ?? 0
+        return (min(total, total - triageQueue.count + 1), total)
     }
 
-    func triageAssignSelection(to store: Store) async {
-        guard let selection = triage?.selection else { return }
-        for item in triageQueue where selection.contains(item.id) {
-            await triageAssign(item, to: store)
-        }
+    /// Skipped items that are still unsorted – offered again at the end.
+    var triageSkippedItems: [ShoppingItem] {
+        guard let triage else { return [] }
+        let unsorted = Dictionary(uniqueKeysWithValues: unsortedItems.map { ($0.id, $0) })
+        return triage.itemIDs.filter(triage.skipped.contains).compactMap { unsorted[$0] }
+    }
+
+    /// Switching in the triage toolbar also becomes the start mode next time.
+    func setTriageMode(_ mode: TriageSession.Mode) {
+        triage?.mode = mode
+        preferredTriageMode = mode
+    }
+
+    func triageAssign(_ item: ShoppingItem, to store: Store) async {
+        if suggestion(for: item)?.allowsAutoAssign == true { triage?.autoAssignable += 1 }
+        triage?.history.append(.assigned(item.id, store.id))
+        await assign(item, to: store)
     }
 
     func triageSkip(_ item: ShoppingItem) {
         triage?.skipped.insert(item.id)
+        triage?.history.append(.skipped(item.id))
     }
 
-    /// Undoes the last assignment of this session; the item returns to the queue.
+    /// Second pass over the skipped items.
+    func triageRevisitSkipped() {
+        let skippedIDs = triageSkippedItems.map(\.id)
+        triage?.itemIDs = skippedIDs
+        triage?.skipped = []
+    }
+
+    /// Undoes the last step of this session; the item returns to the queue.
     func triageUndo() async {
-        guard let last = triage?.history.popLast(), let item = items.first(where: { $0.id == last.itemID }) else { return }
-        let key = ItemKeyNormalizer.matchingKey(for: item.title)
-        assignmentMemory.penalize(itemKey: key, storeID: last.storeID)
-        try? learning.penalizeAssignment(itemKey: key, storeID: last.storeID)
-        await assign(item, to: nil, learn: false)
+        switch triage?.history.popLast() {
+        case .skipped(let itemID):
+            triage?.skipped.remove(itemID)
+        case .assigned(let itemID, let storeID):
+            guard let item = items.first(where: { $0.id == itemID }) else { return }
+            let key = ItemKeyNormalizer.matchingKey(for: item.title)
+            assignmentMemory.penalize(itemKey: key, storeID: storeID)
+            try? learning.penalizeAssignment(itemKey: key, storeID: storeID)
+            await assign(item, to: nil, learn: false)
+        case nil:
+            break
+        }
     }
 
     /// Items of the queue that have a suggestion right now.

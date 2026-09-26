@@ -37,7 +37,7 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 
 ## 2. Angebote: Gibt es eine API?
 
-**Kurz: In DACH gibt es keine öffentliche, frei nutzbare Angebots-API.** Die Daten liegen bei zwei Vermarktern, die sie gezielt an Partner-Apps ausspielen.
+**Kurz: In DACH gibt es keine öffentliche, frei nutzbare Angebots-API.** Die Daten liegen bei zwei Vermarktern, die sie gezielt an Partner-Apps ausspielen. Alle kostenlosen Wege zu Preisdaten (auch Regal- und eigene Preise): [PREISDATEN.md](PREISDATEN.md).
 
 | Quelle | Daten | Zugang | Rechtslage | Bewertung |
 |---|---|---|---|---|
@@ -68,7 +68,7 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 
 | Stufe | Feature | Nutzen |
 |---|---|---|
-| **v1.0 – Prospekt-Link** ✅ | Im Laden-Vollbild öffnet „Aktueller Prospekt“ die offizielle Angebotsseite des Händlers (`SFSafariViewController`, `leafletURL` aus dem Katalog) | Ohne Partner, ohne Daten, rechtlich unkritisch |
+| **v1.0 – Prospekt-Link** ✅ | Das Laden-Vollbild und die zentrale Prospektseite öffnen offizielle Angebotsseiten der Händler (`SFSafariViewController`, `leafletURL` aus dem Katalog) | Ohne Partner, ohne Scraping; jede Quelle bleibt direkt dem Händler zugeordnet |
 | **v1.x – Prospekt pro Markt** | Filial-ID der bevorzugten Filiale in die URL (z. B. Rewe-Marktseite), damit der Nutzer nicht erneut seinen Markt wählen muss | Braucht je Kette ein URL-Schema, nur für die großen 5 |
 | **v2.0 – Angebots-Treffer** | Für jedes offene Item wird geprüft, ob es in einem der Läden des Nutzers im Angebot ist. Das Item bekommt ein Badge `🏷 Lidl 1,69 € · bis Sa`, im Zuordnen-Screen erscheint „Im Angebot bei Lidl“ als Vorschlagsgrund, jede Laden-Card bekommt ein Sheet „Angebote für deine Liste“ | Der eigentliche Wow-Effekt: das beste Angebot wird zur Liste passend vorgeschlagen |
 | **v2.0 – Angebot → Liste** | Angebote eines Ladens durchsuchen, per Tipp mit Marker direkt auf die Liste | Wie bei Bring! und MeinProspekt |

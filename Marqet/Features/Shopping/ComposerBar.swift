@@ -10,6 +10,7 @@ import SwiftUI
 struct ComposerBar: View {
     @Binding var isFocused: Bool
     @Binding var showsAddStore: Bool
+    var horizontalSafeAreaInsets: EdgeInsets = .init()
 
     @Environment(AppModel.self) private var model
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
@@ -60,6 +61,15 @@ struct ComposerBar: View {
         .padding(.bottom, 12)
         .clipShape(.rect(cornerRadius: 30, style: .continuous))
         .glassEffect(.regular, in: .rect(cornerRadius: 30, style: .continuous))
+        .background {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(.regularMaterial)
+                // Expand only the decorative surface by the measured Duo rail insets.
+                // Interactive content remains in the safe area above.
+                .padding(.leading, -horizontalSafeAreaInsets.leading)
+                .padding(.trailing, -horizontalSafeAreaInsets.trailing)
+                .backgroundExtensionEffect()
+        }
         .padding(.horizontal, 10)
         .padding(.bottom, 6)
         .offset(y: dragOffset)

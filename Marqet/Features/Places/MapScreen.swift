@@ -2,13 +2,15 @@ import MapKit
 import MarqetCore
 import SwiftUI
 
-/// "Karte" (KONZEPT §14.1): the user's stores with all their branches around the visible area,
-/// chains not added yet, and a search.
+/// "Karte" (KONZEPT §14.1): branches for stores with open list items, plus a search.
 struct MapScreen: View {
+    let focusedStoreID: Store.ID?
+
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
-    /// Places found around the visible area: branches of own stores and shops nearby.
+    /// Places found around the visible area: branches of stores with open list items.
     @State private var found: [PlaceResult] = []
     @State private var lastLoad: (center: GeoPoint, radius: Double)?
     @State private var loadTask: Task<Void, Never>?
@@ -19,8 +21,15 @@ struct MapScreen: View {
 
     private static let initialRadius: Double = 2_500
 
+    init(focusedStoreID: Store.ID? = nil) {
+        self.focusedStoreID = focusedStoreID
+    }
+
     var body: some View {
-        let pins = model.mapPins(found: found)
+        let pins = model.mapPins(found: found).filter { pin in
+            guard let store = pin.store else { return false }
+            return model.openItemCount(of: store.id) > 0
+        }
         NavigationStack {
             Map(position: $position) {
                 UserAnnotation()
@@ -64,7 +73,11 @@ struct MapScreen: View {
                 }
             }
             .task {
-                if let origin = await model.updateUserLocation() {
+                let origin = await model.updateUserLocation()
+                if let focusedStoreID, let location = model.relevantLocation(of: focusedStoreID) {
+                    fly(to: location.coordinate)
+                    scheduleLoad(center: location.coordinate, radius: Self.initialRadius, immediately: true)
+                } else if let origin {
                     scheduleLoad(center: origin, radius: Self.initialRadius, immediately: true)
                 }
             }
@@ -80,6 +93,7 @@ struct MapScreen: View {
                 .presentationDetents([.height(300)])
             }
         }
+        .tint(.primary)
     }
 
     private func title(of pin: MapPin) -> String {
@@ -117,7 +131,7 @@ struct MapScreen: View {
         lastLoad = (center, radius)
         isLoading = true
         defer { isLoading = false }
-        var results = (try? await model.placeSearch.shops(near: center)) ?? []
+        var results: [PlaceResult] = []
         for store in model.storesForBranchSearch() {
             guard !Task.isCancelled else { return }
             let chain = store.catalogKey.flatMap { model.catalog?.entry(forKey: $0) }
@@ -139,40 +153,58 @@ struct MapScreen: View {
 
     // MARK: Store strip
 
-    /// Own stores, nearest branch first, with distance – tap to fly there.
+    /// Stores with open list items, nearest branch first, with distance – tap to fly there.
     @ViewBuilder
     private func storeStrip(pins: [MapPin]) -> some View {
         let nearest = nearestPinPerStore(pins)
         if !nearest.isEmpty {
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(nearest) { pin in
-                        if let store = pin.store {
-                            Button {
-                                fly(to: pin.coordinate)
-                                selectedPin = pin
-                            } label: {
-                                HStack(spacing: 8) {
-                                    StoreBadge(store: store, size: 24)
-                                    VStack(alignment: .leading, spacing: 0) {
-                                        Text(store.name).font(.subheadline.weight(.semibold))
-                                        if let distance = model.distanceText(to: pin.coordinate) {
-                                            Text(distance).font(.caption2).foregroundStyle(.secondary)
+            let routeStops = model.shoppingRouteStops(from: pins)
+            VStack(spacing: 4) {
+                if let routeURL = model.mapsRouteURL(for: routeStops) {
+                    Button {
+                        openURL(routeURL)
+                    } label: {
+                        Label(
+                            routeStops.count == 1 ? "Route zu 1 Laden" : "Route zu \(routeStops.count) Läden",
+                            systemImage: "arrow.triangle.turn.up.right.diamond"
+                        )
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 46)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .padding(.horizontal, 16)
+                }
+                ScrollView(.horizontal) {
+                    HStack(spacing: 10) {
+                        ForEach(nearest) { pin in
+                            if let store = pin.store {
+                                Button {
+                                    fly(to: pin.coordinate)
+                                    selectedPin = pin
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        StoreBadge(store: store, size: 24)
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            Text(store.name).font(.subheadline.weight(.semibold))
+                                            if let distance = model.distanceText(to: pin.coordinate) {
+                                                Text(distance).font(.caption2).foregroundStyle(.secondary)
+                                            }
                                         }
                                     }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .glassEffect(.regular.interactive(), in: .capsule)
                                 }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .glassEffect(.regular.interactive(), in: .capsule)
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .scrollIndicators(.hidden)
             }
-            .scrollIndicators(.hidden)
+            .padding(.bottom, 6)
         }
     }
 
@@ -246,7 +278,7 @@ private struct PinView: View {
                     .overlay(alignment: .bottomTrailing) {
                         Image(systemName: "plus.circle.fill")
                             .font(.caption)
-                            .foregroundStyle(.white, Color.accentColor)
+                            .foregroundStyle(.white, Color.primary)
                     }
             }
         case .place:
@@ -302,6 +334,7 @@ private struct PinSheet: View {
         }
         .padding(20)
         .frame(maxHeight: .infinity, alignment: .top)
+        .tint(.primary)
     }
 
     private var address: String? {

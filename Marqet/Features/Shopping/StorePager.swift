@@ -1,8 +1,10 @@
 import MarqetCore
 import SwiftUI
 
-/// Horizontal card pager, 1–4 cards side by side (KONZEPT §7.2, KONZEPT-DUO-IPAD §2).
+/// Horizontal pager for brochures, Inbox, store lists, and the store catalog.
 struct StorePager: View {
+    @Binding var isComposerFocused: Bool
+    @Binding var showsAddStore: Bool
     @Environment(AppModel.self) private var model
     @SceneStorage("selectedPageV2") private var storedActivePage = ""
     @State private var position = ScrollPosition(idType: String.self)
@@ -23,7 +25,7 @@ struct StorePager: View {
                 // Not lazy: neighbor cards must render outside the scroll bounds to peek in.
                 HStack(spacing: metrics.spacing) {
                     ForEach(content) { slot in
-                        slotView(slot, deck: deck, metrics: metrics)
+                        slotView(slot, content: content, deck: deck, metrics: metrics, horizontalSafeAreaInsets: proxy.safeAreaInsets)
                             .frame(width: metrics.slotWidth)
                             .padding(.top, 8)
                             .padding(.bottom, 32)
@@ -58,6 +60,37 @@ struct StorePager: View {
             .frame(width: metrics.scrollWidth)
             .offset(x: metrics.scrollX)
             .frame(width: proxy.size.width, alignment: .leading)
+            // Take exactly the height left above keyboard and composer, never the cards' own
+            // height: with only max set, a card taller than that space (the empty state) grows
+            // the layout and pushes the composer's text field behind the keyboard.
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if model.composerTarget != nil, model.focusedPage == nil {
+                    if metrics.slots == 1 {
+                        ComposerBar(
+                            isFocused: $isComposerFocused,
+                            showsAddStore: $showsAddStore,
+                            horizontalSafeAreaInsets: proxy.safeAreaInsets
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        let activeIndex = content.firstIndex { $0.page == model.activePage && !$0.isGhost } ?? leadingIndex
+                        let offset = min(max(activeIndex - leadingIndex, 0), metrics.slots - 1)
+                        HStack(spacing: 0) {
+                            Color.clear
+                                .frame(width: metrics.scrollX + CGFloat(offset) * (metrics.slotWidth + metrics.spacing))
+                            ComposerBar(
+                                isFocused: $isComposerFocused,
+                                showsAddStore: $showsAddStore,
+                                horizontalSafeAreaInsets: proxy.safeAreaInsets
+                            )
+                            .frame(width: metrics.slotWidth)
+                            Spacer(minLength: 0)
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            }
             .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.8) { ids in
                 didScroll(toVisible: ids, content: content, metrics: metrics)
             }
@@ -85,6 +118,11 @@ struct StorePager: View {
                 if model.hasLoadedItems { selectInitialPage(pages: deck.pages) }
                 reposition(content: content, pages: deck.pages, metrics: metrics)
             }
+            // The composer is nonmodal behind this pager. A background tap dismisses it;
+            // a horizontal drag fails the tap recognizer and continues paging underneath.
+            .simultaneousGesture(TapGesture().onEnded {
+                if model.composerTarget != nil { model.endComposer() }
+            })
         }
     }
 
@@ -104,13 +142,17 @@ struct StorePager: View {
     }
 
     @ViewBuilder
-    private func slotView(_ slot: SpreadLayout.Slot, deck: CardDeck, metrics: PagerMetrics) -> some View {
+    private func slotView(_ slot: SpreadLayout.Slot, content: [SpreadLayout.Slot], deck: CardDeck, metrics: PagerMetrics, horizontalSafeAreaInsets: EdgeInsets) -> some View {
         if let page = slot.page {
-            let isFocused = metrics.slots > 1 && page == model.activePage && !slot.isGhost
-            PageCard(page: page, deck: deck, isFocused: isFocused)
+            PageCard(page: page, deck: deck, horizontalSafeAreaInsets: horizontalSafeAreaInsets)
                 // "Der Fokus folgt der Hand": touching a card makes it the active one.
                 .simultaneousGesture(TapGesture().onEnded {
-                    if metrics.slots > 1 { model.activePage = page }
+                    guard metrics.slots > 1 else { return }
+                    if metrics.anchor == .trailing {
+                        navigate(to: page, content: content, pages: deck.pages, metrics: metrics)
+                    } else {
+                        model.activePage = page
+                    }
                 })
         } else {
             Color.clear
@@ -170,8 +212,7 @@ struct PageIndicator: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        // The trailing "+" page is reachable by swiping; it gets no dot of its own.
-        let pages = model.deck.pages.filter { $0 != .more }
+        let pages = model.deck.pages
         let activeIndex = pages.firstIndex(of: model.activePage)
             ?? (model.activePage == .more ? pages.count - 1 : 0)
         let start = max(0, min(activeIndex - 2, pages.count - 5))
@@ -210,23 +251,28 @@ struct PageIndicator: View {
     @ViewBuilder
     private func dot(for page: PageID) -> some View {
         switch page {
+        case .brochures:
+            Image(systemName: "newspaper.fill")
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundStyle(.secondary)
         case .more:
-            Image(systemName: "plus")
-                .font(.system(size: 8, weight: .heavy))
+            Image(systemName: "storefront.fill")
+                .font(.system(size: 8, weight: .semibold))
                 .foregroundStyle(.secondary)
         case .unsorted:
             Image(systemName: "tray.fill")
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
-        case .store(let id):
+        case .store:
             Circle().fill(.secondary).frame(width: 7, height: 7)
         }
     }
 
     private func label(for page: PageID) -> String {
         switch page {
-        case .more: String(localized: "Weitere Läden")
+        case .brochures: String(localized: "Prospekte")
         case .unsorted: String(localized: "Inbox")
+        case .more: String(localized: "Weitere Läden")
         case .store(let id): model.store(id)?.name ?? ""
         }
     }
@@ -236,18 +282,20 @@ struct PageIndicator: View {
 struct PageCard: View {
     let page: PageID
     let deck: CardDeck
-    var isFocused = false
+    var horizontalSafeAreaInsets = EdgeInsets()
     @Environment(AppModel.self) private var model
 
     var body: some View {
         switch page {
+        case .brochures:
+            BrochuresCard()
         case .more:
-            MoreStoresCard(isFocused: isFocused)
+            MoreStoresCard()
         case .unsorted:
-            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isFocused: isFocused)
+            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, horizontalSafeAreaInsets: horizontalSafeAreaInsets)
         case .store(let id):
             if let store = model.store(id) {
-                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isFocused: isFocused)
+                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), horizontalSafeAreaInsets: horizontalSafeAreaInsets)
             }
         }
     }

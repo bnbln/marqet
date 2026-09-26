@@ -27,7 +27,7 @@ public struct CardDeck: Equatable, Sendable {
     }
 }
 
-/// Builds the deck: `[Inbox] [Läden …] [Weitere Läden]` with the card lifecycle rules.
+/// Builds the deck: `[Prospekte] [Inbox] [Läden …] [Weitere Läden]` with the card lifecycle rules.
 public enum CardBuilder {
     public struct Context: Sendable {
         /// Pages that must not disappear: currently on screen, or the target of the open composer.
@@ -55,7 +55,7 @@ public enum CardBuilder {
         }
 
         // Keep the inbox mounted when its first item arrives, including on Duo.
-        var pages: [PageID] = [.unsorted]
+        var pages: [PageID] = [.brochures, .unsorted]
 
         var states: [Store.ID: StoreCardState] = [:]
         for store in ordered(stores, by: storeOrder) {
@@ -83,7 +83,7 @@ public enum CardBuilder {
             .map(\.element)
     }
 
-    /// `nil` means the store is hidden and listed on the "Weitere Läden" card.
+    /// `nil` means the store is hidden and can be restored from the brochure page.
     public static func state(of store: Store, hasItems: Bool, context: Context) -> StoreCardState? {
         if hasItems { return .active }
         if context.emptiedInSession.contains(store.id) { return .shoppedEmpty }

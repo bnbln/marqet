@@ -2,10 +2,9 @@ import Foundation
 
 /// Which slot hosts the active card (KONZEPT-DUO-IPAD §2.2).
 public enum SpreadAnchor: Sendable {
-    /// iPad and devices without a hinge: active card first, following stores to the right.
+    /// Compact layouts or a single slot: there is no adjacent context pane.
     case leading
-    /// iPhone Duo: the active card stays on the half behind the outer display, the unfolded
-    /// half shows the previous card (or "Weitere Läden" before the first page).
+    /// Wide layouts keep the active list in the rightmost slot; supporting content sits to its left.
     case trailing
 }
 
@@ -23,7 +22,7 @@ public enum SpreadLayout {
         public let id: String
         /// `nil` for an empty filler.
         public let page: PageID?
-        /// A filler that mirrors a real page (the "Weitere Läden" card left of the first page).
+        /// A mirrored page, if a future spread needs one; current leading fillers are blank.
         public let isGhost: Bool
     }
 
@@ -39,16 +38,10 @@ public enum SpreadLayout {
         let real = pages.map { Slot(id: $0.rawValue, page: $0, isGhost: false) }
         guard anchor == .trailing, slots > 1 else { return real }
 
-        var fillers: [Slot] = []
-        for index in 0..<(slots - 1) {
-            // Only the filler directly left of page 0 mirrors "Weitere Läden" – and only if that
-            // card is not page 0 itself.
-            let isMoreMirror = index == slots - 2 && pages.count > 1 && pages.last == .more
-            fillers.append(Slot(
-                id: isMoreMirror ? "ghost:more" : "filler:\(index)",
-                page: isMoreMirror ? .more : nil,
-                isGhost: isMoreMirror
-            ))
+        // Blank leading slots keep the first real page on the Duo's right-hand anchor without
+        // making the final "Weitere Läden" page appear before the brochure collection.
+        let fillers = (0..<(slots - 1)).map { index in
+            Slot(id: "filler:\(index)", page: nil, isGhost: false)
         }
         return fillers + real
     }

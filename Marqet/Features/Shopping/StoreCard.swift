@@ -8,16 +8,19 @@ struct StoreCard: View {
     let store: Store?
     let items: [ShoppingItem]
     let state: StoreCardState?
-    var isFocused = false
     /// Full screen in `StoreFocusScreen` instead of a card in the pager.
     var isExpanded = false
+    var showsHeader = true
+    var showsOffers = true
+    var horizontalSafeAreaInsets = EdgeInsets()
 
     @Environment(AppModel.self) private var model
     @Environment(\.cardZoomNamespace) private var zoomNamespace
-    @State private var showsSectionOrder = false
-    @State private var showsStoreDetails = false
     /// The user's finger is on the list – only then does pulling up open the card full screen.
     @State private var isDraggingList = false
+    /// Measured height of the inbox footer, so the last item can scroll above it.
+    @State private var triageFooterHeight: CGFloat = 100
+    private var showsTriageFooter: Bool { store == nil && !items.isEmpty && !isExpanded }
 
     private var tint: Color { store?.color ?? .gray }
     /// Store color for text and symbols on the card surface (WCAG AA in light and dark mode).
@@ -28,25 +31,42 @@ struct StoreCard: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-            if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
-                // Full screen, the empty state uses the height like on the home cards; offers sit
-                // right above the add button.
+            if showsHeader { header }
+            if isExpanded, store != nil {
+                itemList
+            } else if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
                 VStack(spacing: 0) {
-                    emptyState
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    if isExpanded, let store {
-                        OffersSection(store: store, inList: false)
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 76)
+                    // With the keyboard up, the card can get too short for the full empty state.
+                    ViewThatFits(in: .vertical) {
+                        emptyState(showsSymbol: true)
+                        emptyState(showsSymbol: false)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background {
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onTapGesture(perform: dismissComposerFromBackground)
+                        }
                 }
             } else {
                 itemList
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .modifier(CardChrome(isExpanded: isExpanded, isFocused: isFocused, tint: tint, glowColor: store?.color))
+        .modifier(CardChrome(isExpanded: isExpanded, glowColor: store?.color))
+        // CardSurface clips its rounded foreground at the safe-area edge. Keep a separate,
+        // noninteractive copy of the header artwork behind that clipped surface so the Duo
+        // sidebar can sit over it without leaving a pale gap.
+        .background(alignment: .top) {
+            if !isExpanded, showsHeader {
+                LinearGradient(colors: [tint, tint.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .frame(height: 76)
+                    .padding(.leading, -horizontalSafeAreaInsets.leading)
+                    .padding(.trailing, -horizontalSafeAreaInsets.trailing)
+                    .backgroundExtensionEffect()
+                    .accessibilityHidden(true)
+            }
+        }
         .modifier(CardZoomSource(page: page, namespace: isExpanded ? nil : zoomNamespace))
         // Items dragged from another card move to this store (KONZEPT-DUO-IPAD §4.2).
         .dropDestination(for: String.self) { ids, _ in
@@ -55,104 +75,12 @@ struct StoreCard: View {
             Task { for item in moved { await model.assign(item, to: store) } }
             return true
         }
-        .sheet(isPresented: $showsSectionOrder) {
-            if let store { SectionOrderSheet(store: store).leadingSheetPlacement() }
-        }
-        .sheet(isPresented: $showsStoreDetails) {
-            if let store { StoreDetailsSheet(store: store).leadingSheetPlacement() }
-        }
     }
 
     // MARK: Header
 
     private var header: some View {
-        HStack(spacing: 14) {
-            if let store {
-                StoreBadge(store: store, size: 44)
-            } else {
-                Image(systemName: "tray.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .frame(width: 44, height: 44)
-                    .background(.white.opacity(0.2), in: .circle)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(store?.name ?? String(localized: "Inbox"))
-                    .font(.title2.bold())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                Text(subtitle)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 0)
-            if let store {
-                cardMenu(for: store)
-            }
-            if isExpanded {
-                Button {
-                    model.focusedPage = nil
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 36, height: 36)
-                        .background(.white.opacity(0.22), in: .circle)
-                }
-                .accessibilityLabel("Schließen")
-            }
-        }
-        .foregroundStyle(store?.foregroundOnColor ?? .white)
-        .padding(.horizontal, 18)
-        .padding(.vertical, 16)
-        .background {
-            LinearGradient(colors: [tint, tint.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                // Full screen, the header color runs up under the status bar.
-                .ignoresSafeArea(edges: isExpanded ? .top : [])
-        }
-        // Tapping the header zooms the card to full screen and back (buttons keep their own taps).
-        .contentShape(.rect)
-        .onTapGesture {
-            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isHeader)
-        .accessibilityAction(named: isExpanded ? "Schließen" : "Vollbild") {
-            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
-        }
-    }
-
-    private var subtitle: String {
-        let open = items.filter { !$0.isCompleted }.count
-        if store == nil {
-            return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
-        }
-        let distance = store.flatMap { model.distanceText(to: $0.id) }
-        if let address = store?.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
-        if let detail = store?.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
-        if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }
-        switch state {
-        case .shoppedEmpty: return String(localized: "Alles erledigt")
-        case .planned where open == 0: return String(localized: "Noch keine Einträge")
-        default: return String(localized: "\(open) offen")
-        }
-    }
-
-    private func cardMenu(for store: Store) -> some View {
-        Menu {
-            Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
-            Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
-            if store.type.showsCategorySections {
-                Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
-            }
-            if items.isEmpty {
-                Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
-            }
-        } label: {
-            Image(systemName: "ellipsis")
-                .font(.body.weight(.semibold))
-                .frame(width: 36, height: 36)
-                .background(.white.opacity(0.22), in: .circle)
-        }
-        .accessibilityLabel("Laden-Optionen")
+        StoreCardHeader(page: page, store: store, items: items, state: state, isExpanded: isExpanded)
     }
 
     // MARK: Items
@@ -160,38 +88,65 @@ struct StoreCard: View {
     private var itemList: some View {
         ScrollViewReader { proxy in
             List {
-                // Category sections in walking order for grocery stores, one flat list otherwise (KONZEPT §6.3).
-                ForEach(model.sections(for: page, items: items)) { section in
+                if isExpanded, showsOffers, let store {
                     Section {
-                        ForEach(section.items) { item in
-                            ItemRow(item: item, tint: readableTint)
+                        OffersSection(store: store)
+                            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
                             .listRowBackground(Color(.secondarySystemGroupedBackground))
-                            .listRowSeparator(.visible, edges: .bottom)
-                            .listRowSeparatorTint(Color(.separator).opacity(0.4))
-                            .id(item.id)
-                        }
-                    } header: {
-                        if let category = section.category {
-                            Label(category.displayName, systemImage: category.symbol)
-                                .font(.subheadline.weight(.semibold))
-                                .textCase(nil)
-                                .foregroundStyle(readableTint)
+                            .listRowSeparator(.hidden)
+                    }
+                }
+                if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
+                    Section {
+                        emptyState(showsSymbol: true)
+                            .frame(maxWidth: .infinity)
+                            .listRowBackground(Color(.secondarySystemGroupedBackground))
+                            .listRowSeparator(.hidden)
+                    }
+                } else {
+                    // Category sections in walking order for grocery stores, one flat list otherwise (KONZEPT §6.3).
+                    ForEach(model.sections(for: page, items: items)) { section in
+                        Section {
+                            ForEach(section.items) { item in
+                                ItemRow(item: item, tint: readableTint)
+                                    .listRowBackground(Color(.secondarySystemGroupedBackground))
+                                    .listRowSeparator(.visible, edges: .bottom)
+                                    .listRowSeparatorTint(Color(.separator).opacity(0.4))
+                                    .id(item.id)
+                            }
+                        } header: {
+                            if let category = section.category {
+                                Label(category.displayName, systemImage: category.symbol)
+                                    .font(.subheadline.weight(.semibold))
+                                    .textCase(nil)
+                                    .foregroundStyle(readableTint)
+                            }
                         }
                     }
                 }
                 completedSection
-                if isExpanded, let store {
-                    OffersSection(store: store)
-                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .background {
+                // A tap on unused list space closes the composer. List rows and their
+                // controls stay in front of this background hit target.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: dismissComposerFromBackground)
+            }
             .scrollIndicators(.visible)
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if store == nil, !items.isEmpty, !isExpanded {
+                Color.clear.frame(height: isExpanded ? 72 : (showsTriageFooter ? triageFooterHeight : 54))
+            }
+            .overlay(alignment: .bottom) {
+                if showsTriageFooter {
                     triageFooter
-                } else {
-                    Color.clear.frame(height: isExpanded ? 72 : 54)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { triageFooterHeight = $0 }
+                        .padding(.bottom, 4)
+                        // Keep the action at the card edge when the keyboard appears;
+                        // the keyboard may cover it until the user dismisses the composer.
+                        .ignoresSafeArea(.keyboard, edges: .bottom)
                 }
             }
             // Pulling the list up opens the card full screen (not while typing or when full screen).
@@ -211,6 +166,11 @@ struct StoreCard: View {
                 }
             }
         }
+    }
+
+    private func dismissComposerFromBackground() {
+        guard model.composerTarget != nil else { return }
+        model.endComposer()
     }
 
     /// Entry into the triage flow, pinned to the bottom of the inbox card (KONZEPT §7.4), centered.
@@ -263,13 +223,15 @@ struct StoreCard: View {
     // MARK: Empty states (KONZEPT §7.2 lifecycle)
 
     @ViewBuilder
-    private var emptyState: some View {
+    private func emptyState(showsSymbol: Bool) -> some View {
         VStack(spacing: 14) {
             switch state {
             case .shoppedEmpty:
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 52))
-                    .foregroundStyle(readableTint)
+                if showsSymbol {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 52))
+                        .foregroundStyle(readableTint)
+                }
                 Text("Alles erledigt bei \(store?.name ?? "")")
                     .font(.title3.bold())
                     .multilineTextAlignment(.center)
@@ -279,9 +241,11 @@ struct StoreCard: View {
                         .tint(readableTint)
                 }
             case .planned:
-                Image(systemName: "cart.badge.plus")
-                    .font(.system(size: 48))
-                    .foregroundStyle(readableTint)
+                if showsSymbol {
+                    Image(systemName: "cart.badge.plus")
+                        .font(.system(size: 48))
+                        .foregroundStyle(readableTint)
+                }
                 Text("Noch leer")
                     .font(.title3.bold())
                 Text("Tippe auf +, um etwas für \(store?.name ?? "") hinzuzufügen.")
@@ -294,11 +258,13 @@ struct StoreCard: View {
                     .foregroundStyle(store?.foregroundOnColor ?? .white)
             default:
                 if store == nil {
-                    Image(systemName: "tray")
-                        .font(.system(size: 34, weight: .light))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 88, height: 88)
-                        .background(Color(.tertiarySystemGroupedBackground), in: .circle)
+                    if showsSymbol {
+                        Image(systemName: "tray")
+                            .font(.system(size: 34, weight: .light))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 88, height: 88)
+                            .background(Color(.tertiarySystemGroupedBackground), in: .circle)
+                    }
                     Text("Alles sortiert")
                         .font(.title3.bold())
                     Text("Einträge ohne Laden findest du hier.")
@@ -308,9 +274,11 @@ struct StoreCard: View {
                     Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: .unsorted) }
                         .buttonStyle(.bordered)
                 } else if let store {
-                    Image(systemName: "cart")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.tertiary)
+                    if showsSymbol {
+                        Image(systemName: "cart")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.tertiary)
+                    }
                     Text("Leer")
                         .font(.title3.bold())
                     Button("Ausblenden") { model.hide(store.id) }
@@ -319,6 +287,135 @@ struct StoreCard: View {
             }
         }
         .padding(24)
+    }
+}
+
+/// A header that owns its environment-dependent content. Keeping it as a rendered child is
+/// important: accessing a computed header from a parent evaluates `@Environment` too early and
+/// crashes when the card is opened in the Duo split detail view.
+struct StoreCardHeader: View {
+    let page: PageID
+    let store: Store?
+    let items: [ShoppingItem]
+    let state: StoreCardState?
+    let isExpanded: Bool
+    var contentWidth: CGFloat? = nil
+    var showsBackground = true
+
+    @Environment(AppModel.self) private var model
+    @State private var showsSectionOrder = false
+    @State private var showsStoreDetails = false
+    @State private var showsMap = false
+
+    private var tint: Color { store?.color ?? .gray }
+
+    var body: some View {
+        HStack(spacing: 14) {
+            if let store {
+                StoreBadge(store: store, size: 44)
+            } else {
+                Image(systemName: "tray.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .frame(width: 44, height: 44)
+                    .background(.white.opacity(0.2), in: .circle)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(store?.name ?? String(localized: "Inbox"))
+                    .font(.title2.bold())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                Text(subtitle)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            if let store { cardMenu(for: store) }
+            if isExpanded {
+                Button {
+                    model.focusedPage = nil
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 36, height: 36)
+                        .background(.white.opacity(0.22), in: .circle)
+                }
+                .accessibilityLabel("Schließen")
+            }
+        }
+        .frame(width: contentWidth.map { max($0 - 36, 0) })
+        .foregroundStyle(store?.foregroundOnColor ?? .white)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
+        .contentShape(.rect)
+        .onTapGesture {
+            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            let gradient = LinearGradient(colors: [tint, tint.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            if isExpanded {
+                if showsBackground {
+                    gradient
+                        .ignoresSafeArea(edges: .top)
+                        .backgroundExtensionEffect()
+                } else {
+                    Color.clear
+                }
+            } else {
+                gradient
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityAction(named: isExpanded ? "Schließen" : "Vollbild") {
+            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
+        }
+        .sheet(isPresented: $showsSectionOrder) {
+            if let store { SectionOrderSheet(store: store).leadingSheetPlacement() }
+        }
+        .sheet(isPresented: $showsStoreDetails) {
+            if let store { StoreDetailsSheet(store: store).leadingSheetPlacement() }
+        }
+        .sheet(isPresented: $showsMap) {
+            if let store { MapScreen(focusedStoreID: store.id).leadingSheetPlacement() }
+        }
+    }
+
+    private var subtitle: String {
+        let open = items.filter { !$0.isCompleted }.count
+        guard let store else {
+            return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
+        }
+        let distance = model.distanceText(to: store.id)
+        if let address = store.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
+        if let detail = store.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
+        if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }
+        switch state {
+        case .shoppedEmpty: return String(localized: "Alles erledigt")
+        case .planned where open == 0: return String(localized: "Noch keine Einträge")
+        default: return String(localized: "\(open) offen")
+        }
+    }
+
+    private func cardMenu(for store: Store) -> some View {
+        Menu {
+            Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
+            Button("Karte", systemImage: "map") { showsMap = true }
+            Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
+            if store.type.showsCategorySections {
+                Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
+            }
+            if items.isEmpty {
+                Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.body.weight(.semibold))
+                .frame(width: 36, height: 36)
+                .background(.white.opacity(0.22), in: .circle)
+        }
+        .tint(.primary)
+        .accessibilityLabel("Laden-Optionen")
     }
 }
 
@@ -527,15 +624,13 @@ private struct ItemTitleParts {
 /// Card look in the pager, edge-to-edge surface full screen.
 private struct CardChrome: ViewModifier {
     let isExpanded: Bool
-    let isFocused: Bool
-    let tint: Color
     let glowColor: Color?
 
     func body(content: Content) -> some View {
         if isExpanded {
             content.background(Color(.secondarySystemGroupedBackground))
         } else {
-            content.cardSurface(isFocused: isFocused, focusColor: tint, glowColor: glowColor)
+            content.cardSurface(glowColor: glowColor)
         }
     }
 }

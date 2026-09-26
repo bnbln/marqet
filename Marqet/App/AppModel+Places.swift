@@ -80,6 +80,34 @@ extension AppModel {
         return userLocation
     }
 
+    /// Uses one nearby-shop search to rank catalog chains and their leaflets by distance.
+    /// It runs only after location permission was already granted; opening a catalog page
+    /// never triggers a new permission prompt.
+    func refreshNearbyCatalogDistancesIfNeeded() async {
+        guard !isRefreshingNearbyCatalogDistances,
+              locationProvider.authorization == .authorized else { return }
+        isRefreshingNearbyCatalogDistances = true
+        defer { isRefreshingNearbyCatalogDistances = false }
+        guard let origin = await updateUserLocation() else { return }
+        if let previousOrigin = nearbyCatalogDistanceOrigin,
+           nearbyCatalogDistanceRegion == region,
+           previousOrigin.distance(to: origin) < 250 {
+            return
+        }
+
+        let entries = catalog?.entries(for: region) ?? []
+        let places = (try? await placeSearch.shops(near: origin)) ?? []
+        var distances: [String: Double] = [:]
+        for place in places {
+            guard let entry = ChainRecognizer.entry(forPlaceNamed: place.name, in: entries) else { continue }
+            let distance = place.coordinate.distance(to: origin)
+            distances[entry.key] = min(distances[entry.key] ?? .infinity, distance)
+        }
+        nearbyCatalogDistances = distances
+        nearbyCatalogDistanceOrigin = origin
+        nearbyCatalogDistanceRegion = region
+    }
+
     // MARK: Branches
 
     /// Saves a branch for a store. A preferred branch also becomes the address shown on the card.
@@ -234,13 +262,23 @@ struct MapPin: Identifiable, Equatable {
     }
 }
 
+/// One stop on the route through stores with open shopping-list items.
+struct ShoppingRouteStop: Identifiable {
+    let storeID: Store.ID
+    let storeName: String
+    let address: String?
+    let coordinate: GeoPoint
+
+    var id: Store.ID { storeID }
+}
+
 extension AppModel {
-    /// Stores whose branches the map looks up: own chains and own stores, no generic kinds
-    /// ("Bäcker"), those with open items first – MapKit throttles, so at most `limit`.
+    /// Stores whose branches the map looks up: only chains with open list items. MapKit
+    /// throttles searches, so at most `limit`.
     func storesForBranchSearch(limit: Int = 8) -> [Store] {
-        let stores = sortedStores.filter { !($0.catalogKey?.hasPrefix("generic-") ?? false) }
-        let open = stores.filter { openItemCount(of: $0.id) > 0 }
-        return Array((open + stores.filter { openItemCount(of: $0.id) == 0 }).prefix(limit))
+        Array(sortedStores.filter {
+            !($0.catalogKey?.hasPrefix("generic-") ?? false) && openItemCount(of: $0.id) > 0
+        }.prefix(limit))
     }
 
     /// Saved branches, branches of own stores found around the map, and chains not added yet.
@@ -274,5 +312,94 @@ extension AppModel {
             }
         }
         return pins
+    }
+
+    /// Picks one known branch per store with open items, then orders the stops with nearest-neighbor
+    /// and 2-opt passes from the user's location. Apple Maps computes the actual leg directions.
+    func shoppingRouteStops(from pins: [MapPin]) -> [ShoppingRouteStop] {
+        let origin = userLocation
+        var stops: [ShoppingRouteStop] = []
+
+        for store in sortedStores where openItemCount(of: store.id) > 0 {
+            let candidates: [(coordinate: GeoPoint, address: String?, name: String, preferred: Bool)] = pins.compactMap { pin in
+                guard pin.store?.id == store.id else { return nil }
+                switch pin.kind {
+                case .saved(let location):
+                    return (location.coordinate, location.address, location.name, location.isPreferred)
+                case .branch(let place):
+                    return (place.coordinate, place.address, place.name, false)
+                case .suggestion, .place:
+                    return nil
+                }
+            }
+            guard !candidates.isEmpty else { continue }
+
+            let selected: (coordinate: GeoPoint, address: String?, name: String, preferred: Bool)
+            if let origin {
+                selected = candidates.min { $0.coordinate.distance(to: origin) < $1.coordinate.distance(to: origin) }!
+            } else {
+                selected = candidates.first(where: \.preferred) ?? candidates[0]
+            }
+            stops.append(ShoppingRouteStop(
+                storeID: store.id,
+                storeName: store.name,
+                address: selected.address,
+                coordinate: selected.coordinate
+            ))
+        }
+
+        guard let origin else { return stops }
+        var remaining = stops
+        var route: [ShoppingRouteStop] = []
+        var current = origin
+        while !remaining.isEmpty {
+            let nearestIndex = remaining.indices.min {
+                remaining[$0].coordinate.distance(to: current) < remaining[$1].coordinate.distance(to: current)
+            }!
+            let next = remaining.remove(at: nearestIndex)
+            route.append(next)
+            current = next.coordinate
+        }
+        var improved = true
+        while improved, route.count > 2 {
+            improved = false
+            for start in 0..<(route.count - 2) {
+                for end in (start + 1)..<(route.count - 1) {
+                    let before = start == 0 ? origin : route[start - 1].coordinate
+                    let after = route[end + 1].coordinate
+                    let currentDistance = before.distance(to: route[start].coordinate)
+                        + route[end].coordinate.distance(to: after)
+                    let reversedDistance = before.distance(to: route[end].coordinate)
+                        + route[start].coordinate.distance(to: after)
+                    if reversedDistance + 1 < currentDistance {
+                        let reversedSegment = Array(route[start...end].reversed())
+                        route.replaceSubrange(start...end, with: reversedSegment)
+                        improved = true
+                    }
+                }
+            }
+        }
+        return route
+    }
+
+    /// Apple Maps directions URL with repeated waypoints; omitting a source starts at the
+    /// user's current location. The stop order is proximity-optimized above.
+    func mapsRouteURL(for stops: [ShoppingRouteStop]) -> URL? {
+        guard let destination = stops.last else { return nil }
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "maps.apple.com"
+        components.path = "/directions"
+        components.queryItems = [
+            URLQueryItem(name: "destination", value: "\(destination.coordinate.latitude),\(destination.coordinate.longitude)"),
+        ]
+        for stop in stops.dropLast() {
+            components.queryItems?.append(URLQueryItem(
+                name: "waypoint",
+                value: "\(stop.coordinate.latitude),\(stop.coordinate.longitude)"
+            ))
+        }
+        components.queryItems?.append(URLQueryItem(name: "mode", value: travelMode.rawValue))
+        return components.url
     }
 }

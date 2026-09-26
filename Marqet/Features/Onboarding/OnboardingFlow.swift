@@ -101,7 +101,7 @@ struct OnboardingFlow: View {
             ],
             footnote: "Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung."
         ) {
-            Button("Los geht’s") {
+            OnboardingPrimaryButton(title: "Los geht’s") {
                 let hasAccess = model.phase == .needsList || model.phase == .ready
                 advance(to: hasAccess ? .list : .access)
             }
@@ -122,7 +122,7 @@ struct OnboardingFlow: View {
                 ],
                 footnote: "Alles bleibt auf deinem Gerät und in deinem iCloud."
             ) {
-                Button("Zugriff erlauben") {
+                OnboardingPrimaryButton(title: "Zugriff erlauben") {
                     Task { await model.requestAccess() }
                 }
             }
@@ -140,7 +140,7 @@ struct OnboardingFlow: View {
             ],
             footnote: nil
         ) {
-            Button("Fertig") { model.completeOnboarding() }
+            OnboardingPrimaryButton(title: "Fertig") { model.completeOnboarding() }
         }
     }
 }
@@ -205,17 +205,14 @@ private struct OnboardingStoresView: View {
             .padding(20)
         }
         .safeAreaInset(edge: .bottom) {
-            Button {
+            OnboardingPrimaryButton(title: "Weiter") {
                 for key in selection {
                     if let entry = model.catalog?.entry(forKey: key) { model.addStore(from: entry, planned: false) }
                 }
                 onContinue()
-            } label: {
-                Text("Weiter")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.glassProminent)
-            .controlSize(.large)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
             .padding(20)
         }
         .sheet(isPresented: $showsCustomStore) {
@@ -263,10 +260,25 @@ private struct OnboardingPage<Action: View>: View {
         }
         .safeAreaInset(edge: .bottom) {
             action
-                .buttonStyle(.glassProminent)
-                .controlSize(.large)
+                .frame(maxWidth: 560)
                 .frame(maxWidth: .infinity)
                 .padding(20)
         }
+    }
+}
+
+/// Identical full-width primary action for every onboarding step.
+private struct OnboardingPrimaryButton: View {
+    let title: LocalizedStringKey
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.glassProminent)
+        .controlSize(.large)
+        .frame(maxWidth: .infinity)
     }
 }

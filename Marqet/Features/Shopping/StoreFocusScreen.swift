@@ -23,8 +23,8 @@ struct CardZoomSource: ViewModifier {
     }
 }
 
-/// One card full screen: the card zooms up to the full width, the header runs under the status
-/// bar, the add button stays, the page dots are gone. Stores show offers and leaflets below the items.
+/// One card full screen. On wide layouts, store details sit left of the active list; compact
+/// layouts keep the existing single-card detail view.
 struct StoreFocusScreen: View {
     let page: PageID
     @Environment(AppModel.self) private var model
@@ -32,22 +32,53 @@ struct StoreFocusScreen: View {
     @State private var isComposerFocused = false
     @State private var showsAddStore = false
     @State private var addFeedback = 0
+    @State private var horizontalSafeAreaInsets = EdgeInsets()
 
     var body: some View {
         let deck = model.deck
-        card(deck: deck)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        GeometryReader { proxy in
+            let metrics = PagerMetrics(
+                size: proxy.size,
+                fold: FoldGeometry.verticalFold(in: proxy),
+                maximumVisibleSlots: 2
+            )
+            let contextStore = page.storeID.flatMap { model.store($0) }
+            let usesSplit = metrics.slots > 1 && contextStore != nil
+
+            Group {
+                if let store = contextStore, usesSplit {
+                    splitCard(deck: deck, store: store, metrics: metrics, containerWidth: proxy.size.width)
+                } else {
+                    card(deck: deck)
+                }
+            }
+            // min and max: exactly the space above keyboard and composer, even if the card is
+            // taller – otherwise it pushes the composer's text field behind the keyboard.
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
             .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
             .overlay(alignment: .bottom) {
                 if model.composerTarget == nil { bottomControls(deck: deck) }
             }
-            .safeAreaInset(edge: .bottom) {
+            .safeAreaInset(edge: .bottom, spacing: 0) {
                 if model.composerTarget != nil {
-                    ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
+                    if usesSplit {
+                        HStack(spacing: 0) {
+                            Color.clear.frame(width: metrics.scrollX + metrics.slotWidth + metrics.spacing)
+                            composerBar
+                                .frame(width: metrics.slotWidth)
+                            Spacer(minLength: 0)
+                        }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else {
+                        composerBar
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
             }
             .animation(.snappy, value: model.composerTarget == nil)
+            .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
+                horizontalSafeAreaInsets = insets
+            }
             .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
             .onChange(of: model.composerTarget) { _, target in
                 if target != nil { isComposerFocused = true }
@@ -65,6 +96,15 @@ struct StoreFocusScreen: View {
             .fullScreenCover(isPresented: Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })) {
                 TriageScreen()
             }
+        }
+    }
+
+    private var composerBar: some View {
+        ComposerBar(
+            isFocused: $isComposerFocused,
+            showsAddStore: $showsAddStore,
+            horizontalSafeAreaInsets: horizontalSafeAreaInsets
+        )
     }
 
     /// "Läden zuordnen" centered at the height of the add button (inbox only).
@@ -85,15 +125,69 @@ struct StoreFocusScreen: View {
     @ViewBuilder
     private func card(deck: CardDeck) -> some View {
         switch page {
+        case .brochures, .more:
+            EmptyView()
         case .unsorted:
             StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isExpanded: true)
         case .store(let id):
             if let store = model.store(id) {
                 StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isExpanded: true)
             }
-        case .more:
-            EmptyView()
         }
+    }
+
+    private func splitCard(deck: CardDeck, store: Store, metrics: PagerMetrics, containerWidth: CGFloat) -> some View {
+        let storePage = PageID.store(store.id)
+        let storeItems = deck.items(on: storePage)
+        let listCard = StoreCard(
+            page: storePage,
+            store: store,
+            items: storeItems,
+            state: deck.state(of: store.id),
+            isExpanded: true,
+            showsHeader: false,
+            showsOffers: false
+        )
+        let headerWidth = max(metrics.scrollWidth, containerWidth - metrics.scrollX + horizontalSafeAreaInsets.trailing)
+
+        return ZStack(alignment: .topLeading) {
+            LinearGradient(colors: [store.color, store.color.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .frame(width: headerWidth, height: 76)
+                .ignoresSafeArea(edges: .top)
+                .backgroundExtensionEffect()
+                .accessibilityHidden(true)
+
+            VStack(spacing: 0) {
+                StoreCardHeader(
+                    page: storePage,
+                    store: store,
+                    items: storeItems,
+                    state: deck.state(of: store.id),
+                    isExpanded: true,
+                    contentWidth: metrics.slotWidth,
+                    showsBackground: false
+                )
+                .frame(width: headerWidth, height: 76, alignment: .leading)
+
+                HStack(spacing: metrics.spacing) {
+                    StoreContextPane(store: store)
+                        .frame(width: metrics.slotWidth)
+                        .background(Color(.secondarySystemGroupedBackground))
+
+                    listCard
+                        .frame(width: metrics.slotWidth)
+                        .background(Color(.secondarySystemGroupedBackground))
+                }
+                .frame(width: metrics.scrollWidth)
+                .frame(minHeight: 0, maxHeight: .infinity)
+                .background(Color(.secondarySystemGroupedBackground))
+            }
+            .frame(width: headerWidth, alignment: .leading)
+            .frame(minHeight: 0, maxHeight: .infinity, alignment: .leading)
+        }
+        .offset(x: metrics.scrollX)
+        .frame(width: containerWidth, alignment: .leading)
+        .frame(minHeight: 0, maxHeight: .infinity, alignment: .leading)
     }
 
     private var addButton: some View {
@@ -115,12 +209,9 @@ struct StoreFocusScreen: View {
 
 // MARK: - Offers & leaflets
 
-/// "Angebote & Prospekte" below a store's items. v1: the chain's official leaflet page
-/// (MARKTANALYSE §3) – no offer data of our own, nothing sent anywhere before the tap.
+/// The retailer's official leaflet link, shown directly below its detail header.
 struct OffersSection: View {
     let store: Store
-    /// `true`: a section in the item list. `false`: a free-standing block (empty card, above the add button).
-    var inList = true
     @Environment(AppModel.self) private var model
     @State private var showsLeaflet = false
 
@@ -130,33 +221,11 @@ struct OffersSection: View {
 
     var body: some View {
         if let leafletURL {
-            Group {
-                if inList {
-                    Section {
-                        leafletButton
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                    } header: {
-                        header
-                    }
-                } else {
-                    VStack(alignment: .leading, spacing: 10) {
-                        header
-                        leafletButton
-                    }
-                }
-            }
+            leafletButton
             .sheet(isPresented: $showsLeaflet) {
                 SafariView(url: leafletURL).ignoresSafeArea()
             }
         }
-    }
-
-    private var header: some View {
-        Label("Angebote & Prospekte", systemImage: "tag.fill")
-            .font(.subheadline.weight(.semibold))
-            .textCase(nil)
-            .foregroundStyle(store.readableColor)
     }
 
     private var leafletButton: some View {

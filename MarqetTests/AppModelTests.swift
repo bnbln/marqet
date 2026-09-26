@@ -157,6 +157,37 @@ struct AppModelTests {
 
         model.triageSkip(milk)
         #expect(model.triageQueue.map(\.title) == ["Zahnpasta"])
+        #expect(model.triageProgress == (2, 2))
+    }
+
+    @Test func triageSkipIsUndoableAndComesBackInASecondPass() async throws {
+        let model = try await makeModel(items: [("Milch", nil), ("Zahnpasta", nil), ("Tomaten", nil)])
+        let aldi = try catalogStore(model, "aldi-sued")
+        model.startTriage()
+        let milk = try #require(model.triageQueue.first)
+
+        model.triageSkip(milk)
+        await model.triageUndo()
+        #expect(model.triageQueue.map(\.title) == ["Milch", "Zahnpasta", "Tomaten"])
+
+        model.triageSkip(milk)
+        for item in model.triageQueue { await model.triageAssign(item, to: aldi) }
+        #expect(model.triageQueue.isEmpty)
+        #expect(model.triageSkippedItems.map(\.title) == ["Milch"])
+        #expect(model.triage?.assignedCount == 2)
+
+        model.triageRevisitSkipped()
+        #expect(model.triageQueue.map(\.title) == ["Milch"])
+        #expect(model.triageProgress == (1, 1))
+    }
+
+    @Test func switchingTriageModeIsRemembered() async throws {
+        let model = try await makeModel(items: [("Milch", nil)])
+        model.startTriage()
+        model.setTriageMode(.board)
+        model.endTriage()
+        model.startTriage()
+        #expect(model.triage?.mode == .board)
     }
 
     @Test func freeUsersGetLearnedSuggestionsNotAutoAssign() async throws {

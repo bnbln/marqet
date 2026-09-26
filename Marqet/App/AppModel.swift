@@ -136,6 +136,11 @@ final class AppModel {
     }
     /// Last known position (only with location access).
     var userLocation: GeoPoint?
+    /// Nearest Apple Maps result by retailer, used to sort catalog tiles and brochures.
+    var nearbyCatalogDistances: [String: Double] = [:]
+    @ObservationIgnored var nearbyCatalogDistanceOrigin: GeoPoint?
+    @ObservationIgnored var nearbyCatalogDistanceRegion: StoreCatalog.Region?
+    @ObservationIgnored var isRefreshingNearbyCatalogDistances = false
     /// Card order for distance/smart, computed on open – never while the user looks at the cards.
     var storeOrderSnapshot: [Store.ID]?
 

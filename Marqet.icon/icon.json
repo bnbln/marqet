@@ -15,6 +15,17 @@
               0
             ]
           }
+        },
+        {
+          "image-name" : "cart.fill.svg",
+          "name" : "cart.fill",
+          "position" : {
+            "scale" : 8.809999999999999,
+            "translation-in-points" : [
+              -24,
+              0
+            ]
+          }
         }
       ],
       "shadow" : {

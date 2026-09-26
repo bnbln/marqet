@@ -2,7 +2,7 @@ import MarqetCore
 import SwiftUI
 
 /// A store as a round badge with its name below, in a rounded square. The one component wherever
-/// a store is picked: "Weitere Läden" and Zuordnen (single and board).
+/// a store is picked: "Weitere Läden" and Zuordnen.
 struct StoreTile<Badge: View>: View {
     let name: String
     /// Small line below the name, e.g. "Wie zuletzt" on a suggestion.
@@ -12,7 +12,6 @@ struct StoreTile<Badge: View>: View {
     var highlight: Color?
     /// `nil` outside a multi-selection.
     var isSelected: Bool?
-    var isDimmed = false
     var fill: Color = Color(.tertiarySystemFill)
     @ViewBuilder let badge: () -> Badge
 
@@ -53,16 +52,15 @@ struct StoreTile<Badge: View>: View {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(highlight ?? .clear, lineWidth: 2)
         }
-        .opacity(isDimmed ? 0.5 : 1)
         .contentShape(.rect(cornerRadius: 20, style: .continuous))
     }
 }
 
 extension StoreTile where Badge == StoreBadge {
     init(store: Store, caption: String? = nil, captionSymbol: String? = nil, highlight: Color? = nil,
-         isSelected: Bool? = nil, isDimmed: Bool = false, fill: Color = Color(.tertiarySystemFill)) {
+         isSelected: Bool? = nil, fill: Color = Color(.tertiarySystemFill)) {
         self.init(name: store.name, caption: caption, captionSymbol: captionSymbol, highlight: highlight,
-                  isSelected: isSelected, isDimmed: isDimmed, fill: fill) {
+                  isSelected: isSelected, fill: fill) {
             StoreBadge(store: store, size: 48)
         }
     }

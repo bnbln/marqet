@@ -69,8 +69,8 @@ struct SettingsView: View {
                         LabeledContent("Läden verwalten", value: "\(model.stores.count)")
                     }
                     Picker("Zuordnen startet mit", selection: $model.preferredTriageMode) {
-                        Text("Einzeln").tag(TriageSession.Mode.single)
-                        Text("Board").tag(TriageSession.Mode.board)
+                        Text("Nacheinander").tag(TriageSession.Mode.single)
+                        Text("Übersicht").tag(TriageSession.Mode.board)
                     }
                 } header: {
                     Text("Läden")

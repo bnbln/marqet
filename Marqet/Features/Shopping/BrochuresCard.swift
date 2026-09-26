@@ -34,19 +34,18 @@ struct BrochuresCard: View {
             }
 
             ScrollView {
-                LazyVStack(spacing: 10) {
-                    if entries.isEmpty {
-                        ContentUnavailableView(
-                            "Keine Prospekte verfügbar",
-                            systemImage: "newspaper",
-                            description: Text("Für deine Region sind noch keine offiziellen Angebotsseiten hinterlegt.")
-                        )
+                if entries.isEmpty {
+                    ContentUnavailableView(
+                        "Keine Prospekte verfügbar",
+                        systemImage: "newspaper",
+                        description: Text("Für deine Region sind noch keine offiziellen Angebotsseiten hinterlegt.")
+                    )
+                } else {
+                    BrochureShelf(entries: entries) { entry in
+                        if let url = entry.leafletURL { selectedLeaflet = LeafletDestination(url: url) }
                     }
-                    ForEach(entries) { entry in
-                        leafletRow(entry)
-                    }
+                    .padding(.bottom, 4)
                 }
-                .padding(.bottom, 4)
             }
             .scrollIndicators(.visible)
             .background {
@@ -77,35 +76,6 @@ struct BrochuresCard: View {
         }
         return location.coordinate.distance(to: origin)
     }
-
-    private func leafletRow(_ entry: StoreCatalog.Entry) -> some View {
-        let store = entry.makeStore(sortIndex: 0)
-        return Button {
-            if let url = entry.leafletURL { selectedLeaflet = LeafletDestination(url: url) }
-        } label: {
-            HStack(spacing: 12) {
-                StoreBadge(store: store, size: 38)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(entry.name)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Text("Aktueller Prospekt")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 8)
-                Image(systemName: "arrow.up.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(12)
-            .background(Color(.tertiarySystemGroupedBackground), in: .rect(cornerRadius: 16))
-            .contentShape(.rect(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
-        .accessibilityHint("Öffnet die offizielle Angebotsseite von \(entry.name)")
-    }
-
 }
 
 private struct LeafletDestination: Identifiable {

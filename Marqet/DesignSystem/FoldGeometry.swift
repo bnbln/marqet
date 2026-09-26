@@ -32,6 +32,10 @@ struct PagerMetrics: Equatable {
     let spacing: CGFloat
     /// Leading x of the scroll view inside the pager.
     let scrollX: CGFloat
+    /// Distance from the container's leading edge to where a full-width leading column may start.
+    /// On the Duo the right half is narrower (system bar), so both equal cards sit further right;
+    /// a column that fills the whole left half starts here instead.
+    let leadingMargin: CGFloat
 
     var scrollWidth: CGFloat { CGFloat(slots) * slotWidth + CGFloat(slots - 1) * spacing }
 
@@ -50,6 +54,7 @@ struct PagerMetrics: Equatable {
             slotWidth = cardWidth
             spacing = fold.width + 2 * gapToFold
             scrollX = fold.minX - gapToFold - cardWidth
+            leadingMargin = outerMargin
         } else {
             let margin: CGFloat = slots == 1 ? 20 : 16
             let spacing: CGFloat = slots == 1 ? 10 : 14
@@ -60,6 +65,7 @@ struct PagerMetrics: Equatable {
             self.spacing = spacing
             slotWidth = max((width - 2 * margin - CGFloat(slots - 1) * spacing) / CGFloat(slots), 100)
             scrollX = margin
+            leadingMargin = margin
         }
     }
 }

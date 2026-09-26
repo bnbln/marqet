@@ -27,6 +27,8 @@ struct CardZoomSource: ViewModifier {
 /// layouts keep the existing single-card detail view.
 struct StoreFocusScreen: View {
     let page: PageID
+    /// Duo: add, store menu and close sit in the system bar, as on Home (KONZEPT-DUO-IPAD §3).
+    var hinge: HingeState = .none
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var isComposerFocused = false
@@ -35,8 +37,21 @@ struct StoreFocusScreen: View {
     @State private var horizontalSafeAreaInsets = EdgeInsets()
 
     var body: some View {
+        NavigationStack {
+            content
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { if hinge.hasHinge { duoToolbar } }
+                .toolbar(hinge.hasHinge ? .automatic : .hidden, for: .navigationBar)
+                .toolbarVerticalCompressionPreferringItems()
+        }
+        // As on Home: the stack would otherwise reset the tint to the app accent.
+        .tint(.primary)
+    }
+
+    private var content: some View {
         let deck = model.deck
-        GeometryReader { proxy in
+        return GeometryReader { proxy in
             let metrics = PagerMetrics(
                 size: proxy.size,
                 fold: FoldGeometry.verticalFold(in: proxy),
@@ -47,13 +62,7 @@ struct StoreFocusScreen: View {
 
             Group {
                 if let store = contextStore, usesSplit {
-                    splitCard(
-                        deck: deck,
-                        store: store,
-                        metrics: metrics,
-                        containerWidth: proxy.size.width,
-                        safeAreaInsets: proxy.safeAreaInsets
-                    )
+                    splitCard(deck: deck, store: store, metrics: metrics, containerWidth: proxy.size.width)
                 } else {
                     card(deck: deck)
                 }
@@ -61,6 +70,19 @@ struct StoreFocusScreen: View {
             // min and max: exactly the space above keyboard and composer, even if the card is
             // taller – otherwise it pushes the composer's text field behind the keyboard.
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
+            .background(alignment: .top) {
+                // The header color spans the whole screen, edge to edge and under the system bar.
+                // Drawn here rather than offset inside the split: an offset keeps the layout frame,
+                // and the background extension clips to it, so the color stopped at the column.
+                if let store = contextStore, usesSplit {
+                    LinearGradient(colors: [store.color, store.color.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        // Also under the top bar: on the Duo its items sit in the side bar, but it keeps its height.
+                        .frame(height: StoreFocusScreen.headerHeight + proxy.safeAreaInsets.top)
+                        .offset(y: -proxy.safeAreaInsets.top)
+                        .ignoresSafeArea(edges: .horizontal)
+                        .accessibilityHidden(true)
+                }
+            }
             .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
             .overlay(alignment: .bottom) {
                 if model.composerTarget == nil { bottomControls(deck: deck) }
@@ -118,9 +140,11 @@ struct StoreFocusScreen: View {
             if page == .unsorted, !deck.items(on: page).isEmpty {
                 TriageButton()
             }
-            HStack {
-                Spacer()
-                addButton
+            if !hinge.hasHinge {
+                HStack {
+                    Spacer()
+                    addButton
+                }
             }
         }
         .padding(.horizontal, 20)
@@ -133,21 +157,19 @@ struct StoreFocusScreen: View {
         case .brochures, .more:
             EmptyView()
         case .unsorted:
-            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isExpanded: true)
+            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isExpanded: true, showsHeaderActions: !hinge.hasHinge)
         case .store(let id):
             if let store = model.store(id) {
-                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isExpanded: true)
+                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isExpanded: true, showsHeaderActions: !hinge.hasHinge)
             }
         }
     }
 
-    private func splitCard(
-        deck: CardDeck,
-        store: Store,
-        metrics: PagerMetrics,
-        containerWidth: CGFloat,
-        safeAreaInsets: EdgeInsets
-    ) -> some View {
+    private static let headerHeight: CGFloat = 76
+
+    /// Store context left, list right. The context column fills the whole left half: on the Duo
+    /// the right half is narrower (system bar), and two equal columns left a wide gap on the left.
+    private func splitCard(deck: CardDeck, store: Store, metrics: PagerMetrics, containerWidth: CGFloat) -> some View {
         let storePage = PageID.store(store.id)
         let storeItems = deck.items(on: storePage)
         let listCard = StoreCard(
@@ -159,49 +181,55 @@ struct StoreFocusScreen: View {
             showsHeader: false,
             showsOffers: false
         )
-        let headerWidth = max(metrics.scrollWidth, containerWidth - metrics.scrollX + safeAreaInsets.trailing)
-        let headerBackgroundWidth = containerWidth + safeAreaInsets.leading + safeAreaInsets.trailing
-        let headerBackgroundOffset = -(metrics.scrollX + safeAreaInsets.leading)
+        let contextWidth = metrics.scrollX + metrics.slotWidth - metrics.leadingMargin
 
-        return ZStack(alignment: .topLeading) {
-            LinearGradient(colors: [store.color, store.color.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .frame(width: headerBackgroundWidth, height: 76)
-                .offset(x: headerBackgroundOffset)
-                .ignoresSafeArea(edges: .top)
-                .backgroundExtensionEffect()
-                .accessibilityHidden(true)
+        return VStack(alignment: .leading, spacing: 0) {
+            StoreCardHeader(
+                page: storePage,
+                store: store,
+                items: storeItems,
+                state: deck.state(of: store.id),
+                isExpanded: true,
+                contentWidth: contextWidth,
+                showsBackground: false,
+                showsActions: !hinge.hasHinge
+            )
+            .frame(width: containerWidth - metrics.leadingMargin, height: Self.headerHeight, alignment: .leading)
 
-            VStack(spacing: 0) {
-                StoreCardHeader(
-                    page: storePage,
-                    store: store,
-                    items: storeItems,
-                    state: deck.state(of: store.id),
-                    isExpanded: true,
-                    contentWidth: metrics.slotWidth,
-                    showsBackground: false
-                )
-                .frame(width: headerWidth, height: 76, alignment: .leading)
-
-                HStack(spacing: metrics.spacing) {
-                    StoreContextPane(store: store)
-                        .frame(width: metrics.slotWidth)
-                        .background(Color(.secondarySystemGroupedBackground))
-
-                    listCard
-                        .frame(width: metrics.slotWidth)
-                        .background(Color(.secondarySystemGroupedBackground))
-                }
-                .frame(width: metrics.scrollWidth)
-                .frame(minHeight: 0, maxHeight: .infinity)
-                .background(Color(.secondarySystemGroupedBackground))
+            HStack(spacing: metrics.spacing) {
+                StoreContextPane(store: store)
+                    .frame(width: contextWidth)
+                listCard
+                    .frame(width: metrics.slotWidth)
             }
-            .frame(width: headerWidth, alignment: .leading)
-            .frame(minHeight: 0, maxHeight: .infinity, alignment: .leading)
+            .frame(minHeight: 0, maxHeight: .infinity)
         }
-        .offset(x: metrics.scrollX)
+        .padding(.leading, metrics.leadingMargin)
         .frame(width: containerWidth, alignment: .leading)
-        .frame(minHeight: 0, maxHeight: .infinity, alignment: .leading)
+        .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
+    }
+
+    /// Duo system bar: add at the thumb like on Home, store menu and close above it.
+    @ToolbarContentBuilder
+    private var duoToolbar: some ToolbarContent {
+        ToolbarItem(placement: .bottomBar) {
+            Button("Hinzufügen", systemImage: "plus") {
+                addFeedback += 1
+                model.startComposer(on: page)
+            }
+            .tint(.primary)
+        }
+        if let store = page.storeID.flatMap({ model.store($0) }) {
+            ToolbarItem(placement: .topBarTrailing) {
+                StoreActionsMenu(page: page, store: store, items: model.deck.items(on: page)) {
+                    Label("Laden-Optionen", systemImage: "ellipsis")
+                }
+            }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button("Schließen", systemImage: "chevron.down") { model.focusedPage = nil }
+                .tint(.primary)
+        }
     }
 
     private var addButton: some View {

@@ -65,7 +65,7 @@ struct ShoppingScreen: View {
                         TriageScreen()
                     }
                     .fullScreenCover(item: focusBinding) { focused in
-                        StoreFocusScreen(page: focused.page)
+                        StoreFocusScreen(page: focused.page, hinge: hinge)
                             .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
                     }
                     .overlay(alignment: .top) { briefingBlock }
@@ -96,6 +96,10 @@ struct ShoppingScreen: View {
                         #if DEBUG
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
                             model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
+                        }
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-focus"),
+                           let store = model.deck.pages.first(where: { $0.storeID != nil }) {
+                            model.focus(store)
                         }
                         #endif
                     }
@@ -294,7 +298,7 @@ private struct AutoAssignToast: View {
     }
 }
 
-private extension View {
+extension View {
     /// Marqet has no tabs: when space runs out on iPhone Duo, keep the toolbar items.
     @ViewBuilder
     func toolbarVerticalCompressionPreferringItems() -> some View {

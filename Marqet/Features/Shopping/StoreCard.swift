@@ -12,6 +12,8 @@ struct StoreCard: View {
     var isExpanded = false
     var showsHeader = true
     var showsOffers = true
+    /// Store menu and close button in the header; the Duo detail view has them in the system bar.
+    var showsHeaderActions = true
     var horizontalSafeAreaInsets = EdgeInsets()
 
     @Environment(AppModel.self) private var model
@@ -80,7 +82,7 @@ struct StoreCard: View {
     // MARK: Header
 
     private var header: some View {
-        StoreCardHeader(page: page, store: store, items: items, state: state, isExpanded: isExpanded)
+        StoreCardHeader(page: page, store: store, items: items, state: state, isExpanded: isExpanded, showsActions: showsHeaderActions)
     }
 
     // MARK: Items
@@ -301,11 +303,10 @@ struct StoreCardHeader: View {
     let isExpanded: Bool
     var contentWidth: CGFloat? = nil
     var showsBackground = true
+    /// Store menu and close button. Off where the system bar carries them (Duo detail view).
+    var showsActions = true
 
     @Environment(AppModel.self) private var model
-    @State private var showsSectionOrder = false
-    @State private var showsStoreDetails = false
-    @State private var showsMap = false
 
     private var tint: Color { store?.color ?? .gray }
 
@@ -329,17 +330,26 @@ struct StoreCardHeader: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
-            if let store { cardMenu(for: store) }
-            if isExpanded {
-                Button {
-                    model.focusedPage = nil
-                } label: {
-                    Image(systemName: "chevron.down")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 36, height: 36)
-                        .background(.white.opacity(0.22), in: .circle)
+            if showsActions {
+                if let store {
+                    StoreActionsMenu(page: page, store: store, items: items) {
+                        Image(systemName: "ellipsis")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 36, height: 36)
+                            .background(.white.opacity(0.22), in: .circle)
+                    }
                 }
-                .accessibilityLabel("Schließen")
+                if isExpanded {
+                    Button {
+                        model.focusedPage = nil
+                    } label: {
+                        Image(systemName: "chevron.down")
+                            .font(.body.weight(.semibold))
+                            .frame(width: 36, height: 36)
+                            .background(.white.opacity(0.22), in: .circle)
+                    }
+                    .accessibilityLabel("Schließen")
+                }
             }
         }
         .frame(width: contentWidth.map { max($0 - 36, 0) })
@@ -370,15 +380,6 @@ struct StoreCardHeader: View {
         .accessibilityAction(named: isExpanded ? "Schließen" : "Vollbild") {
             if isExpanded { model.focusedPage = nil } else { model.focus(page) }
         }
-        .sheet(isPresented: $showsSectionOrder) {
-            if let store { SectionOrderSheet(store: store).leadingSheetPlacement() }
-        }
-        .sheet(isPresented: $showsStoreDetails) {
-            if let store { StoreDetailsSheet(store: store).leadingSheetPlacement() }
-        }
-        .sheet(isPresented: $showsMap) {
-            if let store { MapScreen(focusedStoreID: store.id).leadingSheetPlacement() }
-        }
     }
 
     private var subtitle: String {
@@ -396,8 +397,22 @@ struct StoreCardHeader: View {
         default: return String(localized: "\(open) offen")
         }
     }
+}
 
-    private func cardMenu(for store: Store) -> some View {
+/// The store's options ("…"): in the card header, or in the system bar on the Duo detail view.
+/// Owns its sheets, so it works wherever it is placed.
+struct StoreActionsMenu<MenuLabel: View>: View {
+    let page: PageID
+    let store: Store
+    let items: [ShoppingItem]
+    @ViewBuilder var label: MenuLabel
+
+    @Environment(AppModel.self) private var model
+    @State private var showsSectionOrder = false
+    @State private var showsStoreDetails = false
+    @State private var showsMap = false
+
+    var body: some View {
         Menu {
             Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
             Button("Karte", systemImage: "map") { showsMap = true }
@@ -409,13 +424,19 @@ struct StoreCardHeader: View {
                 Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
             }
         } label: {
-            Image(systemName: "ellipsis")
-                .font(.body.weight(.semibold))
-                .frame(width: 36, height: 36)
-                .background(.white.opacity(0.22), in: .circle)
+            label
         }
         .tint(.primary)
         .accessibilityLabel("Laden-Optionen")
+        .sheet(isPresented: $showsSectionOrder) {
+            SectionOrderSheet(store: store).leadingSheetPlacement()
+        }
+        .sheet(isPresented: $showsStoreDetails) {
+            StoreDetailsSheet(store: store).leadingSheetPlacement()
+        }
+        .sheet(isPresented: $showsMap) {
+            MapScreen(focusedStoreID: store.id).leadingSheetPlacement()
+        }
     }
 }
 

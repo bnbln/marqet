@@ -6,12 +6,12 @@
     {
       "layers" : [
         {
-          "image-name" : "download.svg",
-          "name" : "download",
+          "image-name" : "cart.svg",
+          "name" : "cart",
           "position" : {
-            "scale" : 2.3000000000000003,
+            "scale" : 8.809999999999999,
             "translation-in-points" : [
-              50,
+              -44,
               0
             ]
           }

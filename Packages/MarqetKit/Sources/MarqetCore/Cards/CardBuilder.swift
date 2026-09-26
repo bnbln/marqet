@@ -52,10 +52,8 @@ public enum CardBuilder {
             itemsByPage[page] = sorted(pageItems)
         }
 
-        var pages: [PageID] = []
-        if itemsByPage[.unsorted] != nil || context.retainedPages.contains(.unsorted) {
-            pages.append(.unsorted)
-        }
+        // Keep the inbox mounted when its first item arrives, including on Duo.
+        var pages: [PageID] = [.unsorted]
 
         var states: [Store.ID: StoreCardState] = [:]
         for store in stores.sorted(by: { $0.sortIndex < $1.sortIndex }) {

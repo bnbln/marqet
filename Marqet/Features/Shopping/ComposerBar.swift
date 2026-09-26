@@ -31,6 +31,7 @@ struct ComposerBar: View {
             .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 22, style: .continuous))
         }
         .padding(12)
+        .clipShape(.rect(cornerRadius: 30, style: .continuous))
         .glassEffect(.regular, in: .rect(cornerRadius: 30, style: .continuous))
         .padding(.horizontal, 10)
         .padding(.bottom, 6)
@@ -64,12 +65,15 @@ struct ComposerBar: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 20)
             }
             .scrollIndicators(.hidden)
-            .padding(.trailing, -12)
+            .padding(.horizontal, -12)
             .onAppear {
-                if let target = model.composerTarget { proxy.scrollTo(target, anchor: .center) }
+                if let target = model.composerTarget { proxy.scrollTo(target) }
+            }
+            .onChange(of: model.composerTarget) { _, target in
+                if let target { withAnimation(.smooth) { proxy.scrollTo(target) } }
             }
         }
     }

@@ -7,7 +7,6 @@ struct MoreStoresCard: View {
 
     @Environment(AppModel.self) private var model
     @State private var showsAddStore = false
-    @State private var showsStoreOrder = false
     @State private var isSelecting = false
     @State private var selection: Set<Tile> = []
 
@@ -19,50 +18,45 @@ struct MoreStoresCard: View {
     private let columns = [GridItem(.adaptive(minimum: 92), spacing: 12)]
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    header
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                header
 
-                    if !model.hiddenStores.isEmpty {
-                        section("Deine Läden") {
-                            ForEach(model.hiddenStores) { store in
-                                tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
-                            }
-                        }
-                    }
-
-                    if !model.catalogSuggestions.isEmpty {
-                        section(model.stores.isEmpty ? "Wo kaufst du ein?" : "Vorschläge") {
-                            ForEach(model.catalogSuggestions.prefix(12)) { entry in
-                                tile(.catalog(entry.key), name: entry.name) {
-                                    StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
-                                }
-                            }
+                if !model.hiddenStores.isEmpty {
+                    section("Deine Läden") {
+                        ForEach(model.hiddenStores) { store in
+                            tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
                         }
                     }
                 }
-                .padding(20)
-            }
-            .scrollIndicators(.visible)
 
-            footer
-                .padding(.bottom, 60)
+                if !model.catalogSuggestions.isEmpty {
+                    section(model.stores.isEmpty ? "Wo kaufst du ein?" : "Vorschläge") {
+                        ForEach(model.catalogSuggestions.prefix(12)) { entry in
+                            tile(.catalog(entry.key), name: entry.name) {
+                                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
+                            }
+                        }
+                        addStoreTile
+                    }
+                } else {
+                    section("Läden") { addStoreTile }
+                }
+            }
+            .padding(20)
+            .padding(.bottom, 58)
         }
+        .scrollIndicators(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .cardSurface(isFocused: isFocused)
         .sheet(isPresented: $showsAddStore) {
             AddStoreSheet()
                 .leadingSheetPlacement()
         }
-        .sheet(isPresented: $showsStoreOrder) {
-            StoreOrderSheet()
-                .leadingSheetPlacement()
-        }
     }
 
     private var header: some View {
-        let nothingElse = model.deck.pages == [.more]
+        let nothingElse = model.deck.pages == [.unsorted, .more] && model.unsortedItems.isEmpty
         return HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(isSelecting ? "Läden auswählen" : (nothingElse ? "Alles eingekauft 🎉" : "Weitere Läden"))
@@ -74,7 +68,7 @@ struct MoreStoresCard: View {
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 0)
-            if !nothingElse {
+            if !model.hiddenStores.isEmpty || !model.catalogSuggestions.isEmpty {
                 Button {
                     isSelecting.toggle()
                     if !isSelecting { selection = [] }
@@ -86,58 +80,31 @@ struct MoreStoresCard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(isSelecting ? "Mehrfachauswahl beenden" : "Mehrere Läden planen")
-
-                Button {
-                    showsStoreOrder = true
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                        .font(.body.weight(.semibold))
-                        .frame(width: 40, height: 40)
-                        .background(Color(.tertiarySystemFill), in: .circle)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Lädenreihenfolge ändern")
+            }
+            if isSelecting {
+                Button("\(selection.count) planen") { planSelection() }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(selection.isEmpty)
             }
         }
     }
 
-    private var footer: some View {
-        VStack(spacing: 10) {
-            if isSelecting {
-                HStack(spacing: 10) {
-                    Button("Abbrechen") {
-                        isSelecting = false
-                        selection = []
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
-
-                    Button {
-                        planSelection()
-                    } label: {
-                        Label("\(selection.count) planen", systemImage: "checklist")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(selection.isEmpty)
-                }
+    private var addStoreTile: some View {
+        Button { showsAddStore = true } label: {
+            VStack(spacing: 8) {
+                Image(systemName: "plus")
+                    .font(.title2.weight(.medium))
+                    .frame(width: 48, height: 48)
+                    .background(Color(.tertiarySystemFill), in: .circle)
+                Text("Laden hinzufügen")
+                    .font(.caption.weight(.medium))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
-
-            Button {
-                showsAddStore = true
-            } label: {
-                Label("Laden hinzufügen", systemImage: "plus")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.glassProminent)
-            .controlSize(.large)
+            .frame(maxWidth: .infinity, minHeight: 96, alignment: .top)
+            .contentShape(.rect)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 18)
-        .background(Color(.secondarySystemGroupedBackground))
-        .overlay(alignment: .top) { Color(.separator).opacity(0.45).frame(height: 0.5) }
+        .buttonStyle(.plain)
     }
 
     private func section(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {

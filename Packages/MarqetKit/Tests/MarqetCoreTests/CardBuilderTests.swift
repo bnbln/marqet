@@ -26,9 +26,9 @@ struct CardBuilderTests {
         #expect(deck.pages == [.unsorted, .store(dm.id), .store(aldi.id), .more])
     }
 
-    @Test func emptyListShowsOnlyMore() {
+    @Test func emptyListKeepsUnsortedBeforeMore() {
         let deck = CardBuilder.deck(items: [], stores: [aldi, dm])
-        #expect(deck.pages == [.more])
+        #expect(deck.pages == [.unsorted, .more])
     }
 
     @Test func itemsAreOrderedOldestFirst() {
@@ -51,7 +51,7 @@ struct CardBuilderTests {
     @Test func plannedEmptyStoreStays() {
         let planned = Self.store("Markt", sortIndex: 3, planned: true)
         let deck = CardBuilder.deck(items: [], stores: [aldi, planned])
-        #expect(deck.pages == [.store(planned.id), .more])
+        #expect(deck.pages == [.unsorted, .store(planned.id), .more])
         #expect(deck.state(of: planned.id) == .planned)
         #expect(deck.state(of: aldi.id) == nil)
     }

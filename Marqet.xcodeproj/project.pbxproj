@@ -47,6 +47,7 @@
 		F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */; };
 		F00D00000000000000000001 /* AppAccentPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D00000000000000000002 /* AppAccentPalette.swift */; };
 		F00D00000000000000000003 /* StoreOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D00000000000000000004 /* StoreOrderSheet.swift */; };
+		F00D00000000000000000006 /* Marqet.icon in Resources */ = {isa = PBXBuildFile; fileRef = F00D00000000000000000005 /* Marqet.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +100,7 @@
 		F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
 		F00D00000000000000000002 /* AppAccentPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAccentPalette.swift; sourceTree = "<group>"; };
 		F00D00000000000000000004 /* StoreOrderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreOrderSheet.swift; sourceTree = "<group>"; };
+		F00D00000000000000000005 /* Marqet.icon */ = {isa = PBXFileReference; path = Marqet.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -237,6 +239,7 @@
 			isa = PBXGroup;
 			children = (
 				6264ED2C19EC4099099BF46E /* Marqet */,
+				F00D00000000000000000005 /* Marqet.icon */,
 				8F00E56301DEC8995117BFDC /* MarqetTests */,
 				F3476EDDC27852D171EC2117 /* Packages */,
 				64AC9F8E12AD1FB3541251F4 /* Products */,
@@ -369,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				013A6F32AC3C118BE686C668 /* Assets.xcassets in Resources */,
+				F00D00000000000000000006 /* Marqet.icon in Resources */,
 				EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -516,7 +520,7 @@
 		ACEDD704B3E9300D047D0A5C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Marqet;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
@@ -536,7 +540,7 @@
 		F0CB3AE8B7FD1EC13B9BB694 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = Marqet;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;

@@ -67,14 +67,6 @@ struct TriageScreen: View {
         ToolbarItem(placement: .cancellationAction) {
             Button(role: .close) { model.endTriage() }
         }
-        ToolbarItem(placement: .principal) {
-            Picker("Modus", selection: modeBinding) {
-                Text("Einzeln").tag(TriageSession.Mode.single)
-                Text("Board").tag(TriageSession.Mode.board)
-            }
-            .pickerStyle(.segmented)
-            .frame(width: 200)
-        }
         ToolbarItem(placement: .confirmationAction) {
             Button(role: .confirm) { model.endTriage() }
         }
@@ -87,15 +79,6 @@ struct TriageScreen: View {
         }
     }
 
-    private var modeBinding: Binding<TriageSession.Mode> {
-        Binding(
-            get: { model.triage?.mode ?? .single },
-            set: { mode in
-                model.triage?.mode = mode
-                model.preferredTriageMode = mode
-            }
-        )
-    }
 }
 
 // MARK: - Single item

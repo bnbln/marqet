@@ -7,6 +7,7 @@ struct ShoppingScreen: View {
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsAddStore = false
     @State private var showsSettings = false
+    @State private var showsStoreOrder = false
     @State private var showsNewListPrompt = false
     @State private var newListName = ""
     @State private var isComposerFocused = false
@@ -32,9 +33,8 @@ struct ShoppingScreen: View {
                     }
                 }
                 .animation(.snappy, value: model.composerTarget == nil)
-                .navigationTitle("Marqet")
-                .navigationSubtitle(model.selectedList?.title ?? "Liste wählen")
-                .navigationBarTitleDisplayMode(.large)
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbar }
                 .toolbarVerticalCompressionPreferringItems()
                 .tint(accentColor)
@@ -44,6 +44,9 @@ struct ShoppingScreen: View {
                 }
                 .sheet(isPresented: $showsSettings) {
                     SettingsView()
+                }
+                .sheet(isPresented: $showsStoreOrder) {
+                    StoreOrderSheet().leadingSheetPlacement()
                 }
                 .alert("Neue Liste anlegen", isPresented: $showsNewListPrompt) {
                     TextField("Listenname", text: $newListName)
@@ -66,6 +69,20 @@ struct ShoppingScreen: View {
                 .onChange(of: model.composerTarget) { _, target in
                     if target != nil { isComposerFocused = true }
                 }
+                .onChange(of: model.triagePrompt) { _, prompt in
+                    #if DEBUG
+                    if prompt != nil, ProcessInfo.processInfo.arguments.contains("-demo-no-prompt") {
+                        model.postponeTriage()
+                    }
+                    #endif
+                }
+                .onChange(of: model.hasLoadedItems) { _, loaded in
+                    #if DEBUG
+                    if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
+                        model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
+                    }
+                    #endif
+                }
                 .onChange(of: isComposerFocused) { _, focused in
                     if !focused, model.composerTarget != nil { model.endComposer() }
                 }
@@ -73,28 +90,32 @@ struct ShoppingScreen: View {
     }
 
     private var bottomControls: some View {
-        HStack(spacing: 14) {
+        ZStack {
             PageIndicator()
                 .glassEffect(.regular, in: .capsule)
-            Spacer(minLength: 0)
-            Menu {
-                Section("Hinzufügen zu …") {
-                    Button("Unsortiert", systemImage: "tray") { model.startComposer(on: .unsorted) }
-                    ForEach(model.sortedStores) { store in
-                        Button(store.name) { model.startComposer(on: .store(store.id)) }
+            HStack {
+                Spacer()
+                Menu {
+                    Section("Hinzufügen zu …") {
+                        Button("Unsortiert", systemImage: "tray") { model.startComposer(on: .unsorted) }
+                        ForEach(model.sortedStores) { store in
+                            Button(store.name) { model.startComposer(on: .store(store.id)) }
+                        }
                     }
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .glassEffect(.regular.tint(accentColor), in: .circle)
+                        .contentShape(.circle)
+                } primaryAction: {
+                    model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
                 }
-            } label: {
-                Image(systemName: "plus")
-                    .font(.title3.weight(.bold))
-                    .frame(width: 48, height: 48)
-                    .contentShape(Circle())
-            } primaryAction: {
-                model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
+                .menuStyle(.button)
+                .buttonStyle(.plain)
+                .accessibilityLabel("Eintrag hinzufügen")
             }
-            .menuStyle(.button)
-            .buttonStyle(.glassProminent)
-            .accessibilityLabel("Eintrag hinzufügen")
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
@@ -103,29 +124,66 @@ struct ShoppingScreen: View {
     // System navigation and settings items remain available in the iPhone Duo vertical bar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            Menu {
+                Section("Listen") {
+                    ForEach(model.lists.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }) { list in
+                        Button {
+                            Task { await model.selectList(list.id) }
+                        } label: {
+                            if list.id == model.selectedListID {
+                                Label(list.title, systemImage: "checkmark")
+                            } else {
+                                Text(list.title)
+                            }
+                        }
+                        .disabled(!list.allowsModifications)
+                    }
+                }
+                Button("Neue Liste anlegen", systemImage: "plus") {
+                    newListName = ""
+                    showsNewListPrompt = true
+                }
+            } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 3) {
+                        Text("Marqet")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .frame(width: 24, height: 24)
+                            .glassEffect(.regular, in: .circle)
+                    }
+                    Text(model.selectedList?.title ?? "Liste wählen")
+                        .lineLimit(1)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(.rect)
+            }
+            .accessibilityLabel("Liste wechseln")
+            .buttonStyle(.plain)
+            .tint(.primary)
+        }
+        .sharedBackgroundVisibility(.hidden)
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                Button(model.showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen",
+                       systemImage: model.showsCompleted ? "checkmark.circle.fill" : "clock.arrow.circlepath") {
+                    withAnimation(.snappy) { model.showsCompleted.toggle() }
+                    if model.showsCompleted { Task { await model.loadRecentlyCompleted() } }
+                }
+                Button("Läden sortieren", systemImage: "arrow.up.arrow.down") {
+                    showsStoreOrder = true
+                }
+            } label: {
+                Label("Anzeigeoptionen", systemImage: "line.3.horizontal.decrease")
+            }
+        }
         ToolbarItem(placement: .topBarTrailing) {
             Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }
-        }
-
-        ToolbarTitleMenu {
-            Section("Listen") {
-                ForEach(model.lists.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }) { list in
-                    Button {
-                        Task { await model.selectList(list.id) }
-                    } label: {
-                        if list.id == model.selectedListID {
-                            Label(list.title, systemImage: "checkmark")
-                        } else {
-                            Text(list.title)
-                        }
-                    }
-                    .disabled(!list.allowsModifications)
-                }
-            }
-            Button("Neue Liste anlegen", systemImage: "plus") {
-                newListName = ""
-                showsNewListPrompt = true
-            }
         }
     }
 }

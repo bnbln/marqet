@@ -8,7 +8,13 @@ struct StoreBadge: View {
 
     var body: some View {
         Group {
-            if store.catalogKey == "billa-plus", size > 28 {
+            if let key = store.catalogKey, ["rewe", "edeka"].contains(key) {
+                Image(key)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: size, height: size)
+                    .clipShape(.rect(cornerRadius: size * 0.18, style: .continuous))
+            } else if store.catalogKey == "billa-plus", size > 28 {
                 Image("billa-plus-wordmark")
                     .resizable()
                     .scaledToFit()

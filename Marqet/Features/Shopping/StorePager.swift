@@ -4,7 +4,7 @@ import SwiftUI
 /// Horizontal card pager, 1–4 cards side by side (KONZEPT §7.2, KONZEPT-DUO-IPAD §2).
 struct StorePager: View {
     @Environment(AppModel.self) private var model
-    @SceneStorage("activePage") private var storedActivePage = PageID.unsorted.rawValue
+    @SceneStorage("selectedPageV2") private var storedActivePage = ""
     @State private var position = ScrollPosition(idType: String.self)
     @State private var leadingIndex = 0
 
@@ -47,12 +47,31 @@ struct StorePager: View {
                 navigate(to: request, content: content, pages: deck.pages, metrics: metrics)
             }
             .onChange(of: model.activePage) { _, page in
-                storedActivePage = page.rawValue
+                if model.hasLoadedItems { storedActivePage = page.rawValue }
+            }
+            .onChange(of: model.hasLoadedItems) { _, loaded in
+                if loaded {
+                    selectInitialPage(pages: deck.pages)
+                    reposition(content: content, pages: deck.pages, metrics: metrics)
+                }
+            }
+            .onChange(of: model.selectedListID) { _, _ in
+                storedActivePage = ""
             }
             .onAppear {
-                if let stored = PageID(rawValue: storedActivePage) { model.activePage = stored }
+                if model.hasLoadedItems { selectInitialPage(pages: deck.pages) }
                 reposition(content: content, pages: deck.pages, metrics: metrics)
             }
+        }
+    }
+
+    private func selectInitialPage(pages: [PageID]) {
+        if let stored = PageID(rawValue: storedActivePage), pages.contains(stored) {
+            model.activePage = stored
+        } else if !model.unsortedItems.isEmpty {
+            model.activePage = .unsorted
+        } else {
+            model.activePage = pages.first(where: { $0.storeID != nil }) ?? .unsorted
         }
     }
 

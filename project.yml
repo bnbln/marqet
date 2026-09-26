@@ -28,6 +28,9 @@ targets:
     platform: iOS
     sources:
       - path: Marqet
+      - path: Marqet.icon
+        type: file
+        buildPhase: resources
     dependencies:
       - package: MarqetKit
         product: MarqetCore
@@ -55,7 +58,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.marqet.Marqet
         TARGETED_DEVICE_FAMILY: "1,2"
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: Marqet
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
         CODE_SIGN_STYLE: Automatic

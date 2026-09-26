@@ -80,7 +80,10 @@
     "Alles erledigt bei %@" : {
 
     },
-    "Alles zugeordnet" : {
+    "Alles sortiert" : {
+
+    },
+    "Anzeigeoptionen" : {
 
     },
     "Apotheke" : {
@@ -215,6 +218,9 @@
     "Einträge links auswählen oder ziehen, dann auf einen Laden tippen." : {
 
     },
+    "Einträge ohne Laden findest du hier." : {
+
+    },
     "Eintragen mit Siri" : {
 
     },
@@ -332,13 +338,13 @@
     "Laden-Optionen" : {
 
     },
-    "Lädenreihenfolge ändern" : {
-
-    },
     "Laufweg lernen" : {
 
     },
     "Leer" : {
+
+    },
+    "Liste wechseln" : {
 
     },
     "Listen" : {
@@ -405,9 +411,6 @@
 
     },
     "Möbel & Einrichtung" : {
-
-    },
-    "Modus" : {
 
     },
     "Name" : {

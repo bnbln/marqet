@@ -30,6 +30,8 @@ final class AppModel {
     var items: [ShoppingItem] = []
     var stores: [Store] = []
     private(set) var recentlyCompleted: [ShoppingItem] = []
+    var showsCompleted = false
+    var hasLoadedItems = false
     var errorMessage: String?
 
     // MARK: Pager state
@@ -227,6 +229,7 @@ final class AppModel {
 
     func selectList(_ id: String) async {
         selectedListID = id
+        hasLoadedItems = false
         recentlyCompleted = []
         phase = .ready
         await reload()
@@ -259,6 +262,7 @@ final class AppModel {
         do {
             apply(try await gateway.openReminders(in: selectedListID))
             await afterReload()
+            hasLoadedItems = true
         } catch {
             present(error)
         }
@@ -526,16 +530,18 @@ final class AppModel {
 extension AppModel {
     /// A realistic weekly shop across several stores.
     static func demo(isPro: Bool = false) -> AppModel {
+        let demoItems: [(title: String, notes: String?)] = [
+            ("Bananen", "🛒 Aldi Süd"), ("Milch", "laktosefrei\n🛒 Aldi Süd"), ("Vollkornbrot", "🛒 Aldi Süd"),
+            ("Butter", "🛒 Aldi Süd"), ("Eier", "🛒 Aldi Süd"), ("Kaffee", "🛒 Aldi Süd"), ("Tiefkühlpizza", "🛒 Aldi Süd"),
+            ("Gouda", "🛒 Aldi Süd"), ("Zucchini", "🛒 Aldi Süd"),
+            ("Zahnpasta", "🛒 dm"), ("Duschgel", "🛒 dm"), ("Sonnencreme", "LSF 50\n🛒 dm"),
+            ("Erdbeeren", "🛒 Markt"), ("Spargel", "🛒 Markt"),
+            ("Frischkäse", "🛒 Rewe"), ("Joghurt", "🛒 Rewe"),
+            ("Batterien AA", nil), ("Geschenkpapier", nil), ("Hafermilch", nil),
+        ]
         let model = preview(
-            items: [
-                ("Bananen", "🛒 Aldi Süd"), ("Milch", "laktosefrei\n🛒 Aldi Süd"), ("Vollkornbrot", "🛒 Aldi Süd"),
-                ("Butter", "🛒 Aldi Süd"), ("Eier", "🛒 Aldi Süd"), ("Kaffee", "🛒 Aldi Süd"), ("Tiefkühlpizza", "🛒 Aldi Süd"),
-                ("Gouda", "🛒 Aldi Süd"), ("Zucchini", "🛒 Aldi Süd"),
-                ("Zahnpasta", "🛒 dm"), ("Duschgel", "🛒 dm"), ("Sonnencreme", "LSF 50\n🛒 dm"),
-                ("Erdbeeren", "🛒 Markt"), ("Spargel", "🛒 Markt"),
-                ("Frischkäse", "🛒 Rewe"), ("Joghurt", "🛒 Rewe"),
-                ("Batterien AA", nil), ("Geschenkpapier", nil), ("Hafermilch", nil),
-            ],
+            items: ProcessInfo.processInfo.arguments.contains("-demo-empty-unsorted")
+                ? demoItems.filter { $0.notes != nil } : demoItems,
             stores: ["rewe", "aldi-sued", "dm", "generic-market"]
         )
         model.hasCompletedOnboarding = true

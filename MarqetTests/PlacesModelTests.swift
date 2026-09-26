@@ -31,7 +31,7 @@ final class FakeLocation: LocationProviding {
 @MainActor
 final class FakePlaceSearch: PlaceSearching {
     var places: [PlaceResult] = []
-    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint) async throws -> [PlaceResult] { places }
+    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint, radius: Double) async throws -> [PlaceResult] { places }
     func shops(near origin: GeoPoint) async throws -> [PlaceResult] { places }
     func search(_ query: String, near origin: GeoPoint?) async throws -> [PlaceResult] { places }
 }
@@ -169,6 +169,64 @@ struct PlacesModelTests {
         await model.deleteStore(store.id)
         #expect(model.locations.isEmpty)
         #expect(try model.locationRepository.all().isEmpty)
+    }
+
+    @Test func branchesOfOwnStoresShowWithoutBeingSaved() async throws {
+        // The bug from the device: Rewe was an own store without a saved branch – the map showed nothing.
+        let model = try await makeModel(items: [("Milch", "🛒 Rewe")])
+        let rewe = try #require(model.stores.first { $0.catalogKey == "rewe" })
+        let pins = model.mapPins(found: [
+            place("REWE City", metersNorth: 300),
+            place("REWE", metersNorth: 900),
+            place("EDEKA Ernst", metersNorth: 500),
+            place("Bäckerei Hofpfisterei", metersNorth: 200),
+        ])
+        let branches = pins.filter { if case .branch = $0.kind { true } else { false } }
+        #expect(branches.count == 2)
+        #expect(branches.allSatisfy { $0.store?.id == rewe.id })
+        #expect(pins.contains { if case .suggestion(_, "edeka") = $0.kind { true } else { false } })
+        #expect(pins.count == 3)   // no pin for the bakery
+    }
+
+    @Test func savedBranchIsShownOnce() async throws {
+        let model = try await makeModel()
+        let rewe = place("REWE", metersNorth: 300, id: "rewe-1")
+        let store = try #require(model.addStore(from: rewe))
+        let pins = model.mapPins(found: [rewe, place("REWE", metersNorth: 310, id: "rewe-1-duplicate")])
+        #expect(pins.count == 1)
+        #expect(pins.first?.store?.id == store.id)
+        #expect(pins.first.map { if case .saved = $0.kind { true } else { false } } == true)
+    }
+
+    @Test func branchSearchSkipsGenericKindsAndPrefersOpenItems() async throws {
+        let model = try await makeModel(items: [("Brot", "🛒 Edeka")])
+        _ = model.addStore(from: try #require(model.catalog?.entry(forKey: "generic-bakery")), planned: false)
+        _ = model.addStore(from: try #require(model.catalog?.entry(forKey: "rewe")), planned: false)
+        let stores = model.storesForBranchSearch()
+        #expect(stores.first?.catalogKey == "edeka")
+        #expect(!stores.contains { $0.catalogKey == "generic-bakery" })
+        #expect(stores.contains { $0.catalogKey == "rewe" })
+    }
+
+    @Test func budniIsRecognizedAsChain() async throws {
+        let model = try await makeModel()
+        let store = try #require(model.addStore(from: place("BUDNI", metersNorth: 300, type: .other)))
+        #expect(store.catalogKey == "budni")
+        #expect(model.catalog?.entry(forKey: "budni")?.leafletURL != nil)
+    }
+
+    @Test func focusOpensStoreCardsButNotWhileTyping() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Rewe")])
+        let rewe = try #require(model.stores.first { $0.catalogKey == "rewe" })
+        model.focus(.more)
+        #expect(model.focusedPage == nil)
+        model.startComposer(on: .store(rewe.id))
+        model.focus(.store(rewe.id))
+        #expect(model.focusedPage == nil)
+        model.endComposer()
+        model.focus(.store(rewe.id))
+        #expect(model.focusedPage == .store(rewe.id))
+        #expect(model.activePage == .store(rewe.id))
     }
 
     @Test func branchesSurviveRelaunch() async throws {

@@ -107,7 +107,7 @@ struct ComposerBar: View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(spacing: 8) {
-                    chip(page: .unsorted, title: String(localized: "Unsortiert"), color: .gray, badge: nil)
+                    chip(page: .unsorted, title: String(localized: "Inbox"), color: .gray, badge: nil)
                     ForEach(model.stores.sorted { $0.sortIndex < $1.sortIndex }) { store in
                         chip(page: .store(store.id), title: store.name, color: store.color, badge: store)
                     }

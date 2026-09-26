@@ -135,18 +135,27 @@ public enum ChainRecognizer {
     /// Generic kinds ("Markt", "Bäcker") are never recognized from a POI name – every bakery
     /// would otherwise become "Bäcker".
     public static func entry(forPlaceNamed placeName: String, in catalog: [StoreCatalog.Entry]) -> StoreCatalog.Entry? {
-        let place = ItemKeyNormalizer.storeNameKey(placeName)
-        guard !place.isEmpty else { return nil }
+        let placeWords = words(placeName)
+        let placeKey = placeWords.joined()
+        guard !placeKey.isEmpty else { return nil }
         var best: (entry: StoreCatalog.Entry, length: Int)?
         for entry in catalog where !entry.key.hasPrefix("generic-") {
             let names = [entry.name] + entry.aliases + (entry.mapSearchTerms ?? [])
             for name in names {
-                let key = ItemKeyNormalizer.storeNameKey(name)
-                // The chain must lead the place name ("REWE City", not "Bäckerei Müller").
-                guard key.count >= 2, place == key || place.hasPrefix(key) else { continue }
+                let nameWords = words(name)
+                let key = nameWords.joined()
+                // The chain must lead the place name as whole words ("REWE City", "EDEKA-Center"),
+                // so "HIT" does not match "Hitzler" and "Norma" not "Normann".
+                guard key.count >= 2, placeKey == key || placeWords.starts(with: nameWords) else { continue }
                 if key.count > (best?.length ?? 0) { best = (entry, key.count) }
             }
         }
         return best?.entry
+    }
+
+    private static func words(_ name: String) -> [String] {
+        ItemKeyNormalizer.fold(name)
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
     }
 }

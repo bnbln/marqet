@@ -49,3 +49,6 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 34 | iCloud-Sync eigener Läden | *Rev. 4:* **v1.1**; v1.0 speichert lokal, Läden werden über die Marker auf jedem Gerät erkannt |
 | 35 | Unsortiert-Card | *Rev. 4:* **Immer die erste Card**, auch ohne Einträge (ersetzt #5) |
 | 36 | Projektdatei | *Rev. 4:* **`project.yml` ist die einzige Quelle**, `scripts/generate.sh` erzeugt das Projekt, `scripts/ci.sh` prüft alles |
+| 37 | Name der ersten Card | *Rev. 5 (26.09.):* **„Inbox“** statt „Unsortiert“; „Läden zuordnen“ mittig am Card-Ende |
+| 38 | Laden-Vollbild | *Rev. 5:* Tipp auf den Header oder Hochziehen der Liste zoomt die Card auf Vollbild (Zoom-Transition). Plus bleibt, Seitenpunkte fallen weg. Hier sitzen „Angebote & Prospekte“ |
+| 39 | Prospekt-Link | *Rev. 5:* **v1.0** (vorgezogen aus #27) im Laden-Vollbild: offizielle Angebotsseite der Kette im `SFSafariViewController`. Einzelangebote bleiben v2.0 (#27) |

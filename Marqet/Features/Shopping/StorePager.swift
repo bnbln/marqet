@@ -7,8 +7,10 @@ struct StorePager: View {
     @SceneStorage("selectedPageV2") private var storedActivePage = ""
     @State private var position = ScrollPosition(idType: String.self)
     @State private var leadingIndex = 0
-    /// Bumped when a swipe settles on another card; drives a light haptic tick.
+    /// Bumped when a swipe crosses the midpoint to another card; drives a light haptic tick.
     @State private var swipeFeedback = 0
+    /// Only the user's own swipes tick, not programmatic scrolls (launch, page dots).
+    @State private var isUserScrolling = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -31,6 +33,15 @@ struct StorePager: View {
             }
             .scrollPosition($position)
             .sensoryFeedback(.selection, trigger: swipeFeedback)
+            .onScrollPhaseChange { _, phase in
+                isUserScrolling = phase == .interacting || phase == .decelerating
+            }
+            // Tick as soon as the nearest card changes, not when the next one is fully in view.
+            .onScrollGeometryChange(for: Int.self) { geometry in
+                Int((geometry.contentOffset.x / (metrics.slotWidth + metrics.spacing)).rounded())
+            } action: { _, _ in
+                if isUserScrolling { swipeFeedback += 1 }
+            }
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
             .scrollIndicators(.hidden)
             .scrollClipDisabled()
@@ -103,7 +114,6 @@ struct StorePager: View {
 
         guard leading != leadingIndex else { return }
         leadingIndex = leading
-        swipeFeedback += 1
         let pages = content.compactMap { $0.isGhost ? nil : $0.page }
         guard let anchored = SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) else { return }
         // Duo: the right-hand card is always the active one. iPad: keep a tapped card while visible.
@@ -203,7 +213,7 @@ struct PageIndicator: View {
     private func label(for page: PageID) -> String {
         switch page {
         case .more: String(localized: "Weitere Läden")
-        case .unsorted: String(localized: "Unsortiert")
+        case .unsorted: String(localized: "Inbox")
         case .store(let id): model.store(id)?.name ?? ""
         }
     }

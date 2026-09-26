@@ -135,7 +135,7 @@ struct OnboardingFlow: View {
             title: "Eintragen mit Siri",
             points: [
                 ("quote.bubble.fill", "Sag: „Hey Siri, setz Milch auf die Liste \(model.selectedList?.title ?? "Einkaufen")“."),
-                ("tray.and.arrow.down.fill", "Neue Einträge landen in „Unsortiert“ – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören."),
+                ("tray.and.arrow.down.fill", "Neue Einträge landen in der Inbox – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören."),
                 ("hand.draw.fill", "Wische zwischen den Läden, tippe + für neue Einträge."),
             ],
             footnote: nil

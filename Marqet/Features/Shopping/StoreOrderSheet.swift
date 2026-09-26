@@ -50,7 +50,7 @@ struct StoreOrderSheet: View {
                 let count = model.openItemCount(of: store.id)
                 Text(count == 0
                      ? "Gelernte Zuordnungen für diesen Laden gehen verloren."
-                     : "\(count) offene Einträge werden unsortiert. Gelernte Zuordnungen für diesen Laden gehen verloren.")
+                     : "\(count) offene Einträge landen in der Inbox. Gelernte Zuordnungen für diesen Laden gehen verloren.")
             }
         }
         .presentationDetents([.medium, .large])

@@ -88,7 +88,7 @@ struct BranchPickerSection: View {
             return
         }
         do {
-            results = try await model.placeSearch.branches(of: store, chain: chain, near: origin)
+            results = try await model.placeSearch.branches(of: store, chain: chain, near: origin, radius: MapKitPlaceSearch.branchRadius)
             message = results.isEmpty ? String(localized: "Keine Filiale in der Nähe gefunden.") : nil
         } catch {
             message = error.localizedDescription

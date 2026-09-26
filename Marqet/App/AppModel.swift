@@ -42,6 +42,8 @@ final class AppModel {
     var activePage: PageID = .unsorted
     /// Set to scroll the pager to a page; the pager clears it.
     var pageRequest: PageID?
+    /// The card opened full screen with a zoom from the pager (header tap or pull up), else `nil`.
+    var focusedPage: PageID?
     /// Pages currently on screen – they never disappear under the user's finger.
     var visiblePages: Set<PageID> = [] {
         didSet { dismissedPages.formIntersection(visiblePages) }
@@ -482,6 +484,13 @@ final class AppModel {
     // MARK: Composer
 
     /// Opens the composer on `page`. A hidden store becomes planned so its card appears.
+    /// Opens a card full screen – not while typing, and not the "Weitere Läden" card.
+    func focus(_ page: PageID) {
+        guard page != .more, composerTarget == nil, focusedPage == nil else { return }
+        activePage = page
+        focusedPage = page
+    }
+
     func startComposer(on page: PageID) {
         var page = page
         if page == .more { page = .unsorted }

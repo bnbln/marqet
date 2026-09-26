@@ -24,8 +24,15 @@ extension AppModel {
     /// "1,2 km" / "350 m" for card subtitles and lists.
     func distanceText(to storeID: Store.ID) -> String? {
         guard let userLocation, let location = relevantLocation(of: storeID) else { return nil }
-        let meters = location.coordinate.distance(to: userLocation)
-        // "650 m" below a kilometre, "1,2 km" above – more precision would be false accuracy.
+        return Self.distanceText(meters: location.coordinate.distance(to: userLocation))
+    }
+
+    func distanceText(to point: GeoPoint) -> String? {
+        userLocation.map { Self.distanceText(meters: point.distance(to: $0)) }
+    }
+
+    /// "650 m" below a kilometre, "1,2 km" above – more precision would be false accuracy.
+    static func distanceText(meters: Double) -> String {
         let rounded = meters < 1_000 ? (meters / 10).rounded() * 10 : meters
         return Measurement(value: rounded, unit: UnitLength.meters)
             .formatted(.measurement(width: .abbreviated, usage: .road, numberFormatStyle: .number.precision(.fractionLength(meters < 1_000 ? 0...0 : 0...1))))
@@ -167,5 +174,90 @@ extension AppModel {
         }
         if let store { addLocation(place, to: store.id) }
         return store
+    }
+}
+
+// MARK: Map pins
+
+/// One point on the map (KONZEPT §14.1).
+struct MapPin: Identifiable, Equatable {
+    enum Kind: Equatable {
+        /// A branch the user saved for one of their stores.
+        case saved(StoreLocation)
+        /// A branch of one of the user's stores found on the map, not saved yet.
+        case branch(PlaceResult)
+        /// A catalog chain the user has not added yet – shown faded with a plus.
+        case suggestion(PlaceResult, chainKey: String)
+        /// Any other place, e.g. a search result ("Hofladen Maier").
+        case place(PlaceResult)
+    }
+
+    let kind: Kind
+    let store: Store?
+
+    var id: String {
+        switch kind {
+        case .saved(let location): "saved:\(location.id)"
+        case .branch(let place): "branch:\(place.id)"
+        case .suggestion(let place, _): "suggestion:\(place.id)"
+        case .place(let place): "place:\(place.id)"
+        }
+    }
+
+    var coordinate: GeoPoint {
+        switch kind {
+        case .saved(let location): location.coordinate
+        case .branch(let place), .suggestion(let place, _), .place(let place): place.coordinate
+        }
+    }
+
+    var place: PlaceResult? {
+        switch kind {
+        case .saved: nil
+        case .branch(let place), .suggestion(let place, _), .place(let place): place
+        }
+    }
+}
+
+extension AppModel {
+    /// Stores whose branches the map looks up: own chains and own stores, no generic kinds
+    /// ("Bäcker"), those with open items first – MapKit throttles, so at most `limit`.
+    func storesForBranchSearch(limit: Int = 8) -> [Store] {
+        let stores = sortedStores.filter { !($0.catalogKey?.hasPrefix("generic-") ?? false) }
+        let open = stores.filter { openItemCount(of: $0.id) > 0 }
+        return Array((open + stores.filter { openItemCount(of: $0.id) == 0 }).prefix(limit))
+    }
+
+    /// Saved branches, branches of own stores found around the map, and chains not added yet.
+    /// A found place that is already saved is shown once, as the saved branch.
+    /// The pin for a single place (search result): own branch, chain suggestion or plain place.
+    func mapPin(for place: PlaceResult) -> MapPin {
+        if let store = existingStore(for: place) {
+            if let saved = locations(of: store.id).first(where: { $0.mapItemIdentifier != nil && $0.mapItemIdentifier == place.mapItemIdentifier }) {
+                return MapPin(kind: .saved(saved), store: store)
+            }
+            return MapPin(kind: .branch(place), store: store)
+        }
+        if let chain = chain(of: place) { return MapPin(kind: .suggestion(place, chainKey: chain.key), store: nil) }
+        return MapPin(kind: .place(place), store: nil)
+    }
+
+    func mapPins(found: [PlaceResult]) -> [MapPin] {
+        var pins = locations.compactMap { location in
+            store(location.storeID).map { MapPin(kind: .saved(location), store: $0) }
+        }
+        var seen = Set<String>()
+        for place in found where seen.insert(place.id).inserted {
+            if let store = existingStore(for: place) {
+                let isSaved = locations(of: store.id).contains { location in
+                    (location.mapItemIdentifier != nil && location.mapItemIdentifier == place.mapItemIdentifier)
+                        || location.coordinate.distance(to: place.coordinate) < 40
+                }
+                if !isSaved { pins.append(MapPin(kind: .branch(place), store: store)) }
+            } else if let chain = chain(of: place) {
+                pins.append(MapPin(kind: .suggestion(place, chainKey: chain.key), store: nil))
+            }
+        }
+        return pins
     }
 }

@@ -35,6 +35,7 @@
 		63B6677F47535B463636BFD4 /* Marqet.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */; };
 		64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */; };
 		67B40B5BD20A6C9B73086212 /* StoreOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EB610271AC41550A76CFD4 /* StoreOrderSheet.swift */; };
+		69FBBFE5522A433B53A97EA0 /* StoreFocusScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */; };
 		6CE122BF46C50E69135ED788 /* PlacesModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */; };
 		71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */; };
 		88167E848566A767ED3889AC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3044CC8DBA6E48095569D /* RootView.swift */; };
@@ -111,6 +112,7 @@
 		A87358243D9ADFF22154E6EF /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		B307E22CA868870A6E3000A8 /* MarqetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetApp.swift; sourceTree = "<group>"; };
 		B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFocusScreen.swift; sourceTree = "<group>"; };
 		C843D403846165703592E11F /* ComposerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerBar.swift; sourceTree = "<group>"; };
 		C9BFF55B4149AA06EB81000A /* StoresSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresSettingsView.swift; sourceTree = "<group>"; };
 		CA8E8FFBB9F34B86F2F9CF63 /* AppModel+Stores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Stores.swift"; sourceTree = "<group>"; };
@@ -320,6 +322,7 @@
 				A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */,
 				3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */,
 				56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */,
+				BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */,
 				36EB610271AC41550A76CFD4 /* StoreOrderSheet.swift */,
 				8662B64170332932ED37FE06 /* StorePager.swift */,
 			);
@@ -502,6 +505,7 @@
 				0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */,
 				913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */,
 				64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */,
+				69FBBFE5522A433B53A97EA0 /* StoreFocusScreen.swift in Sources */,
 				67B40B5BD20A6C9B73086212 /* StoreOrderSheet.swift in Sources */,
 				11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */,
 				B5C40E5BA2742DB2FBCF99D4 /* StoreStyle.swift in Sources */,

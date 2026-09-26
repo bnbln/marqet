@@ -25,7 +25,20 @@
     "%lld offen" : {
 
     },
-    "%lld offene Einträge werden unsortiert. Gelernte Zuordnungen für diesen Laden gehen verloren." : {
+    "%lld offen · %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld offen · %2$@"
+          }
+        }
+      }
+    },
+    "%lld offene Einträge" : {
+
+    },
+    "%lld offene Einträge landen in der Inbox. Gelernte Zuordnungen für diesen Laden gehen verloren." : {
 
     },
     "%lld planen" : {
@@ -74,6 +87,9 @@
     "Aktuelle Liste" : {
 
     },
+    "Aktueller Prospekt" : {
+
+    },
     "Alle Vorschläge übernehmen (%lld)" : {
 
     },
@@ -87,6 +103,21 @@
 
     },
     "Alles sortiert" : {
+
+    },
+    "Als bevorzugte Filiale" : {
+
+    },
+    "Als Laden hinzufügen" : {
+
+    },
+    "Als meine Filiale merken" : {
+
+    },
+    "Angebote & Prospekte" : {
+
+    },
+    "Angebote der Woche bei %@" : {
 
     },
     "Anzeigeoptionen" : {
@@ -188,10 +219,16 @@
     "Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“." : {
 
     },
+    "Der nächste Laden steht vorn. Läden ohne Filiale folgen in deiner Reihenfolge." : {
+
+    },
     "Deutschland" : {
 
     },
-    "Die Adresse oder Info erscheint unter dem Ladennamen auf der Karte." : {
+    "Die Adresse oder Info erscheint unter dem Ladennamen auf der Card." : {
+
+    },
+    "Die bevorzugte Filiale bestimmt Entfernung, Kartenpunkt und die Adresse auf der Card." : {
 
     },
     "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
@@ -210,6 +247,9 @@
 
     },
     "Drogerie & Pflege" : {
+
+    },
+    "Du bestimmst die Reihenfolge selbst. Entfernung und Smart nutzen deinen Standort nur, während Marqet offen ist." : {
 
     },
     "Eigenen Laden anlegen" : {
@@ -254,6 +294,12 @@
     "Einzeln" : {
 
     },
+    "Entfernen" : {
+
+    },
+    "Entfernung" : {
+
+    },
     "Erledigt" : {
 
     },
@@ -279,6 +325,12 @@
 
     },
     "Filiale" : {
+
+    },
+    "Filialen" : {
+
+    },
+    "Filialen in der Nähe suchen" : {
 
     },
     "Fisch" : {
@@ -326,7 +378,13 @@
     "In den letzten 7 Tagen nichts erledigt." : {
 
     },
+    "Inbox" : {
+
+    },
     "Intelligenz" : {
+
+    },
+    "Karte" : {
 
     },
     "Käse" : {
@@ -342,6 +400,9 @@
 
     },
     "Käufe wiederherstellen" : {
+
+    },
+    "Keine Filiale in der Nähe gefunden." : {
 
     },
     "Kette suchen" : {
@@ -363,6 +424,9 @@
 
     },
     "Laden hinzufügen" : {
+
+    },
+    "Laden oder Adresse suchen" : {
 
     },
     "Läden sortieren" : {
@@ -393,6 +457,9 @@
 
     },
     "Löschen" : {
+
+    },
+    "Manuell" : {
 
     },
     "Markt" : {
@@ -452,6 +519,9 @@
     "Milchprodukte & Eier" : {
 
     },
+    "Mit dem Auto" : {
+
+    },
     "Mit Marqet Pro wäre einer davon automatisch zugeordnet worden." : {
 
     },
@@ -470,13 +540,16 @@
     "Name, z. B. Hofladen Maier" : {
 
     },
-    "Neue Einträge landen in „Unsortiert“ – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
+    "Neue Einträge landen in der Inbox – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
 
     },
     "Neue Liste anlegen" : {
 
     },
     "Neuer Eintrag" : {
+
+    },
+    "Nichts gefunden." : {
 
     },
     "Noch keine Einträge" : {
@@ -492,6 +565,15 @@
 
     },
     "Obst & Gemüse" : {
+
+    },
+    "Oder Ort bzw. Adresse eingeben" : {
+
+    },
+    "Öffnet die offizielle Seite von %@. Dort wählst du deinen Markt." : {
+
+    },
+    "Ohne Standortfreigabe kannst du eine Filiale über Ort oder Adresse suchen." : {
 
     },
     "OK" : {
@@ -512,10 +594,22 @@
     "Region" : {
 
     },
+    "Reihenfolge" : {
+
+    },
+    "Reihenfolge der Cards" : {
+
+    },
+    "Route" : {
+
+    },
     "Rückgängig" : {
 
     },
     "Sag: „Hey Siri, setz Milch auf die Liste %@“." : {
+
+    },
+    "Schließen" : {
 
     },
     "Schweiz" : {
@@ -525,6 +619,9 @@
 
     },
     "Sichern" : {
+
+    },
+    "Smart" : {
 
     },
     "Snacks & Süßes" : {
@@ -563,13 +660,19 @@
     "Überspringen" : {
 
     },
-    "Unsortiert" : {
+    "Unterwegs" : {
 
     },
     "Version" : {
 
     },
+    "Viele offene Einträge und kurze Wege stehen vorn. Die Reihenfolge ändert sich nur beim Öffnen, nicht beim Wischen." : {
+
+    },
     "Violett" : {
+
+    },
+    "Vollbild" : {
 
     },
     "Vorrat" : {
@@ -623,6 +726,9 @@
     "Zu %@ zuordnen" : {
 
     },
+    "Zu Fuß" : {
+
+    },
     "Zugriff auf Erinnerungen" : {
 
     },
@@ -633,6 +739,9 @@
 
     },
     "Zuordnen startet mit" : {
+
+    },
+    "Zur Card" : {
 
     },
     "Zurück" : {

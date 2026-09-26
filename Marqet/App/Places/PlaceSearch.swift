@@ -15,8 +15,8 @@ struct PlaceResult: Identifiable, Hashable, Sendable {
 
 @MainActor
 protocol PlaceSearching: AnyObject {
-    /// Branches of one store near `origin` (chain stores: only branches of that chain).
-    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint) async throws -> [PlaceResult]
+    /// Branches of one store within `radius` meters of `origin` (chain stores: only that chain).
+    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint, radius: Double) async throws -> [PlaceResult]
     /// Shops around `origin` – for "Läden in der Nähe" on the map.
     func shops(near origin: GeoPoint) async throws -> [PlaceResult]
     /// Free-text search ("Hofladen Maier").
@@ -27,7 +27,7 @@ protocol PlaceSearching: AnyObject {
 /// throttles searches (KONZEPT §14.1).
 @MainActor
 final class MapKitPlaceSearch: PlaceSearching {
-    static let branchRadius: CLLocationDistance = 10_000
+    static let branchRadius: CLLocationDistance = 5_000
     static let shopsRadius: CLLocationDistance = 2_500
     /// `.store` is left out on purpose: in city centres it returns dozens of boutiques and pushes
     /// the supermarkets out of MapKit's result limit. Chains come from the text queries instead.
@@ -36,18 +36,29 @@ final class MapKitPlaceSearch: PlaceSearching {
 
     private var cache: [String: (results: [PlaceResult], date: Date)] = [:]
 
-    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint) async throws -> [PlaceResult] {
-        let query = chain?.mapSearchTerms?.first ?? chain?.name ?? store.name
-        let results = try await cached("branch:\(query)", near: origin) {
-            let request = MKLocalSearch.Request()
-            request.naturalLanguageQuery = query
-            request.resultTypes = .pointOfInterest
-            request.region = MKCoordinateRegion(center: origin.clCoordinate, latitudinalMeters: Self.branchRadius, longitudinalMeters: Self.branchRadius)
-            return try await Self.run(request)
+    func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint, radius: Double) async throws -> [PlaceResult] {
+        // MapKit returns at most ~25 results per request – every search term ("EDEKA", "E center")
+        // gets its own request, and a smaller radius (zoomed-in map) finds the rest.
+        let terms = chain?.mapSearchTerms ?? [chain?.name ?? store.name]
+        var results: [PlaceResult] = []
+        for term in terms {
+            let found = try await cached("branch:\(term):\(Int(radius / 500))", near: origin) {
+                let request = MKLocalSearch.Request()
+                request.naturalLanguageQuery = term
+                request.resultTypes = .pointOfInterest
+                request.region = MKCoordinateRegion(center: origin.clCoordinate, latitudinalMeters: radius * 2, longitudinalMeters: radius * 2)
+                return try await Self.run(request)
+            }
+            results += found
         }
-        guard let chain else { return results }
-        // Apple Maps also returns look-alikes ("Aldi Nord" for "Aldi Süd") – keep only the chain.
-        return results.filter { ChainRecognizer.entry(forPlaceNamed: $0.name, in: [chain])?.key == chain.key }
+        var seen = Set<String>()
+        results = results.filter { seen.insert($0.id).inserted }
+        if let chain {
+            // Apple Maps also returns look-alikes ("Aldi Nord" for "Aldi Süd") – keep only the chain.
+            return results.filter { ChainRecognizer.entry(forPlaceNamed: $0.name, in: [chain])?.key == chain.key }
+        }
+        let key = ItemKeyNormalizer.storeNameKey(store.name)
+        return results.filter { ItemKeyNormalizer.storeNameKey($0.name).hasPrefix(key) }
     }
 
     func shops(near origin: GeoPoint) async throws -> [PlaceResult] {

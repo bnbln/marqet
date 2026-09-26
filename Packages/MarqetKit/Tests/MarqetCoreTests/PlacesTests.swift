@@ -83,13 +83,20 @@ struct PlacesTests {
         ("EDEKA Center Huber", "edeka"),
         ("Müller Drogerie", "mueller"),
         ("BILLA PLUS", "billa-plus"),   // longest match beats "Billa"
+        ("BUDNI", "budni"),
+        ("Budnikowsky Eppendorf", "budni"),
+        ("EDEKA Ernst", "edeka"),
+        ("E center Singer", "edeka"),
+        ("REWE Markt GmbH", "rewe"),
+        ("HIT Ullrich", "hit"),
     ])
     func recognizesChains(_ place: String, _ key: String) throws {
         let catalog = try StoreCatalog.bundled().stores
         #expect(ChainRecognizer.entry(forPlaceNamed: place, in: catalog)?.key == key)
     }
 
-    @Test(arguments: ["Bäckerei Müller", "Café Lidl-Eck", "Wochenmarkt Viktualienmarkt", "Metzgerei Huber", ""])
+    @Test(arguments: ["Bäckerei Müller", "Café Lidl-Eck", "Wochenmarkt Viktualienmarkt", "Metzgerei Huber", "",
+                      "Hitzler Bäckerei", "Normann Optik", "Reweler Kiosk", "Combina Pizza"])
     func doesNotGuess(_ place: String) throws {
         let catalog = try StoreCatalog.bundled().stores
         #expect(ChainRecognizer.entry(forPlaceNamed: place, in: catalog) == nil)

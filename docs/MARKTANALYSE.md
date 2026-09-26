@@ -48,6 +48,16 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 | **Händler-APIs** (REWE, Lidl Plus, Edeka) | Angebote und teils Preise | Nur private, reverse-engineerte Schnittstellen | wie oben | ❌ No-Go |
 | **Scraping** (z. B. Apify-Actors für kaufDA) | Prospekte | – | wie oben | ❌ No-Go |
 
+### Nachrecherche 26.09.2026
+
+| Quelle | Befund | Folgerung |
+|---|---|---|
+| **Open Prices** (Open Food Facts, [API](https://prices.openfoodfacts.org/api/docs), ODbL) | Einzige **offene, legale** Preisdatenbank. Crowdsourcing per Kassenbon/Preisschild. In Deutschland aktuell nur rund **1.070 Orte**, die aktivsten mit wenigen hundert Preisen (z. B. Netto Strausberg 1.150, EDEKA München 597, Rewe Bielefeld 264) | Für Angebote ungeeignet (keine Aktionen, keine Aktualität). Später denkbar als Hinweis „zuletzt gesehen: 1,19 € bei Lidl“ mit Quellenangabe, oder Marqet-Nutzer tragen selbst bei |
+| **kaufDA / Bonial** | Hat 2025 eine **eigene Einkaufsliste mit integrierten Angeboten** gestartet ([retail-news](https://retail-news.de/kaufda-einkaufsliste-launch-2025/)) | Bonial ist damit direkter Wettbewerber, als Datenpartner unwahrscheinlicher |
+| **ShopFully** | Publisher-Programm mit 1.400+ Publishern ([Solutions for Publishers](https://shopfully.com/business-solutions/publishers/)) | Bleibt der **realistischste Partner** für Einzelangebote (v2.0) |
+| **Offizielle Händlerseiten** | Jede große Kette hat eine öffentliche Angebots- bzw. Prospektseite, teils mit Marktwahl | Ab v1.0 als Link im Laden-Vollbild (KONZEPT #39), `leafletURL` im Katalog (25 Ketten) |
+| Staatliche Preisbeobachtung | In Deutschland nur gefordert (vzbv, foodwatch), keine offenen Daten; Österreich hat einen Preistransparenz-Bericht der AMA, aber keine Einzelpreise | Keine Quelle |
+
 **Wichtige Einschränkung beim „besten Angebot“:** Verfügbar sind nur **Aktionspreise** aus Prospekten, **keine regulären Preise**. Ein echter Warenkorb-Preisvergleich („bei Lidl insgesamt 4,20 € billiger“) ist damit nicht seriös möglich. Möglich ist: *„Butter ist diese Woche bei Lidl im Angebot (1,69 €, bis Sa)“*. Genau so müssen wir das Feature auch vermarkten.
 
 ---
@@ -58,7 +68,8 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 
 | Stufe | Feature | Nutzen |
 |---|---|---|
-| **v1.1 – Prospekt-Link** | Im Card-Menü „Aktuelles Prospekt“ öffnet die offizielle Prospektseite des Händlers (`SFSafariViewController`, URL aus dem Katalog) | Ohne Partner, ohne Daten, rechtlich unkritisch |
+| **v1.0 – Prospekt-Link** ✅ | Im Laden-Vollbild öffnet „Aktueller Prospekt“ die offizielle Angebotsseite des Händlers (`SFSafariViewController`, `leafletURL` aus dem Katalog) | Ohne Partner, ohne Daten, rechtlich unkritisch |
+| **v1.x – Prospekt pro Markt** | Filial-ID der bevorzugten Filiale in die URL (z. B. Rewe-Marktseite), damit der Nutzer nicht erneut seinen Markt wählen muss | Braucht je Kette ein URL-Schema, nur für die großen 5 |
 | **v2.0 – Angebots-Treffer** | Für jedes offene Item wird geprüft, ob es in einem der Läden des Nutzers im Angebot ist. Das Item bekommt ein Badge `🏷 Lidl 1,69 € · bis Sa`, im Zuordnen-Screen erscheint „Im Angebot bei Lidl“ als Vorschlagsgrund, jede Laden-Card bekommt ein Sheet „Angebote für deine Liste“ | Der eigentliche Wow-Effekt: das beste Angebot wird zur Liste passend vorgeschlagen |
 | **v2.0 – Angebot → Liste** | Angebote eines Ladens durchsuchen, per Tipp mit Marker direkt auf die Liste | Wie bei Bring! und MeinProspekt |
 | **v2.x – Einkauf optimieren** | Kombiniert Angebote, Entfernung und Artikelmenge: „Wenn du Butter und Kaffee bei Lidl statt Aldi kaufst, sparst du ca. 3,10 € bei 4 min Umweg“ | Verbindet sich mit der Routenplanung (v1.3) |

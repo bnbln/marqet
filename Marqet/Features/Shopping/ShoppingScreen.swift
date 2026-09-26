@@ -12,10 +12,12 @@ struct ShoppingScreen: View {
     /// Bumped by the add button and undo; each drives a light haptic tap.
     @State private var addFeedback = 0
     @State private var undoFeedback = 0
+    @Namespace private var cardZoom
 
     var body: some View {
         NavigationStack {
             StorePager()
+                .environment(\.cardZoomNamespace, cardZoom)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemGroupedBackground).ignoresSafeArea())
                 .overlay(alignment: .bottom) {
@@ -24,7 +26,8 @@ struct ShoppingScreen: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    if model.composerTarget != nil {
+                    // Full screen, the focus screen has its own composer.
+                    if model.composerTarget != nil, model.focusedPage == nil {
                         ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -53,12 +56,16 @@ struct ShoppingScreen: View {
                 .fullScreenCover(isPresented: triageBinding) {
                     TriageScreen()
                 }
+                .fullScreenCover(item: focusBinding) { focused in
+                    StoreFocusScreen(page: focused.page)
+                        .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
+                }
                 .overlay(alignment: .top) {
                     if model.autoAssignReport != nil { AutoAssignToast() }
                 }
                 .animation(.snappy, value: model.autoAssignReport)
                 .onChange(of: model.composerTarget) { _, target in
-                    if target != nil { isComposerFocused = true }
+                    if target != nil, model.focusedPage == nil { isComposerFocused = true }
                 }
                 .onChange(of: model.hasLoadedItems) { _, loaded in
                     #if DEBUG
@@ -79,7 +86,7 @@ struct ShoppingScreen: View {
                 Spacer()
                 Menu {
                     Section("Hinzufügen zu …") {
-                        Button("Unsortiert", systemImage: "tray") { model.startComposer(on: .unsorted) }
+                        Button("Inbox", systemImage: "tray") { model.startComposer(on: .unsorted) }
                         ForEach(model.sortedStores) { store in
                             Button(store.name) { model.startComposer(on: .store(store.id)) }
                         }
@@ -153,6 +160,15 @@ struct ShoppingScreen: View {
 }
 
 extension ShoppingScreen {
+    private struct FocusedPage: Identifiable {
+        let page: PageID
+        var id: String { page.rawValue }
+    }
+
+    private var focusBinding: Binding<FocusedPage?> {
+        Binding(get: { model.focusedPage.map(FocusedPage.init) }, set: { model.focusedPage = $0?.page })
+    }
+
     private var triageBinding: Binding<Bool> {
         Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })
     }

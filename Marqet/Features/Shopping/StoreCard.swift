@@ -9,11 +9,16 @@ struct StoreCard: View {
     let items: [ShoppingItem]
     let state: StoreCardState?
     var isFocused = false
+    /// Full screen in `StoreFocusScreen` instead of a card in the pager.
+    var isExpanded = false
 
     @Environment(AppModel.self) private var model
+    @Environment(\.cardZoomNamespace) private var zoomNamespace
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsSectionOrder = false
     @State private var showsStoreDetails = false
+    /// The user's finger is on the list – only then does pulling up open the card full screen.
+    @State private var isDraggingList = false
 
     private var tint: Color { store?.color ?? .gray }
     /// Store color for text and symbols on the card surface (WCAG AA in light and dark mode).
@@ -25,7 +30,7 @@ struct StoreCard: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
+            if !isExpanded && items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
                 emptyState
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -33,7 +38,8 @@ struct StoreCard: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .cardSurface(isFocused: isFocused, focusColor: tint, glowColor: store?.color)
+        .modifier(CardChrome(isExpanded: isExpanded, isFocused: isFocused, tint: tint, glowColor: store?.color))
+        .modifier(CardZoomSource(page: page, namespace: isExpanded ? nil : zoomNamespace))
         // Items dragged from another card move to this store (KONZEPT-DUO-IPAD §4.2).
         .dropDestination(for: String.self) { ids, _ in
             let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store?.id }
@@ -62,7 +68,7 @@ struct StoreCard: View {
                     .background(.white.opacity(0.2), in: .circle)
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(store?.name ?? String(localized: "Unsortiert"))
+                Text(store?.name ?? String(localized: "Inbox"))
                     .font(.title2.bold())
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -74,15 +80,36 @@ struct StoreCard: View {
             if let store {
                 cardMenu(for: store)
             }
+            if isExpanded {
+                Button {
+                    model.focusedPage = nil
+                } label: {
+                    Image(systemName: "chevron.down")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 36, height: 36)
+                        .background(.white.opacity(0.22), in: .circle)
+                }
+                .accessibilityLabel("Schließen")
+            }
         }
         .foregroundStyle(store?.foregroundOnColor ?? .white)
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .background {
             LinearGradient(colors: [tint, tint.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                // Full screen, the header color runs up under the status bar.
+                .ignoresSafeArea(edges: isExpanded ? .top : [])
+        }
+        // Tapping the header zooms the card to full screen and back (buttons keep their own taps).
+        .contentShape(.rect)
+        .onTapGesture {
+            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
+        .accessibilityAction(named: isExpanded ? "Schließen" : "Vollbild") {
+            if isExpanded { model.focusedPage = nil } else { model.focus(page) }
+        }
     }
 
     private var subtitle: String {
@@ -144,7 +171,16 @@ struct StoreCard: View {
                         }
                     }
                 }
+                if isExpanded && items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
+                    emptyState
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
                 completedSection
+                if isExpanded, let store {
+                    OffersSection(store: store)
+                }
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
@@ -153,8 +189,17 @@ struct StoreCard: View {
                 if store == nil, !items.isEmpty {
                     triageFooter
                 } else {
-                    Color.clear.frame(height: 54)
+                    Color.clear.frame(height: isExpanded ? 72 : 54)
                 }
+            }
+            // Pulling the list up opens the card full screen (not while typing or when full screen).
+            .onScrollPhaseChange { _, phase in
+                isDraggingList = phase == .interacting
+            }
+            .onScrollGeometryChange(for: Bool.self) { geometry in
+                geometry.contentOffset.y + geometry.contentInsets.top > 36
+            } action: { _, pulledUp in
+                if pulledUp, isDraggingList, !isExpanded { model.focus(page) }
             }
             // No keyboard dismissal on scroll here: the scroll to a new item would close the composer.
             .onChange(of: items.count) { old, new in
@@ -166,10 +211,10 @@ struct StoreCard: View {
         }
     }
 
-    /// Entry into the triage flow, pinned to the bottom of the unsorted card (KONZEPT §7.4).
-    /// Leaves the trailing corner free for the add button that overlaps the card.
+    /// Entry into the triage flow, pinned to the bottom of the inbox card (KONZEPT §7.4), centered.
     private var triageFooter: some View {
         HStack {
+            Spacer(minLength: 0)
             Button {
                 model.startTriage()
             } label: {
@@ -182,7 +227,7 @@ struct StoreCard: View {
             .buttonBorderShape(.capsule)
             .tint(AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color)
             .foregroundStyle(.white)
-            Spacer(minLength: 72)
+            Spacer(minLength: 0)
         }
         .padding(.horizontal, 18)
         .padding(.top, 10)
@@ -404,7 +449,7 @@ struct ItemRow: View {
         .draggable(item.id)
         .contextMenu {
             Menu("Laden ändern", systemImage: "storefront") {
-                Button("Unsortiert", systemImage: item.storeID == nil ? "checkmark" : "tray") {
+                Button("Inbox", systemImage: item.storeID == nil ? "checkmark" : "tray") {
                     Task { await model.assign(item, to: nil) }
                 }
                 ForEach(model.stores.sorted { $0.sortIndex < $1.sortIndex }) { store in
@@ -489,4 +534,20 @@ private struct ItemTitleParts {
         pattern: #"^(.+?)\s+((?:\d+(?:[.,]\d+)?\s*)?(?:x|×|kg|g|mg|l|ml|Stück|Stk\.?))$"#,
         options: [.caseInsensitive]
     )
+}
+
+/// Card look in the pager, edge-to-edge surface full screen.
+private struct CardChrome: ViewModifier {
+    let isExpanded: Bool
+    let isFocused: Bool
+    let tint: Color
+    let glowColor: Color?
+
+    func body(content: Content) -> some View {
+        if isExpanded {
+            content.background(Color(.secondarySystemGroupedBackground))
+        } else {
+            content.cardSurface(isFocused: isFocused, focusColor: tint, glowColor: glowColor)
+        }
+    }
 }

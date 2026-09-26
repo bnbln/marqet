@@ -11,11 +11,19 @@ Konzept: [docs/KONZEPT.md](docs/KONZEPT.md) · Markt & Angebote: [docs/MARKTANAL
 ## Setup
 
 ```bash
-xcodegen generate
+scripts/generate.sh
 open Marqet.xcodeproj
 ```
 
-`project.yml` ist die Quelle der Wahrheit für das Xcode-Projekt. Nach Änderungen daran `xcodegen generate` erneut ausführen.
+`project.yml` ist die **einzige** Quelle für das Xcode-Projekt. `Marqet.xcodeproj` nie von Hand oder über Xcode-Einstellungen ändern, sondern `project.yml` anpassen und `scripts/generate.sh` ausführen. Die CI bricht ab, wenn beide nicht übereinstimmen.
+
+## Vor jedem Merge nach `main`
+
+```bash
+scripts/ci.sh
+```
+
+Prüft Projektdatei, Paket-Tests und App-Tests auf dem Simulator (mit `MARQET_SIMULATOR_ID` lässt sich ein bestimmter Simulator wählen). Dieselbe Prüfung läuft in `.github/workflows/ci.yml`, sobald ein GitHub-Remote existiert. Gearbeitet wird auf Feature-Branches.
 
 ## Struktur
 

@@ -1,4 +1,5 @@
-# Generate the Xcode project with: xcodegen generate
+# Single source of truth for the Xcode project – never edit Marqet.xcodeproj by hand.
+# Regenerate with: scripts/generate.sh (CI fails if the committed project is out of date).
 name: Marqet
 options:
   bundleIdPrefix: app.marqet
@@ -10,6 +11,7 @@ options:
 
 settings:
   base:
+    DEVELOPMENT_TEAM: C4VHG63LL9
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     MARKETING_VERSION: "0.1.0"

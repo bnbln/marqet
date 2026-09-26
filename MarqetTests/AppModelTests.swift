@@ -219,4 +219,41 @@ struct AppModelTests {
         let page = PageID.store(aldi.id)
         #expect(model.sections(for: page, items: model.deck.items(on: page)).map(\.category) == [.alcohol, .dairyEggs, .produce])
     }
+
+    // MARK: Briefing (KONZEPT #40)
+
+    @Test func briefingSummarizesStoresAndInboxOncePerLaunch() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Rewe"), ("Butter", "🛒 Rewe"), ("Zahnpasta", "🛒 dm"), ("Batterien", nil)])
+        let briefing = try #require(model.briefing)
+        #expect(briefing.stores.map(\.store.name) == ["Rewe", "dm"])
+        #expect(briefing.stores.map(\.openCount) == [2, 1])
+        #expect(briefing.inboxCount == 1)
+        #expect(briefing.headline == "Einkäufe bei 2 Läden")
+        #expect(briefing.detail.contains("3 Einträge für Rewe und dm."))
+        #expect(briefing.detail.contains("1 Eintrag wartet in der Inbox."))
+        #expect(briefing.firstStore?.name == "Rewe")
+
+        model.dismissBriefing()
+        await model.reload()
+        #expect(model.briefing == nil)   // not again in the same launch
+    }
+
+    @Test func noBriefingWithOnlyInboxItems() async throws {
+        let model = try await makeModel(items: [("Batterien", nil), ("Geschenkpapier", nil)])
+        #expect(model.briefing == nil)
+    }
+
+    @Test func briefingGoesAwayWhenTheUserActs() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Rewe"), ("Batterien", nil)])
+        #expect(model.briefing != nil)
+        model.startComposer(on: .unsorted)
+        #expect(model.briefing == nil)
+        #expect(model.briefingProgress == 0)
+    }
+
+    @Test(arguments: [(7, "Guten Morgen"), (13, "Guten Tag"), (19, "Guten Abend"), (2, "Hallo")])
+    func greetingFollowsTheTimeOfDay(_ hour: Int, _ greeting: String) throws {
+        let date = try #require(Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: .now))
+        #expect(AppModel.greeting(at: date) == greeting)
+    }
 }

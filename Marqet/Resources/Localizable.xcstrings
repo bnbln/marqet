@@ -13,10 +13,10 @@
     "%lld" : {
 
     },
-    "%lld Einträge" : {
+    "%lld Einträge automatisch zugeordnet" : {
 
     },
-    "%lld Einträge automatisch zugeordnet" : {
+    "%lld Einträge wie vorgeschlagen zuordnen" : {
 
     },
     "%lld Einträge zugeordnet" : {
@@ -60,6 +60,9 @@
     "1 Eintrag automatisch zugeordnet" : {
 
     },
+    "1 Eintrag wie vorgeschlagen zuordnen" : {
+
+    },
     "1 Eintrag zugeordnet" : {
 
     },
@@ -88,9 +91,6 @@
 
     },
     "Aktueller Prospekt" : {
-
-    },
-    "Alle Vorschläge übernehmen (%lld)" : {
 
     },
     "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
@@ -148,9 +148,6 @@
 
     },
     "Ausgewählt" : {
-
-    },
-    "Auswählen und auf einen Laden tippen – oder einen Eintrag direkt auf den Laden ziehen." : {
 
     },
     "Automatisch zuordnen" : {
@@ -280,9 +277,6 @@
 
     },
     "Eintrag hinzufügen" : {
-
-    },
-    "Einträge links auswählen oder ziehen, dann auf einen Laden tippen." : {
 
     },
     "Einträge ohne Laden findest du hier." : {
@@ -507,6 +501,9 @@
     "Mehr über Marqet Pro" : {
 
     },
+    "Mehrere" : {
+
+    },
     "Mehrere Läden planen" : {
 
     },
@@ -529,6 +526,9 @@
 
     },
     "Möbel & Einrichtung" : {
+
+    },
+    "Modus" : {
 
     },
     "N" : {
@@ -568,9 +568,6 @@
 
     },
     "Oder Ort bzw. Adresse eingeben" : {
-
-    },
-    "Öffnet die offizielle Seite von %@. Dort wählst du deinen Markt." : {
 
     },
     "Ohne Standortfreigabe kannst du eine Filiale über Ort oder Adresse suchen." : {
@@ -648,9 +645,6 @@
     "Tippe auf +, um etwas für %@ hinzuzufügen." : {
 
     },
-    "Tippe auf den Laden für den Eintrag links." : {
-
-    },
     "Trag Einkäufe wie gewohnt ein – mit Siri, in Erinnerungen oder in Marqet." : {
 
     },
@@ -685,6 +679,9 @@
 
     },
     "Vorschläge mit Apple Intelligence" : {
+
+    },
+    "Wähle Artikel und füge sie unten einem Laden hinzu." : {
 
     },
     "Wähle deine Läden in der Reihenfolge, in der du sie am häufigsten besuchst. Du kannst später jederzeit weitere hinzufügen." : {

@@ -44,6 +44,11 @@ final class AppModel {
     var pageRequest: PageID?
     /// The card opened full screen with a zoom from the pager (header tap or pull up), else `nil`.
     var focusedPage: PageID?
+    /// "Was jetzt wichtig ist" above the inbox, once per launch (KONZEPT #40).
+    var briefing: Briefing?
+    /// 0 on the inbox, 1 one card further – the briefing follows the swipe away.
+    var briefingProgress: Double = 0
+    @ObservationIgnored var hasPreparedBriefing = false
     /// Pages currently on screen – they never disappear under the user's finger.
     var visiblePages: Set<PageID> = [] {
         didSet { dismissedPages.formIntersection(visiblePages) }
@@ -318,6 +323,7 @@ final class AppModel {
         do {
             apply(try await gateway.openReminders(in: selectedListID))
             await afterReload()
+            if !hasLoadedItems { prepareBriefing() }
             hasLoadedItems = true
         } catch {
             present(error)
@@ -487,11 +493,13 @@ final class AppModel {
     /// Opens a card full screen – not while typing, and not the "Weitere Läden" card.
     func focus(_ page: PageID) {
         guard page != .more, composerTarget == nil, focusedPage == nil else { return }
+        dismissBriefing()
         activePage = page
         focusedPage = page
     }
 
     func startComposer(on page: PageID) {
+        dismissBriefing()
         var page = page
         if page == .more { page = .unsorted }
         if let id = page.storeID { plan(id) }

@@ -4,6 +4,7 @@ import SwiftUI
 /// Main screen: the store card pager (KONZEPT §7.2) with the add button and the composer.
 struct ShoppingScreen: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showsAddStore = false
     @State private var showsSettings = false
     @State private var showsStoreOrder = false
@@ -13,11 +14,22 @@ struct ShoppingScreen: View {
     @State private var addFeedback = 0
     @State private var undoFeedback = 0
     @Namespace private var cardZoom
+    /// Height of large title + briefing card; the pager moves down by it.
+    @State private var briefingHeight: CGFloat = 0
+
+    /// 1 while the briefing sits above the inbox, 0 once the user swiped on – follows the finger.
+    /// iPhone only: side by side cards (iPad, Duo open) keep the plain pager.
+    private var briefingAmount: CGFloat {
+        guard model.briefing != nil, sizeClass == .compact else { return 0 }
+        return 1 - model.briefingProgress
+    }
 
     var body: some View {
         NavigationStack {
             StorePager()
                 .environment(\.cardZoomNamespace, cardZoom)
+                // The inbox slides down under the briefing and comes back up as the user swipes on.
+                .offset(y: briefingAmount * briefingHeight)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemGroupedBackground).ignoresSafeArea())
                 .overlay(alignment: .bottom) {
@@ -60,10 +72,19 @@ struct ShoppingScreen: View {
                     StoreFocusScreen(page: focused.page)
                         .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
                 }
+                .overlay(alignment: .top) { briefingBlock }
                 .overlay(alignment: .top) {
                     if model.autoAssignReport != nil { AutoAssignToast() }
                 }
                 .animation(.snappy, value: model.autoAssignReport)
+                .onChange(of: model.activePage) { _, page in
+                    if page != .unsorted, model.briefing != nil {
+                        withAnimation(.snappy) { model.dismissBriefing() }
+                    }
+                }
+                .onChange(of: model.briefing != nil, initial: true) { _, shown in
+                    if shown, sizeClass == .regular { model.dismissBriefing() }
+                }
                 .onChange(of: model.composerTarget) { _, target in
                     if target != nil, model.focusedPage == nil { isComposerFocused = true }
                 }
@@ -77,11 +98,42 @@ struct ShoppingScreen: View {
         }
     }
 
+    /// Large title and "Was jetzt wichtig ist" above the inbox (KONZEPT #40).
+    @ViewBuilder
+    private var briefingBlock: some View {
+        if let briefing = model.briefing, sizeClass == .compact {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Marqet")
+                        .font(.largeTitle.bold())
+                    Text(model.selectedList?.title ?? "")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 4)
+                BriefingCard(briefing: briefing)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 2)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { briefingHeight = $0 + 8 }
+            .offset(x: -model.briefingProgress * 160)
+            .opacity(briefingAmount)
+            // Swiping on the card itself also moves on to the first store.
+            .gesture(DragGesture(minimumDistance: 24).onEnded { value in
+                if value.translation.width < -60, let first = briefing.firstStore {
+                    model.pageRequest = .store(first.id)
+                }
+            })
+            .transition(.opacity)
+        }
+    }
+
     private var bottomControls: some View {
         // The dots sit bottom-aligned with the add button, on the background below the cards.
         ZStack(alignment: .bottom) {
             PageIndicator()
-                .offset(y: 12)
+                .offset(y: 12 + briefingAmount * 60)
+                .opacity(1 - briefingAmount)
             HStack {
                 Spacer()
                 Menu {
@@ -125,6 +177,8 @@ struct ShoppingScreen: View {
                     .foregroundStyle(.secondary)
             }
             .fixedSize(horizontal: true, vertical: false)
+            // With the briefing, the title is shown large below the bar instead.
+            .opacity(1 - briefingAmount)
         }
         .sharedBackgroundVisibility(.hidden)
         if model.lastUndoAction != nil {

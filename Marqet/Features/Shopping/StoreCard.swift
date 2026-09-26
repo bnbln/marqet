@@ -29,9 +29,18 @@ struct StoreCard: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            if !isExpanded && items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
-                emptyState
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
+                // Full screen, the empty state uses the height like on the home cards; offers sit
+                // right above the add button.
+                VStack(spacing: 0) {
+                    emptyState
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    if isExpanded, let store {
+                        OffersSection(store: store, inList: false)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 76)
+                    }
+                }
             } else {
                 itemList
             }
@@ -169,12 +178,6 @@ struct StoreCard: View {
                                 .foregroundStyle(readableTint)
                         }
                     }
-                }
-                if isExpanded && items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
-                    emptyState
-                        .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
                 }
                 completedSection
                 if isExpanded, let store {

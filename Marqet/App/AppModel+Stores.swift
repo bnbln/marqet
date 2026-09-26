@@ -100,6 +100,7 @@ extension AppModel {
         stores[index].address = address.isEmpty ? nil : address
         stores[index].detail = detail.isEmpty ? nil : detail
         persist(stores[index])
+        placeManualAddress(address, for: id)
     }
 
     /// Renames a store and rewrites the markers of its open items. The old name stays as an

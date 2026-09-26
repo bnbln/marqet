@@ -99,6 +99,21 @@ extension AppModel {
         save(location)
     }
 
+    /// A typed-in address gets a point on the map: it is looked up and saved as the preferred
+    /// branch, replacing an earlier manual one. Picked branches (with Maps identifier) stay.
+    func placeManualAddress(_ address: String, for storeID: Store.ID) {
+        guard !address.isEmpty,
+              relevantLocation(of: storeID)?.address != address,
+              let store = store(storeID) else { return }
+        Task {
+            guard let place = try? await placeSearch.search(address, near: userLocation).first else { return }
+            for manual in locations(of: storeID) where manual.mapItemIdentifier == nil {
+                removeLocation(manual)
+            }
+            save(StoreLocation(storeID: storeID, name: store.name, address: address, coordinate: place.coordinate, isPreferred: true))
+        }
+    }
+
     func setPreferredLocation(_ location: StoreLocation) {
         var preferred = location
         preferred.isPreferred = true

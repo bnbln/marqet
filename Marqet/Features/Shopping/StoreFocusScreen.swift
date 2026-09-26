@@ -119,6 +119,8 @@ struct StoreFocusScreen: View {
 /// (MARKTANALYSE §3) – no offer data of our own, nothing sent anywhere before the tap.
 struct OffersSection: View {
     let store: Store
+    /// `true`: a section in the item list. `false`: a free-standing block (empty card, above the add button).
+    var inList = true
     @Environment(AppModel.self) private var model
     @State private var showsLeaflet = false
 
@@ -128,45 +130,62 @@ struct OffersSection: View {
 
     var body: some View {
         if let leafletURL {
-            Section {
-                Button {
-                    showsLeaflet = true
-                } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "newspaper.fill")
-                            .font(.title3)
-                            .foregroundStyle(store.foregroundOnColor)
-                            .frame(width: 44, height: 44)
-                            .background(store.color, in: .rect(cornerRadius: 12, style: .continuous))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Aktueller Prospekt")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(.primary)
-                            Text("Angebote der Woche bei \(store.name)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: "arrow.up.right")
-                            .foregroundStyle(.tertiary)
+            Group {
+                if inList {
+                    Section {
+                        leafletButton
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                    } header: {
+                        header
                     }
-                    .padding(12)
-                    .background(Color(.tertiarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
-                    .contentShape(.rect)
+                } else {
+                    VStack(alignment: .leading, spacing: 10) {
+                        header
+                        leafletButton
+                    }
                 }
-                .buttonStyle(.plain)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            } header: {
-                Label("Angebote & Prospekte", systemImage: "tag.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .textCase(nil)
-                    .foregroundStyle(store.readableColor)
             }
             .sheet(isPresented: $showsLeaflet) {
                 SafariView(url: leafletURL).ignoresSafeArea()
             }
         }
+    }
+
+    private var header: some View {
+        Label("Angebote & Prospekte", systemImage: "tag.fill")
+            .font(.subheadline.weight(.semibold))
+            .textCase(nil)
+            .foregroundStyle(store.readableColor)
+    }
+
+    private var leafletButton: some View {
+        Button {
+            showsLeaflet = true
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "newspaper.fill")
+                    .font(.title3)
+                    .foregroundStyle(store.foregroundOnColor)
+                    .frame(width: 44, height: 44)
+                    .background(store.color, in: .rect(cornerRadius: 12, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Aktueller Prospekt")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text("Angebote der Woche bei \(store.name)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(Color(.tertiarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
     }
 }
 

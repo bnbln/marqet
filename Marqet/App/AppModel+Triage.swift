@@ -69,6 +69,7 @@ extension AppModel {
     func startTriage() {
         let ids = unsortedItems.map(\.id)
         guard !ids.isEmpty else { return }
+        dismissBriefing()
         triage = TriageSession(itemIDs: ids, mode: preferredTriageMode)
         Task { await prepareIntelligentSuggestions(for: unsortedItems) }
     }

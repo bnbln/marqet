@@ -42,6 +42,14 @@ struct StorePager: View {
             } action: { _, _ in
                 if isUserScrolling { swipeFeedback += 1 }
             }
+            // How far the pager is from the inbox toward the next card – the briefing follows it.
+            .onScrollGeometryChange(for: Double.self) { geometry in
+                guard metrics.slots == 1, let inbox = content.firstIndex(where: { $0.page == .unsorted }) else { return 0 }
+                let position = geometry.contentOffset.x / (metrics.slotWidth + metrics.spacing)
+                return min(max(position - Double(inbox), 0), 1)
+            } action: { _, progress in
+                if model.briefing != nil { model.briefingProgress = progress }
+            }
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
             .scrollIndicators(.hidden)
             .scrollClipDisabled()
@@ -81,6 +89,11 @@ struct StorePager: View {
     }
 
     private func selectInitialPage(pages: [PageID]) {
+        // The briefing belongs to the inbox: start there.
+        if model.briefing != nil {
+            model.activePage = .unsorted
+            return
+        }
         if let stored = PageID(rawValue: storedActivePage), pages.contains(stored) {
             model.activePage = stored
         } else if !model.unsortedItems.isEmpty {

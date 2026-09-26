@@ -46,15 +46,27 @@ Ohne diese Freigabe werden die Integrationstests übersprungen.
 
 ## Demo-Daten
 
-In Debug-Builds startet die App mit dem Startparameter `-demo` mit Beispieldaten im Speicher, ohne Erinnerungen-Zugriff (z. B. für Screenshots oder das iPad):
+In Debug-Builds startet die App mit dem Startparameter `-demo` mit Beispieldaten im Speicher, ohne Erinnerungen-Zugriff (z. B. für Screenshots oder das iPad). `-pro` schaltet Marqet Pro ein, `-triage` öffnet direkt das Zuordnen:
 
 ```bash
-xcrun simctl launch booted app.marqet.Marqet -demo
+xcrun simctl launch booted app.marqet.Marqet -demo -pro -triage
 ```
+
+Marqet Pro lässt sich bis zur StoreKit-Anbindung (M7) nur in Debug-Builds über Einstellungen › Entwicklung einschalten.
 
 ## Stand
 
-- **M1 – Fundament** ✅: Marker, Laden-Erkennung, Katalog, EventKit-Gateway, Listenauswahl, Berechtigungen.
-- **M2 – Hauptscreen** ✅: Card-Pager mit Laden-Cards in Markenfarbe; 1–4 Cards nebeneinander je nach Breite (iPad; iPhone Duo mit Falz-Ausrichtung, noch nicht auf dem Duo-Innendisplay gemessen); Laden-Lebenszyklus (geplant / leer eingekauft / ausgeblendet); Card „Weitere Läden“ mit Katalog-Vorschlägen und „Mehrere planen“; Laden hinzufügen (Katalog oder eigener Laden); Serien-Eingabe mit Laden-Chips; Abhaken mit 1,5 s Rückgängig; Erledigte anzeigen und „nochmal kaufen“; Laden ändern, Umbenennen, Löschen; Items per Drag zwischen Cards verschieben; SwiftData-Speicher der Läden.
+| Meilenstein | Status |
+|---|---|
+| **M1 Fundament** | ✅ Marker, Laden-Erkennung, Katalog, EventKit-Gateway, Listenauswahl, Berechtigungen |
+| **M2 Hauptscreen** | ✅ Laden-Cards in Markenfarbe, 1–4 Cards je Breite (iPad, Duo-Falz vorbereitet), Lebenszyklus, „Weitere Läden“, Laden hinzufügen, Serien-Eingabe mit Laden-Chips, Abhaken mit Rückgängig, Drag zwischen Cards |
+| **M3 Kategorien** | ✅ Wörterbuch DE/EN/AT/CH (≈ 1.000 Begriffe, Komposita, Ausnahmen), Abschnitte in Lebensmittel-Läden, „Kategorie ändern“ (wird gelernt), „Abschnitte sortieren“ pro Laden. Goldset 293 Einträge: 100 % |
+| **M4 Zuordnen** | ✅ Nachfrage bei neuen Einträgen, Zuordnen-Screen Einzeln/Board (Tippen, Ziehen, VoiceOver-Aktionen), gelernte Vorschläge (Free), Überspringen, Rückgängig, „Alle Vorschläge übernehmen“, Zusammenfassung mit Pro-Hinweis; auf iPad/Duo zweiseitig |
+| **M5 Onboarding & Einstellungen** | ✅ Onboarding (Willkommen, Zugriff, Liste, Läden, Siri-Tipp → direkt Zuordnen), Einstellungen, Läden verwalten (sortieren, umbenennen mit Marker-Umschreibung, Farbe/Symbol/Art, löschen) |
+| **M6 Pro-Intelligenz** | ✅ Auto-Zuordnung mit Rückgängig, Apple Intelligence (Foundation Models, geführte Generierung) für Läden und Kategorien, Ladenart-Heuristik als Fallback, Laufweg lernen (Kategorien und Einträge pro Laden) |
+| M7 Kauf | offen – bis dahin Pro nur über den Debug-Schalter |
+| M8 Launch-Reife | offen |
 
-Nächster Schritt: **M3 – Kategorien** (Abschnitte in den Cards) bzw. der Duo-Spike.
+**Tests:** 85 im Paket (`swift test`), 16 in der App (AppModel-Abläufe M2–M6 und EventKit).
+
+**Bekannte Lücken:** Löschen ohne Rückgängig; Items innerhalb eines Abschnitts nicht per Drag sortierbar (Free: alphabetisch, Pro: Laufweg); Kategorie-Korrektur per Menü statt Ziehen zwischen Abschnitten; Duo-Innendisplay und `ArrangementView` (ab iOS 27.1) nicht im Simulator geprüft; mehrere iPad-Fenster aus; Wörterbuch ≈ 1.000 statt 2.500 Begriffe.

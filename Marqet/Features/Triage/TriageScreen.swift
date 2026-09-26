@@ -31,6 +31,19 @@ struct TriageScreen: View {
                 }
             }
             .background(Color(.systemGroupedBackground))
+            .safeAreaInset(edge: .bottom) {
+                if !model.triageSuggestions.isEmpty {
+                    Button {
+                        Task { await model.triageAcceptAllSuggestions() }
+                    } label: {
+                        Label("Alle Vorschläge übernehmen (\(model.triageSuggestions.count))", systemImage: "sparkles")
+                            .frame(maxWidth: 420)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
+                    .padding(.bottom, 8)
+                }
+            }
             .navigationTitle("Zuordnen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
@@ -64,13 +77,6 @@ struct TriageScreen: View {
         }
         ToolbarItem(placement: .confirmationAction) {
             Button(role: .confirm) { model.endTriage() }
-        }
-        if !model.triageSuggestions.isEmpty {
-            ToolbarItem(placement: .bottomBar) {
-                Button("Alle Vorschläge übernehmen (\(model.triageSuggestions.count))", systemImage: "sparkles") {
-                    Task { await model.triageAcceptAllSuggestions() }
-                }
-            }
         }
         if !(model.triage?.history.isEmpty ?? true) {
             ToolbarItem(placement: .bottomBar) {
@@ -349,7 +355,10 @@ private struct TriageSummary: View {
             Text(assigned == 1 ? "1 Eintrag zugeordnet" : "\(assigned) Einträge zugeordnet")
                 .font(.title2.bold())
             if !model.isPro, autoAssignable > 0 {
-                Label("Mit Marqet Pro wären \(autoAssignable) davon automatisch zugeordnet worden.", systemImage: "sparkles")
+                Label(autoAssignable == 1
+                      ? "Mit Marqet Pro wäre einer davon automatisch zugeordnet worden."
+                      : "Mit Marqet Pro wären \(autoAssignable) davon automatisch zugeordnet worden.",
+                      systemImage: "sparkles")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

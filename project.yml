@@ -39,6 +39,8 @@ targets:
       path: Marqet/Info.plist
       properties:
         CFBundleDisplayName: Marqet
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleDevelopmentRegion: de
         CFBundleLocalizations: [de, en]
         NSRemindersFullAccessUsageDescription: Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.

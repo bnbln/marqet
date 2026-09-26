@@ -120,6 +120,12 @@ struct SuggestionEngineTests {
         memory.record(itemKey: "kaffee", storeID: aldi)
         memory.penalize(itemKey: "kaffee", storeID: aldi)
         #expect(memory.counts["kaffee"]?[aldi] == 1)
+        memory.penalize(itemKey: "kaffee", storeID: aldi)
+        #expect(memory.counts["kaffee"] == nil)   // no empty leftovers that would still match as "similar"
+
+        memory.record(itemKey: "tee", storeID: rewe)
+        memory.forget(storeID: rewe)
+        #expect(memory.counts["tee"] == nil)
     }
 
     @Test func storeTypeFallbackPicksFittingStore() {

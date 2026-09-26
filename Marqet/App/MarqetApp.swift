@@ -29,7 +29,16 @@ struct MarqetApp: App {
         WindowGroup {
             RootView()
                 .environment(model)
-                .task { await model.start() }
+                .task {
+                    await model.start()
+                    #if DEBUG
+                    // `-triage`: open the triage screen right away (screenshots).
+                    if ProcessInfo.processInfo.arguments.contains("-triage") {
+                        try? await Task.sleep(for: .seconds(1))
+                        model.startTriage()
+                    }
+                    #endif
+                }
         }
         .onChange(of: scenePhase) { _, phase in
             // No background push from EventKit – refresh whenever the app comes to the foreground.

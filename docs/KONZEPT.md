@@ -659,6 +659,14 @@ marqet/
 | **M7 Kauf** | StoreKit 2, Paywall, Gates, Upsell | Sandbox-Kauf, Restore und Familienfreigabe funktionieren |
 | **M8 Launch-Reife** | A11y, Lokalisierung, Performance, Icon, Screenshots, Datenschutz/Support-Seite, TestFlight | TestFlight-Beta mit ≥ 5 Haushalten, 0 Crash-Cluster |
 
+**Umsetzungsstand (26.09.2026):** M1–M6 umgesetzt und getestet, Details und bekannte Lücken in der [README](../README.md#stand). Abweichungen vom Konzept:
+- Die Eingabe ist eine feste Leiste über der Tastatur statt einer Zeile in der Card (siehe 7.3).
+- Kategorie-Korrektur erfolgt über „Kategorie ändern“ im Kontextmenü, nicht per Ziehen zwischen Abschnitten.
+- Free sortiert Einträge innerhalb eines Abschnitts alphabetisch, manuelles Ziehen einzelner Einträge fehlt noch.
+- Laufweg-Daten werden auch ohne Pro gesammelt und erst mit Pro angewendet. Nach dem Kauf ist der Laufweg dadurch sofort da.
+- Das Zahnrad öffnet direkt die Einstellungen, „Liste wechseln“ und „Laden hinzufügen“ liegen dort bzw. auf „Weitere Läden“.
+- Das Wörterbuch hat in v1 ≈ 1.000 Begriffe, der Ausbau auf ≈ 2.500 erfolgt mit echten Listen aus der Beta.
+
 **M0 – Spike-Fragen**
 1. Übersteht `🛒 Aldi` in den Notizen den iCloud-Sync zu Reminders auf iPhone und Mac und in eine geteilte Liste unverändert?
 2. Lesen und schreiben wir Listen vom Typ „Einkaufsliste“ (mit automatischen Abschnitten) ohne Nebenwirkungen?

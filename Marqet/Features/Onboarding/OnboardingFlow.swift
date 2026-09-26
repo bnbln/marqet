@@ -91,7 +91,7 @@ struct OnboardingFlow: View {
             symbol: "waveform",
             title: "Eintragen mit Siri",
             points: [
-                ("quote.bubble.fill", "Sag: „Hey Siri, setz Milch auf meine \(model.selectedList?.title ?? "Einkaufsliste")“."),
+                ("quote.bubble.fill", "Sag: „Hey Siri, setz Milch auf die Liste \(model.selectedList?.title ?? "Einkaufen")“."),
                 ("tray.and.arrow.down.fill", "Neue Einträge landen in „Unsortiert“ – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören."),
                 ("hand.draw.fill", "Wische zwischen den Läden, tippe + für neue Einträge."),
             ],

@@ -49,10 +49,12 @@ public struct AssignmentMemory: Sendable, Equatable {
     public mutating func penalize(itemKey: String, storeID: Store.ID) {
         guard let count = counts[itemKey]?[storeID] else { return }
         counts[itemKey]?[storeID] = count > 1 ? count - 1 : nil
+        if counts[itemKey]?.isEmpty == true { counts[itemKey] = nil }
     }
 
     public mutating func forget(storeID: Store.ID) {
         for key in counts.keys { counts[key]?[storeID] = nil }
+        counts = counts.filter { !$0.value.isEmpty }
     }
 }
 

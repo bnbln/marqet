@@ -5,6 +5,7 @@ import SwiftUI
 struct ShoppingScreen: View {
     @Environment(AppModel.self) private var model
     @State private var showsAddStore = false
+    @State private var showsSettings = false
     @State private var isComposerFocused = false
 
     var body: some View {
@@ -32,6 +33,19 @@ struct ShoppingScreen: View {
                 AddStoreSheet()
                     .leadingSheetPlacement()
             }
+            .sheet(isPresented: $showsSettings) {
+                SettingsView()
+            }
+            .sheet(isPresented: triagePromptBinding) {
+                if let ids = model.triagePrompt { TriagePromptSheet(itemIDs: ids) }
+            }
+            .fullScreenCover(isPresented: triageBinding) {
+                TriageScreen()
+            }
+            .overlay(alignment: .top) {
+                if model.autoAssignReport != nil { AutoAssignToast() }
+            }
+            .animation(.snappy, value: model.autoAssignReport)
             .onChange(of: model.composerTarget) { _, target in
                 if target != nil { isComposerFocused = true }
             }
@@ -45,9 +59,14 @@ struct ShoppingScreen: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Menu("Optionen", systemImage: "gearshape") {
-                Button("Laden hinzufügen", systemImage: "storefront") { showsAddStore = true }
-                Button("Liste wechseln", systemImage: "list.bullet") { model.showListPicker() }
+            Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }
+        }
+
+        if !model.unsortedItems.isEmpty {
+            ToolbarItem(placement: .bottomBar) {
+                Button("Zuordnen (\(model.unsortedItems.count))", systemImage: "tray.and.arrow.down") {
+                    model.startTriage()
+                }
             }
         }
 
@@ -69,6 +88,41 @@ struct ShoppingScreen: View {
             .menuStyle(.button)
             .buttonStyle(.glassProminent)
             .tint(.accentColor)
+        }
+    }
+}
+
+extension ShoppingScreen {
+    private var triagePromptBinding: Binding<Bool> {
+        Binding(get: { model.triagePrompt != nil && model.triage == nil }, set: { if !$0 { model.postponeTriage() } })
+    }
+
+    private var triageBinding: Binding<Bool> {
+        Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })
+    }
+}
+
+/// "5 automatisch zugeordnet · Rückgängig" (Pro, KONZEPT §7.4). Disappears after a few seconds.
+private struct AutoAssignToast: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        let count = model.autoAssignReport?.assignments.count ?? 0
+        HStack(spacing: 12) {
+            Image(systemName: "sparkles")
+            Text(count == 1 ? "1 Eintrag automatisch zugeordnet" : "\(count) Einträge automatisch zugeordnet")
+                .font(.subheadline.weight(.medium))
+            Button("Rückgängig") { Task { await model.undoAutoAssign() } }
+                .font(.subheadline.weight(.semibold))
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .glassEffect(.regular, in: .capsule)
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .task(id: count) {
+            try? await Task.sleep(for: .seconds(6))
+            model.autoAssignReport = nil
         }
     }
 }

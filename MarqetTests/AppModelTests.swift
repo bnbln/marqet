@@ -140,19 +140,6 @@ struct AppModelTests {
 
     // MARK: M4 – triage
 
-    @Test func promptAsksOnlyOnceAboutNewItems() async throws {
-        let model = try await makeModel(items: [("Batterien", nil)])
-        #expect(model.triagePrompt?.count == 1)
-        model.postponeTriage()
-        await model.reload()
-        #expect(model.triagePrompt == nil)          // already seen
-
-        let list = try #require(try await gateway.lists().first)
-        _ = try await gateway.createReminder(title: "Kerzen", notes: nil, in: list.id)
-        await model.reload()
-        #expect(model.triagePrompt?.count == 1)     // only the new one
-    }
-
     @Test func triageAssignUndoAndSummary() async throws {
         let model = try await makeModel(items: [("Milch", nil), ("Zahnpasta", nil)])
         let aldi = try catalogStore(model, "aldi-sued")
@@ -200,7 +187,6 @@ struct AppModelTests {
 
         #expect(model.unsortedItems.isEmpty)
         #expect(model.autoAssignReport?.assignments.count == 1)
-        #expect(model.triagePrompt == nil)
 
         await model.undoAutoAssign()
         #expect(model.unsortedItems.map(\.title) == ["Hafermilch"])

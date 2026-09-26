@@ -49,6 +49,7 @@ targets:
         CFBundleDevelopmentRegion: de
         CFBundleLocalizations: [de, en]
         NSRemindersFullAccessUsageDescription: Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.
+        NSLocationWhenInUseUsageDescription: Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -70,6 +71,10 @@ targets:
     platform: iOS
     sources:
       - path: MarqetTests
+      # StoreKit test configuration for SKTestSession-based purchase tests.
+      - path: Marqet.storekit
+        type: file
+        buildPhase: resources
     dependencies:
       - target: Marqet
       - package: MarqetKit
@@ -94,3 +99,5 @@ schemes:
         - MarqetTests
     run:
       config: Debug
+      # Local StoreKit testing: purchases in the simulator without App Store Connect.
+      storeKitConfiguration: Marqet.storekit

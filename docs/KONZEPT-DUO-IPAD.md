@@ -140,7 +140,7 @@ Beispiel mit `[Unsortiert] [Rewe] [Aldi] [dm] [Weitere Läden]`:
 | Element | Bisher | Neu (alle Geräte) | Duo außen / innen quer |
 |---|---|---|---|
 | **Plus-Button** | eigener Glass-FAB unten rechts | `ToolbarItem(placement: .bottomBar)` mit `Menu(primaryAction:)`: Tippen = Hinzufügen, Long Press = „Hinzufügen zu …“. `visibilityPriority(.high)` | automatisch in der senkrechten Leiste rechts, am Daumen |
-| **Zuordnen** | nur Unsortiert-Card + Prompt | zusätzlich Toolbar-Item „Zuordnen“ (`tray.and.arrow.down`) mit Anzahl, sichtbar nur bei unsortierten Items | senkrecht unter dem Plus |
+| **Zuordnen** | nur Unsortiert-Card | zusätzlich Toolbar-Item „Zuordnen“ (`tray.and.arrow.down`) mit Anzahl, sichtbar nur bei unsortierten Items | senkrecht unter dem Plus |
 | **Liste / Läden / Einstellungen** | Zahnrad-Button | `ToolbarOverflowMenu` („…“): Liste wechseln, Läden verwalten, Einstellungen | ganz unten in der Leiste |
 | **Karte** (v1.2) | – | Toolbar-Item „Karte“ (`map`) | senkrecht |
 | **Seitenindikator** | Punkte unten | bleibt **Inhalt** (Overlay in der Safe Area, keine Toolbar). Im Spread markiert er die sichtbaren Seiten als Klammer | unverändert |
@@ -187,7 +187,7 @@ Identisch zum iPhone-Layout, nur dass die Toolbar senkrecht steht. Kein eigener 
 ```
 
 - **Items zwischen Läden ziehen:** Ein Item per Drag von einer Card auf die andere verschieben. Der Marker wird umgeschrieben, bei Pro wird die Zuordnung gelernt. Das geht nur im Spread und ist *der* Vorteil des großen Displays.
-- **Sheets** (Laden hinzufügen, Einstellungen, Zuordnen-Prompt) mit `presentationPlacement(.leading)`: Sie öffnen **auf der linken Hälfte**, die aktive Card rechts bleibt sichtbar. Grundsatz: *Die rechte Seite gehört dem Einkauf.*
+- **Sheets** (Laden hinzufügen, Einstellungen, Abschnitte sortieren) mit `presentationPlacement(.leading)`: Sie öffnen **auf der linken Hälfte**, die aktive Card rechts bleibt sichtbar. Grundsatz: *Die rechte Seite gehört dem Einkauf.*
 - **„Linke Seite anheften“** (Card-Menü, v1.1): Die linke Card bleibt stehen, gewischt wird nur rechts. Beispiel: Unsortiert links anheften und rechts durch die Läden blättern, dann jedes Item per Drag in den passenden Laden ziehen.
 
 ### 4.3 Innen hoch, angewinkelt = Küchenmodus (v1.1)
@@ -258,7 +258,7 @@ Ein Sonderweg für iPad nach `userInterfaceIdiom` gibt es nicht. Alles läuft ü
 
 | Idee | Nutzen | Bewertung |
 |---|---|---|
-| **Aufklappen mit unsortierten Items → Zuordnen-Prompt öffnet sich auf der linken Hälfte** (`presentationPlacement(.leading)`) statt als Modal über alles | Planen beginnt genau dort, wo Platz ist, die aktive Card bleibt rechts | ✅ v1.0 |
+| ~~**Aufklappen mit unsortierten Items → Zuordnen-Prompt öffnet sich auf der linken Hälfte**~~ | Entfallen: Es gibt keinen Zuordnen-Prompt mehr, unsortierte Items warten in der Unsortiert-Card | ❌ gestrichen |
 | **Items zwischen Läden ziehen** | Umsortieren ohne Menü | ✅ v1.0 |
 | **Linke Seite anheften** | Zuordnen und Vergleichen im Buch-Layout | ✅ v1.1 |
 | **Küchenmodus** (Tischhaltung) | freihändig ergänzen, Vorschläge „wieder kaufen?“ | ✅ v1.1 |

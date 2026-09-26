@@ -33,7 +33,7 @@ struct StoreCard: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .cardSurface(isFocused: isFocused, focusColor: tint)
+        .cardSurface(isFocused: isFocused, focusColor: tint, glowColor: store?.color)
         // Items dragged from another card move to this store (KONZEPT-DUO-IPAD §4.2).
         .dropDestination(for: String.self) { ids, _ in
             let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store?.id }

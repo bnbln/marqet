@@ -7,10 +7,10 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "▸ Project file up to date"
+before="$(shasum Marqet.xcodeproj/project.pbxproj)"
 xcodegen generate --quiet
-if ! git diff --quiet -- Marqet.xcodeproj; then
-    echo "✘ Marqet.xcodeproj differs from project.yml – run scripts/generate.sh and commit." >&2
-    git --no-pager diff --stat -- Marqet.xcodeproj >&2
+if [[ "$(shasum Marqet.xcodeproj/project.pbxproj)" != "$before" ]]; then
+    echo "✘ Marqet.xcodeproj was out of date with project.yml – it has been regenerated; review and commit it." >&2
     exit 1
 fi
 

@@ -28,6 +28,9 @@ struct RootView: View {
             }
         }
         .tint(accentColor)
+        .sheet(isPresented: $model.showsPaywall) {
+            PaywallView()
+        }
         .alert(
             "Das hat nicht geklappt",
             isPresented: Binding(

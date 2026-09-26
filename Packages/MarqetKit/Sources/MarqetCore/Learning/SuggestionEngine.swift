@@ -119,11 +119,3 @@ public enum SuggestionEngine {
             .map { ($0.key, $0.value) }
     }
 }
-
-/// When to ask "3 neue Einträge zuordnen?" (KONZEPT §7.4).
-public enum TriagePolicy {
-    /// Unsorted items the user has not been asked about yet.
-    public static func newItems(unsorted: [ShoppingItem.ID], seen: Set<ShoppingItem.ID>) -> [ShoppingItem.ID] {
-        unsorted.filter { !seen.contains($0) }
-    }
-}

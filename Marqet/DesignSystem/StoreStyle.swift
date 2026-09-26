@@ -78,6 +78,9 @@ enum StorePalette {
 struct CardSurface: ViewModifier {
     var isFocused = false
     var focusColor: Color = .accentColor
+    /// Soft glow in the store color below the card; it shows through the glass controls.
+    var glowColor: Color?
+    @Environment(\.colorScheme) private var colorScheme
 
     func body(content: Content) -> some View {
         content
@@ -88,12 +91,25 @@ struct CardSurface: ViewModifier {
                     .strokeBorder(focusColor.opacity(isFocused ? 0.9 : 0), lineWidth: 3)
             }
             .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
+            .background(alignment: .bottom) {
+                if let glowColor {
+                    RoundedRectangle(cornerRadius: 40, style: .continuous)
+                        .fill(glowColor)
+                        .frame(height: 90)
+                        .padding(.horizontal, 20)
+                        .offset(y: 34)
+                        .blur(radius: 56)
+                        // Colored light reads much stronger on the pale light-mode background.
+                        .opacity(colorScheme == .dark ? 0.2 : 0.08)
+                        .accessibilityHidden(true)
+                }
+            }
     }
 }
 
 extension View {
-    func cardSurface(isFocused: Bool = false, focusColor: Color = .accentColor) -> some View {
-        modifier(CardSurface(isFocused: isFocused, focusColor: focusColor))
+    func cardSurface(isFocused: Bool = false, focusColor: Color = .accentColor, glowColor: Color? = nil) -> some View {
+        modifier(CardSurface(isFocused: isFocused, focusColor: focusColor, glowColor: glowColor))
     }
 
     /// iPhone Duo / iPad: sheets open on the leading half so the active card stays visible

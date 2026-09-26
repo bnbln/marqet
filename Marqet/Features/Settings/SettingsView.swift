@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var confirmsReset = false
+    @State private var showsPaywall = false
     @State private var showsNewListPrompt = false
     @State private var newListName = ""
 
@@ -77,12 +78,9 @@ struct SettingsView: View {
 
                 Section {
                     proRow
-                    Toggle("Automatisch zuordnen", isOn: $model.autoAssignEnabled)
-                        .disabled(!model.isPro)
-                    Toggle("Vorschläge mit Apple Intelligence", isOn: $model.intelligenceEnabled)
-                        .disabled(!model.isPro)
-                    Toggle("Laufweg lernen", isOn: $model.routeLearningEnabled)
-                        .disabled(!model.isPro)
+                    proToggle("Automatisch zuordnen", isOn: $model.autoAssignEnabled)
+                    proToggle("Vorschläge mit Apple Intelligence", isOn: $model.intelligenceEnabled)
+                    proToggle("Laufweg lernen", isOn: $model.routeLearningEnabled)
                     Button("Gelerntes zurücksetzen", role: .destructive) { confirmsReset = true }
                 } header: {
                     Text("Intelligenz")
@@ -100,7 +98,7 @@ struct SettingsView: View {
 
                 #if DEBUG
                 Section("Entwicklung") {
-                    Toggle("Marqet Pro (Test)", isOn: $model.isPro)
+                    Toggle("Marqet Pro (Entwickler-Override)", isOn: $model.developerProOverride)
                     Button("Onboarding erneut zeigen") {
                         model.hasCompletedOnboarding = false
                         dismiss()
@@ -125,6 +123,9 @@ struct SettingsView: View {
                 }
                 .disabled(newListName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+            .sheet(isPresented: $showsPaywall) {
+                PaywallView()
+            }
             .confirmationDialog("Gelerntes zurücksetzen?", isPresented: $confirmsReset, titleVisibility: .visible) {
                 Button("Zurücksetzen", role: .destructive) { model.resetLearning() }
             } message: {
@@ -139,13 +140,34 @@ struct SettingsView: View {
             Label("Marqet Pro ist aktiv", systemImage: "checkmark.seal.fill")
                 .foregroundStyle(.tint)
         } else {
-            VStack(alignment: .leading, spacing: 4) {
-                Label("Marqet Pro", systemImage: "sparkles")
-                    .font(.headline)
-                Text("Automatisch zuordnen, Vorschläge mit Apple Intelligence und Sortierung nach deinem Laufweg. Einmalkauf, mit der Familie teilbar.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            Button {
+                showsPaywall = true
+            } label: {
+                VStack(alignment: .leading, spacing: 4) {
+                    Label("Marqet Pro freischalten", systemImage: "sparkles")
+                        .font(.headline)
+                    Text("Automatisch zuordnen, Vorschläge mit Apple Intelligence und Sortierung nach deinem Laufweg. Einmalkauf, mit der Familie teilbar.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
+        }
+    }
+
+    /// Pro switches: usable with Pro, otherwise a lock that opens the paywall.
+    @ViewBuilder
+    private func proToggle(_ title: LocalizedStringKey, isOn: Binding<Bool>) -> some View {
+        if model.isPro {
+            Toggle(title, isOn: isOn)
+        } else {
+            Button {
+                showsPaywall = true
+            } label: {
+                LabeledContent(title) {
+                    Image(systemName: "lock.fill").foregroundStyle(.secondary)
+                }
+            }
+            .foregroundStyle(.primary)
         }
     }
 
@@ -165,6 +187,8 @@ private struct PrivacyView: View {
             Text("Marqet hat kein Konto, keinen Server und keine Werbung. Deine Einträge liegen in Apple Erinnerungen, deine Läden und alles Gelernte auf deinem Gerät.")
             Text("Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch.")
             Text("Apple Intelligence läuft auf deinem Gerät. Marqet erfasst keine Nutzungsdaten.")
+            Text("Deinen Standort nutzt Marqet nur, wenn du es erlaubst: für Filialen in der Nähe und die Sortierung nach Entfernung. Er wird weder gespeichert noch übertragen.")
+            Text("Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten.")
         }
         .navigationTitle("Datenschutz")
     }

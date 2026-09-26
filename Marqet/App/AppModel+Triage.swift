@@ -57,28 +57,18 @@ extension AppModel {
 
     // MARK: After every reload
 
-    /// Pro auto-assignment, then the prompt for items nobody asked about yet (KONZEPT §7.4).
+    /// Pro auto-assignment; the rest waits in the unsorted card (KONZEPT §7.4).
     func afterReload() async {
         guard hasCompletedOnboarding else { return }
         await autoAssignIfPossible()
         await learnMissingCategories()
-
-        let unsorted = unsortedItems.map(\.id)
-        guard triage == nil, composerTarget == nil else { return }
-        let new = TriagePolicy.newItems(unsorted: unsorted, seen: seenUnsorted)
-        seenUnsorted = Set(unsorted)
-        if !new.isEmpty, triagePrompt == nil {
-            triagePrompt = new
-        }
     }
 
     // MARK: Session
 
     func startTriage() {
-        triagePrompt = nil
         let ids = unsortedItems.map(\.id)
         guard !ids.isEmpty else { return }
-        seenUnsorted.formUnion(ids)
         triage = TriageSession(itemIDs: ids, mode: preferredTriageMode)
         Task { await prepareIntelligentSuggestions(for: unsortedItems) }
     }
@@ -86,15 +76,7 @@ extension AppModel {
     /// End of onboarding: existing unsorted items go straight into triage (KONZEPT §7.4).
     func completeOnboarding() {
         hasCompletedOnboarding = true
-        if unsortedItems.isEmpty {
-            seenUnsorted = []
-        } else {
-            startTriage()
-        }
-    }
-
-    func postponeTriage() {
-        triagePrompt = nil
+        startTriage()
     }
 
     func endTriage() {
@@ -158,7 +140,6 @@ extension AppModel {
             guard let suggestion = suggestion(for: item), suggestion.allowsAutoAssign,
                   let store = store(suggestion.storeID) else { continue }
             assignments[item.id] = store.id
-            seenUnsorted.insert(item.id)
             await assign(item, to: store, learn: false)
         }
         if !assignments.isEmpty {
@@ -175,7 +156,6 @@ extension AppModel {
             let key = ItemKeyNormalizer.matchingKey(for: item.title)
             assignmentMemory.penalize(itemKey: key, storeID: storeID)
             try? learning.penalizeAssignment(itemKey: key, storeID: storeID)
-            seenUnsorted.remove(itemID)
             await assign(item, to: nil, learn: false)
         }
     }

@@ -5,13 +5,16 @@ import SwiftUI
 @main
 struct MarqetApp: App {
     @State private var model: AppModel
+    @State private var purchases: PurchaseManager
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
         #if DEBUG
         // `-demo`: in-memory data for screenshots and simulator checks without Reminders access.
         if ProcessInfo.processInfo.arguments.contains("-demo") {
-            _model = State(initialValue: .demo(isPro: ProcessInfo.processInfo.arguments.contains("-pro")))
+            let model = AppModel.demo(isPro: ProcessInfo.processInfo.arguments.contains("-pro"))
+            _model = State(initialValue: model)
+            _purchases = State(initialValue: PurchaseManager { [weak model] in model?.hasProEntitlement = $0 })
             return
         }
         #endif
@@ -22,17 +25,24 @@ struct MarqetApp: App {
             // A broken on-disk store must not brick the app; stores are re-detected from markers.
             container = try! PersistenceContainer.make(inMemory: true)
         }
-        _model = State(initialValue: AppModel(container: container))
+        let model = AppModel(container: container)
+        _model = State(initialValue: model)
+        _purchases = State(initialValue: PurchaseManager { [weak model] in model?.hasProEntitlement = $0 })
     }
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(model)
+                .environment(purchases)
+                .task { await purchases.start() }
                 .task {
                     await model.start()
                     #if DEBUG
                     // `-triage`: open the triage screen right away (screenshots).
+                    if ProcessInfo.processInfo.arguments.contains("-paywall") {
+                        model.showsPaywall = true
+                    }
                     if ProcessInfo.processInfo.arguments.contains("-triage") {
                         try? await Task.sleep(for: .seconds(1))
                         model.startTriage()

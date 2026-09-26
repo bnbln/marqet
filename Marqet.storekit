@@ -1,0 +1,44 @@
+{
+  "identifier" : "8F1C2A4B",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "6.99",
+      "familyShareable" : true,
+      "internalID" : "6751000001",
+      "localizations" : [
+        {
+          "description" : "Automatisch zuordnen, Vorschläge mit Apple Intelligence, Laufweg-Sortierung.",
+          "displayName" : "Marqet Pro",
+          "locale" : "de"
+        },
+        {
+          "description" : "Automatic sorting, Apple Intelligence suggestions, walking-order sorting.",
+          "displayName" : "Marqet Pro",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.marqet.Marqet.pro",
+      "referenceName" : "Marqet Pro",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_developerTeamID" : "C4VHG63LL9",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "de",
+    "_storefront" : "DEU",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

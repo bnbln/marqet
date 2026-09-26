@@ -1,0 +1,29 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Marqet" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marqet" } }
+      }
+    },
+    "NSRemindersFullAccessUsageDescription" : {
+      "comment" : "Reminders permission prompt",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marqet reads your shopping list from the Reminders app and saves an item's store in its notes." } }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Location permission prompt (stores nearby, sort by distance)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät." } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Marqet shows your stores' branches nearby and can sort your stores by distance. Your location stays on your device." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

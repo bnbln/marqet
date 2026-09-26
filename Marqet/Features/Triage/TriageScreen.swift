@@ -330,6 +330,7 @@ private struct TriageBoardList: View {
 
 private struct TriageSummary: View {
     @Environment(AppModel.self) private var model
+    @State private var showsPaywall = false
 
     var body: some View {
         let assigned = model.triage?.history.count ?? 0
@@ -348,6 +349,8 @@ private struct TriageSummary: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                Button("Mehr über Marqet Pro") { showsPaywall = true }
+                    .font(.subheadline.weight(.semibold))
             }
             Button("Fertig") { model.endTriage() }
                 .buttonStyle(.glassProminent)
@@ -355,5 +358,6 @@ private struct TriageSummary: View {
         }
         .padding(32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(isPresented: $showsPaywall) { PaywallView() }
     }
 }

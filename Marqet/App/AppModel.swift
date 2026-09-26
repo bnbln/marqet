@@ -76,23 +76,37 @@ final class AppModel {
 
     // MARK: Triage (KONZEPT §7.4)
 
-    /// Items for the "n neue Einträge zuordnen?" prompt.
-    var triagePrompt: [ShoppingItem.ID]?
     var triage: TriageSession?
     /// Last automatic assignment, for the undo toast (Pro).
     var autoAssignReport: AutoAssignReport?
-    var seenUnsorted: Set<ShoppingItem.ID> {
-        didSet { defaults.set(Array(seenUnsorted), forKey: Keys.seenUnsorted) }
-    }
 
     // MARK: Settings
 
     var hasCompletedOnboarding: Bool {
         didSet { defaults.set(hasCompletedOnboarding, forKey: Keys.onboarding) }
     }
-    /// Pro entitlement. Until StoreKit (M7) arrives, only a developer switch sets it.
+    /// Pro bought (or family-shared) according to StoreKit. Cached for offline launches;
+    /// `PurchaseManager` keeps it current, including refunds.
+    var hasProEntitlement: Bool {
+        didSet { defaults.set(hasProEntitlement, forKey: Keys.isPro) }
+    }
+    /// Developer switch – only honored in Debug builds, never unlocks Pro in Release.
+    var developerProOverride: Bool {
+        didSet { defaults.set(developerProOverride, forKey: Keys.developerProOverride) }
+    }
+    /// Opens the paywall from anywhere (locked switches, triage summary, settings).
+    var showsPaywall = false
+
     var isPro: Bool {
-        didSet { defaults.set(isPro, forKey: Keys.isPro) }
+        get {
+            #if DEBUG
+            hasProEntitlement || developerProOverride
+            #else
+            hasProEntitlement
+            #endif
+        }
+        // Tests, demo and the Debug switch: sets the developer override, never the entitlement.
+        set { developerProOverride = newValue }
     }
     var autoAssignEnabled: Bool {
         didSet { defaults.set(autoAssignEnabled, forKey: Keys.autoAssign) }
@@ -149,9 +163,9 @@ final class AppModel {
         self.classifier = CategoryClassifier(dictionary: dictionary ?? CategoryDictionary(categories: [:]))
         self.selectedListID = defaults.string(forKey: Keys.selectedListID)
         self.emptiedInSession = Set((defaults.stringArray(forKey: Keys.emptiedInSession) ?? []).compactMap(UUID.init))
-        self.seenUnsorted = Set(defaults.stringArray(forKey: Keys.seenUnsorted) ?? [])
         self.hasCompletedOnboarding = defaults.bool(forKey: Keys.onboarding)
-        self.isPro = defaults.bool(forKey: Keys.isPro)
+        self.hasProEntitlement = defaults.bool(forKey: Keys.isPro)
+        self.developerProOverride = defaults.bool(forKey: Keys.developerProOverride)
         self.autoAssignEnabled = defaults.object(forKey: Keys.autoAssign) as? Bool ?? true
         self.intelligenceEnabled = defaults.object(forKey: Keys.intelligence) as? Bool ?? true
         self.routeLearningEnabled = defaults.object(forKey: Keys.routeLearning) as? Bool ?? true
@@ -295,7 +309,6 @@ final class AppModel {
             if !isUndoing { lastUndoAction = .creation(item) }
             // Typing it into a store's card is an assignment, too.
             if let store { rememberAssignment(of: item, to: store) }
-            seenUnsorted.insert(item.id)
         } catch {
             present(error)
         }
@@ -359,7 +372,6 @@ final class AppModel {
         reopened.isCompleted = false
         reopened.completionDate = nil
         items.append(reopened)
-        seenUnsorted.insert(item.id)
         await perform { try await $0.setCompleted(false, reminder: item.id) }
     }
 
@@ -584,9 +596,9 @@ final class AppModel {
         static let selectedListID = "selectedCalendarID"
         static let emptiedInSession = "emptiedInSession"
         static let lastShoppingActivity = "lastShoppingActivity"
-        static let seenUnsorted = "seenUnsortedIDs"
         static let onboarding = "hasCompletedOnboarding"
         static let isPro = "proEntitlementCache"
+        static let developerProOverride = "developerProOverride"
         static let autoAssign = "autoAssignEnabled"
         static let intelligence = "intelligenceEnabled"
         static let routeLearning = "routeLearningEnabled"

@@ -23,7 +23,7 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 8 | Geschäftsmodell | **Freemium + Einmalkauf** „Marqet Pro“ |
 | 9 | Plus-Button | **Kontextabhängig:** neues Item gehört zum Laden der aktiven Card |
 | 10 | Erledigte Items | **Wie Reminders:** Häkchen, nach ~1,5 s ausblenden, „Erledigte anzeigen“ |
-| 11 | Zuordnen-Trigger | **Pro: Auto-Zuordnung** sicherer Items, danach Nachfrage für den Rest |
+| 11 | Zuordnen-Trigger | **Pro: Auto-Zuordnung** sicherer Items. Der Rest wartet in der Unsortiert-Card (Inbox) mit „Läden zuordnen“ als Footer, *keine* Nachfrage per Popover |
 | 12 | Listen | **Eine** Erinnerungsliste, wechselbar in den Einstellungen |
 | 13 | Sortierung in Card | *Rev. 2:* **Kategorie-Abschnitte** (wie Bring!/Reminders). **Laufweg lernt die Reihenfolge der Kategorien** pro Laden (Pro). Free: Standard-Reihenfolge, manuell anpassbar |
 | 14 | Leere Läden | *Rev. 2:* **Lebenszyklus** statt Sofort-Ausblenden: vom Nutzer hinzugefügte (geplante) Läden bleiben, im Einkauf leer gewordene verschwinden erst nach der Einkaufssitzung (siehe 7.2) |

@@ -135,8 +135,4 @@ struct SuggestionEngineTests {
         #expect(SuggestionEngine.storeTypeSuggestion(for: .dairyEggs, stores: [lidl, dm])?.storeID == lidl.id)
         #expect(SuggestionEngine.storeTypeSuggestion(for: .other, stores: [lidl, dm]) == nil)
     }
-
-    @Test func triageAsksOnlyAboutNewItems() {
-        #expect(TriagePolicy.newItems(unsorted: ["a", "b", "c"], seen: ["a"]) == ["b", "c"])
-    }
 }

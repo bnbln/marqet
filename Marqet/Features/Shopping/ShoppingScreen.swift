@@ -4,7 +4,6 @@ import SwiftUI
 /// Main screen: the store card pager (KONZEPT §7.2) with the add button and the composer.
 struct ShoppingScreen: View {
     @Environment(AppModel.self) private var model
-    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsAddStore = false
     @State private var showsSettings = false
     @State private var showsStoreOrder = false
@@ -12,10 +11,6 @@ struct ShoppingScreen: View {
     /// Bumped by the add button and undo; each drives a light haptic tap.
     @State private var addFeedback = 0
     @State private var undoFeedback = 0
-
-    private var accentColor: Color {
-        AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
-    }
 
     var body: some View {
         NavigationStack {
@@ -51,9 +46,6 @@ struct ShoppingScreen: View {
                 .sheet(isPresented: $showsStoreOrder) {
                     StoreOrderSheet().leadingSheetPlacement()
                 }
-                .sheet(isPresented: triagePromptBinding) {
-                    if let ids = model.triagePrompt { TriagePromptSheet(itemIDs: ids) }
-                }
                 .fullScreenCover(isPresented: triageBinding) {
                     TriageScreen()
                 }
@@ -63,13 +55,6 @@ struct ShoppingScreen: View {
                 .animation(.snappy, value: model.autoAssignReport)
                 .onChange(of: model.composerTarget) { _, target in
                     if target != nil { isComposerFocused = true }
-                }
-                .onChange(of: model.triagePrompt) { _, prompt in
-                    #if DEBUG
-                    if prompt != nil, ProcessInfo.processInfo.arguments.contains("-demo-no-prompt") {
-                        model.postponeTriage()
-                    }
-                    #endif
                 }
                 .onChange(of: model.hasLoadedItems) { _, loaded in
                     #if DEBUG
@@ -85,6 +70,7 @@ struct ShoppingScreen: View {
         // The dots sit bottom-aligned with the add button, on the background below the cards.
         ZStack(alignment: .bottom) {
             PageIndicator()
+                .offset(y: 12)
             HStack {
                 Spacer()
                 Menu {
@@ -97,9 +83,9 @@ struct ShoppingScreen: View {
                 } label: {
                     Image(systemName: "plus")
                         .font(.headline.weight(.semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                         .frame(width: 52, height: 52)
-                        .glassEffect(.regular.tint(accentColor).interactive(), in: .circle)
+                        .glassEffect(.regular.interactive(), in: .circle)
                         .contentShape(.circle)
                 } primaryAction: {
                     addFeedback += 1
@@ -160,10 +146,6 @@ struct ShoppingScreen: View {
 }
 
 extension ShoppingScreen {
-    private var triagePromptBinding: Binding<Bool> {
-        Binding(get: { model.triagePrompt != nil && model.triage == nil }, set: { if !$0 { model.postponeTriage() } })
-    }
-
     private var triageBinding: Binding<Bool> {
         Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })
     }

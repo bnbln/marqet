@@ -27,7 +27,10 @@ struct StoreCard: View {
             } else {
                 itemList
             }
+            completedFooter
+            Color.clear.frame(height: 60)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .cardSurface(isFocused: isFocused, focusColor: tint)
         // Items dragged from another card move to this store (KONZEPT-DUO-IPAD §4.2).
         .dropDestination(for: String.self) { ids, _ in
@@ -54,7 +57,11 @@ struct StoreCard: View {
         HStack(spacing: 14) {
             if let store {
                 StoreBadge(store: store, size: 44)
-                    .overlay(Circle().strokeBorder(store.foregroundOnColor.opacity(0.35), lineWidth: 1.5))
+                    .overlay {
+                        if store.catalogKey != "billa-plus" {
+                            Circle().strokeBorder(store.foregroundOnColor.opacity(0.35), lineWidth: 1.5)
+                        }
+                    }
             } else {
                 Image(systemName: "tray.fill")
                     .font(.system(size: 20, weight: .semibold))
@@ -129,6 +136,8 @@ struct StoreCard: View {
                                 renameText = item.title
                                 renaming = item
                             })
+                            .listRowBackground(Color(.tertiarySystemGroupedBackground))
+                            .listRowSeparator(.hidden)
                             .id(item.id)
                         }
                     } header: {
@@ -144,6 +153,7 @@ struct StoreCard: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .scrollIndicators(.visible)
             // No keyboard dismissal on scroll here: the scroll to a new item would close the composer.
             .onChange(of: items.count) { old, new in
                 // Newly added items appear at the bottom – keep them in view while typing.
@@ -165,14 +175,15 @@ struct StoreCard: View {
         }
         .buttonStyle(.borderedProminent)
         .tint(.gray)
+        .listRowBackground(Color(.tertiarySystemGroupedBackground))
         .listRowSeparator(.hidden)
     }
 
     @ViewBuilder
     private var completedSection: some View {
         let completed = model.recentlyCompleted.filter { $0.storeID == store?.id && !items.contains($0) }
-        Section {
-            if showsCompleted {
+        if showsCompleted {
+            Section("Erledigt") {
                 ForEach(completed) { item in
                     Button {
                         Task { await model.restore(item) }
@@ -180,7 +191,7 @@ struct StoreCard: View {
                         HStack(spacing: 14) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.title2)
-                                .foregroundStyle(tint.opacity(0.6))
+                                .foregroundStyle(tint.opacity(0.72))
                             Text(item.title)
                                 .strikethrough()
                                 .foregroundStyle(.secondary)
@@ -191,22 +202,41 @@ struct StoreCard: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .listRowBackground(Color(.tertiarySystemGroupedBackground))
+                    .listRowSeparator(.hidden)
                 }
                 if completed.isEmpty {
                     Text("In den letzten 7 Tagen nichts erledigt.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
+                        .listRowBackground(Color(.tertiarySystemGroupedBackground))
                 }
             }
-            Button(showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen") {
-                showsCompleted.toggle()
-                if showsCompleted { Task { await model.loadRecentlyCompleted() } }
-            }
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(tint)
-            .frame(maxWidth: .infinity)
         }
-        .listRowSeparator(.hidden)
+    }
+
+    private var completedFooter: some View {
+        Button {
+            withAnimation(.snappy) { showsCompleted.toggle() }
+            if showsCompleted { Task { await model.loadRecentlyCompleted() } }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: showsCompleted ? "checkmark.circle.fill" : "clock.arrow.circlepath")
+                Text(showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen")
+                Spacer(minLength: 0)
+                Image(systemName: showsCompleted ? "chevron.up" : "chevron.down")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(tint)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 15)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .background(Color(.secondarySystemGroupedBackground))
+        .overlay(alignment: .top) { Color(.separator).opacity(0.45).frame(height: 0.5) }
     }
 
     // MARK: Empty states (KONZEPT §7.2 lifecycle)
@@ -251,13 +281,6 @@ struct StoreCard: View {
                         .buttonStyle(.bordered)
                 }
             }
-            Button("Erledigte anzeigen") {
-                showsCompleted = true
-                Task { await model.loadRecentlyCompleted() }
-            }
-            .font(.footnote.weight(.medium))
-            .foregroundStyle(.secondary)
-            .padding(.top, 6)
         }
         .padding(24)
     }

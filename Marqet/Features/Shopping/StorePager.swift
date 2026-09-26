@@ -152,7 +152,9 @@ struct PageIndicator: View {
                 .font(.system(size: 8, weight: .heavy))
                 .foregroundStyle(.secondary)
         case .unsorted:
-            Circle().fill(Color.gray).frame(width: 7, height: 7)
+            Image(systemName: "tray.fill")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.secondary)
         case .store(let id):
             Circle().fill(model.store(id)?.color ?? .gray).frame(width: 7, height: 7)
         }

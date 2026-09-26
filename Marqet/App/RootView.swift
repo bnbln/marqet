@@ -2,6 +2,11 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
+
+    private var accentColor: Color {
+        AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
+    }
 
     var body: some View {
         @Bindable var model = model
@@ -22,6 +27,7 @@ struct RootView: View {
             }
             }
         }
+        .tint(accentColor)
         .alert(
             "Das hat nicht geklappt",
             isPresented: Binding(

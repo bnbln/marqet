@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -45,6 +45,8 @@
 		EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */; };
 		F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */; };
 		F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */; };
+		F00D00000000000000000001 /* AppAccentPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D00000000000000000002 /* AppAccentPalette.swift */; };
+		F00D00000000000000000003 /* StoreOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00D00000000000000000004 /* StoreOrderSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,7 +77,7 @@
 		6C36556FC45F2FFF3189F223 /* TriageScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriageScreen.swift; sourceTree = "<group>"; };
 		81FD1AA7953B020E2F971793 /* StoreStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreStyle.swift; sourceTree = "<group>"; };
 		8662B64170332932ED37FE06 /* StorePager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePager.swift; sourceTree = "<group>"; };
-		939362CED74CE9DC640A9D19 /* Marqet.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Marqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		939362CED74CE9DC640A9D19 /* Marqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96E7161CE333347F853CDAB6 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		991A83F47BCCEE4CB948BC3C /* AppModel+Triage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Triage.swift"; sourceTree = "<group>"; };
 		997698A631A4635B7AE98F19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -95,6 +97,8 @@
 		EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerTextField.swift; sourceTree = "<group>"; };
 		F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreStoresCard.swift; sourceTree = "<group>"; };
 		F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
+		F00D00000000000000000002 /* AppAccentPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAccentPalette.swift; sourceTree = "<group>"; };
+		F00D00000000000000000004 /* StoreOrderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreOrderSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +210,7 @@
 		C3B4E92304770B1AA8BABB84 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				F00D00000000000000000002 /* AppAccentPalette.swift */,
 				3FD6E5F8B4968F49192DF3E3 /* AdaptiveSplit.swift */,
 				A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */,
 				E1335C97D860751574A63AE6 /* Color+Hex.swift */,
@@ -245,6 +250,7 @@
 				EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */,
 				F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */,
 				A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */,
+				F00D00000000000000000004 /* StoreOrderSheet.swift */,
 				3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */,
 				56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */,
 				8662B64170332932ED37FE06 /* StorePager.swift */,
@@ -348,7 +354,6 @@
 			packageReferences = (
 				F6D6148A8957996070DC673E /* XCLocalSwiftPackageReference "Packages/MarqetKit" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -376,6 +381,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				07C2E085A543D3710EC87FE6 /* AdaptiveSplit.swift in Sources */,
+				F00D00000000000000000001 /* AppAccentPalette.swift in Sources */,
 				96BFCE1F769A71C3791B4226 /* AddStoreSheet.swift in Sources */,
 				C4B13AD396D7F7FA400F7DF7 /* AppModel+Categories.swift in Sources */,
 				A971BEE745EF4F4C96EF0E49 /* AppModel+Intelligence.swift in Sources */,
@@ -395,6 +401,7 @@
 				F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */,
 				88167E848566A767ED3889AC /* RootView.swift in Sources */,
 				4D8172B6B4DA85E2884F828B /* SectionOrderSheet.swift in Sources */,
+				F00D00000000000000000003 /* StoreOrderSheet.swift in Sources */,
 				0321B39B103F92366C02DDBD /* SettingsView.swift in Sources */,
 				0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */,
 				913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */,
@@ -513,6 +520,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C4VHG63LL9;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Marqet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -532,6 +540,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C4VHG63LL9;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Marqet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

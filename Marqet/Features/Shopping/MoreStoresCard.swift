@@ -7,6 +7,7 @@ struct MoreStoresCard: View {
 
     @Environment(AppModel.self) private var model
     @State private var showsAddStore = false
+    @State private var showsStoreOrder = false
     @State private var isSelecting = false
     @State private var selection: Set<Tile> = []
 
@@ -18,79 +19,125 @@ struct MoreStoresCard: View {
     private let columns = [GridItem(.adaptive(minimum: 92), spacing: 12)]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                header
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    header
 
-                if !model.hiddenStores.isEmpty {
-                    section("Deine Läden") {
-                        ForEach(model.hiddenStores) { store in
-                            tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
+                    if !model.hiddenStores.isEmpty {
+                        section("Deine Läden") {
+                            ForEach(model.hiddenStores) { store in
+                                tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
+                            }
                         }
                     }
-                }
 
-                if !model.catalogSuggestions.isEmpty {
-                    section(model.stores.isEmpty ? "Wo kaufst du ein?" : "Vorschläge") {
-                        ForEach(model.catalogSuggestions.prefix(12)) { entry in
-                            tile(.catalog(entry.key), name: entry.name) {
-                                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
+                    if !model.catalogSuggestions.isEmpty {
+                        section(model.stores.isEmpty ? "Wo kaufst du ein?" : "Vorschläge") {
+                            ForEach(model.catalogSuggestions.prefix(12)) { entry in
+                                tile(.catalog(entry.key), name: entry.name) {
+                                    StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
+                                }
                             }
                         }
                     }
                 }
-
-                VStack(spacing: 10) {
-                    if isSelecting {
-                        Button {
-                            planSelection()
-                        } label: {
-                            Text(selection.isEmpty ? "Läden auswählen" : "\(selection.count) Läden hinzufügen")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .controlSize(.large)
-                        .disabled(selection.isEmpty)
-                        Button("Abbrechen") {
-                            isSelecting = false
-                            selection = []
-                        }
-                        .frame(maxWidth: .infinity)
-                    } else {
-                        Button {
-                            showsAddStore = true
-                        } label: {
-                            Label("Laden hinzufügen", systemImage: "plus")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .controlSize(.large)
-                        Button("Mehrere planen", systemImage: "checklist") { isSelecting = true }
-                            .frame(maxWidth: .infinity)
-                    }
-                }
+                .padding(20)
             }
-            .padding(20)
+            .scrollIndicators(.visible)
+
+            footer
+                .padding(.bottom, 60)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .cardSurface(isFocused: isFocused)
         .sheet(isPresented: $showsAddStore) {
             AddStoreSheet()
                 .leadingSheetPlacement()
         }
+        .sheet(isPresented: $showsStoreOrder) {
+            StoreOrderSheet()
+                .leadingSheetPlacement()
+        }
     }
 
-    @ViewBuilder
     private var header: some View {
         let nothingElse = model.deck.pages == [.more]
-        VStack(alignment: .leading, spacing: 4) {
-            Text(nothingElse ? "Alles eingekauft 🎉" : "Weitere Läden")
-                .font(.title2.bold())
-            Text(nothingElse
-                 ? "Plane deinen nächsten Einkauf: Tippe auf einen Laden."
-                 : "Tippe auf einen Laden, um etwas für ihn einzutragen.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        return HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(isSelecting ? "Läden auswählen" : (nothingElse ? "Alles eingekauft 🎉" : "Weitere Läden"))
+                    .font(.title2.bold())
+                Text(nothingElse
+                     ? "Plane deinen nächsten Einkauf: Tippe auf einen Laden."
+                     : "Tippe auf einen Laden, um etwas für ihn einzutragen.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            if !nothingElse {
+                Button {
+                    isSelecting.toggle()
+                    if !isSelecting { selection = [] }
+                } label: {
+                    Image(systemName: isSelecting ? "xmark" : "checklist")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 40, height: 40)
+                        .background(Color(.tertiarySystemFill), in: .circle)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(isSelecting ? "Mehrfachauswahl beenden" : "Mehrere Läden planen")
+
+                Button {
+                    showsStoreOrder = true
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .font(.body.weight(.semibold))
+                        .frame(width: 40, height: 40)
+                        .background(Color(.tertiarySystemFill), in: .circle)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Lädenreihenfolge ändern")
+            }
         }
+    }
+
+    private var footer: some View {
+        VStack(spacing: 10) {
+            if isSelecting {
+                HStack(spacing: 10) {
+                    Button("Abbrechen") {
+                        isSelecting = false
+                        selection = []
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+
+                    Button {
+                        planSelection()
+                    } label: {
+                        Label("\(selection.count) planen", systemImage: "checklist")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .disabled(selection.isEmpty)
+                }
+            }
+
+            Button {
+                showsAddStore = true
+            } label: {
+                Label("Laden hinzufügen", systemImage: "plus")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.glassProminent)
+            .controlSize(.large)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 18)
+        .background(Color(.secondarySystemGroupedBackground))
+        .overlay(alignment: .top) { Color(.separator).opacity(0.45).frame(height: 0.5) }
     }
 
     private func section(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {

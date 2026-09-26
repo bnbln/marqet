@@ -227,13 +227,20 @@ final class AppModel {
 
     func selectList(_ id: String) async {
         selectedListID = id
+        recentlyCompleted = []
         phase = .ready
         await reload()
     }
 
     func createShoppingList() async {
+        await createShoppingList(named: String(localized: "Einkaufen"))
+    }
+
+    func createShoppingList(named name: String) async {
+        let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
         do {
-            let list = try await gateway.createList(named: String(localized: "Einkaufen"))
+            let list = try await gateway.createList(named: title)
             lists.append(list)
             await selectList(list.id)
         } catch {
@@ -342,13 +349,19 @@ final class AppModel {
     }
 
     func loadRecentlyCompleted() async {
-        guard let selectedListID else { return }
+        guard let listID = selectedListID else { return }
         do {
             let since = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
             let matcher = StoreMatcher(stores: stores)
-            recentlyCompleted = try await gateway.completedReminders(in: selectedListID, since: since)
+            let fetched = try await gateway.completedReminders(in: listID, since: since)
                 .map { ShoppingItemMapper.item(from: $0, matcher: matcher) }
-                .sorted { ($0.completionDate ?? .distantPast) > ($1.completionDate ?? .distantPast) }
+            guard selectedListID == listID else { return }
+            var merged = fetched
+            let fetchedIDs = Set(fetched.map(\.id))
+            merged += recentlyCompleted.filter {
+                !fetchedIDs.contains($0.id) && ($0.completionDate ?? .distantPast) >= since
+            }
+            recentlyCompleted = merged.sorted { ($0.completionDate ?? .distantPast) > ($1.completionDate ?? .distantPast) }
         } catch {
             present(error)
         }

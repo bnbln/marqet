@@ -4,90 +4,128 @@ import SwiftUI
 /// Main screen: the store card pager (KONZEPT §7.2) with the add button and the composer.
 struct ShoppingScreen: View {
     @Environment(AppModel.self) private var model
+    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsAddStore = false
     @State private var showsSettings = false
+    @State private var showsNewListPrompt = false
+    @State private var newListName = ""
     @State private var isComposerFocused = false
+
+    private var accentColor: Color {
+        AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                StorePager()
-                if model.composerTarget == nil {
-                    PageIndicator()
-                        .padding(.vertical, 10)
+            StorePager()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGroupedBackground).ignoresSafeArea())
+                .overlay(alignment: .bottom) {
+                    if model.composerTarget == nil {
+                        bottomControls
+                    }
                 }
-            }
-            .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .safeAreaInset(edge: .bottom) {
-                if model.composerTarget != nil {
-                    ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                .safeAreaInset(edge: .bottom) {
+                    if model.composerTarget != nil {
+                        ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
                 }
-            }
-            .animation(.snappy, value: model.composerTarget == nil)
-            .navigationTitle(model.selectedList?.title ?? "Marqet")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { toolbar }
-            .toolbarVerticalCompressionPreferringItems()
-            .sheet(isPresented: $showsAddStore) {
-                AddStoreSheet()
-                    .leadingSheetPlacement()
-            }
-            .sheet(isPresented: $showsSettings) {
-                SettingsView()
-            }
-            .sheet(isPresented: triagePromptBinding) {
-                if let ids = model.triagePrompt { TriagePromptSheet(itemIDs: ids) }
-            }
-            .fullScreenCover(isPresented: triageBinding) {
-                TriageScreen()
-            }
-            .overlay(alignment: .top) {
-                if model.autoAssignReport != nil { AutoAssignToast() }
-            }
-            .animation(.snappy, value: model.autoAssignReport)
-            .onChange(of: model.composerTarget) { _, target in
-                if target != nil { isComposerFocused = true }
-            }
-            .onChange(of: isComposerFocused) { _, focused in
-                if !focused, model.composerTarget != nil { model.endComposer() }
-            }
+                .animation(.snappy, value: model.composerTarget == nil)
+                .navigationTitle("Marqet")
+                .navigationSubtitle(model.selectedList?.title ?? "Liste wählen")
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar { toolbar }
+                .toolbarVerticalCompressionPreferringItems()
+                .tint(accentColor)
+                .sheet(isPresented: $showsAddStore) {
+                    AddStoreSheet()
+                        .leadingSheetPlacement()
+                }
+                .sheet(isPresented: $showsSettings) {
+                    SettingsView()
+                }
+                .alert("Neue Liste anlegen", isPresented: $showsNewListPrompt) {
+                    TextField("Listenname", text: $newListName)
+                    Button("Abbrechen", role: .cancel) {}
+                    Button("Erstellen") {
+                        Task { await model.createShoppingList(named: newListName) }
+                    }
+                    .disabled(newListName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                .sheet(isPresented: triagePromptBinding) {
+                    if let ids = model.triagePrompt { TriagePromptSheet(itemIDs: ids) }
+                }
+                .fullScreenCover(isPresented: triageBinding) {
+                    TriageScreen()
+                }
+                .overlay(alignment: .top) {
+                    if model.autoAssignReport != nil { AutoAssignToast() }
+                }
+                .animation(.snappy, value: model.autoAssignReport)
+                .onChange(of: model.composerTarget) { _, target in
+                    if target != nil { isComposerFocused = true }
+                }
+                .onChange(of: isComposerFocused) { _, focused in
+                    if !focused, model.composerTarget != nil { model.endComposer() }
+                }
         }
     }
 
-    // Only system toolbar items: on iPhone Duo they move into the vertical bar (KONZEPT-DUO-IPAD §3).
+    private var bottomControls: some View {
+        HStack(spacing: 14) {
+            PageIndicator()
+                .glassEffect(.regular, in: .capsule)
+            Spacer(minLength: 0)
+            Menu {
+                Section("Hinzufügen zu …") {
+                    Button("Unsortiert", systemImage: "tray") { model.startComposer(on: .unsorted) }
+                    ForEach(model.sortedStores) { store in
+                        Button(store.name) { model.startComposer(on: .store(store.id)) }
+                    }
+                }
+            } label: {
+                Image(systemName: "plus")
+                    .font(.title3.weight(.bold))
+                    .frame(width: 48, height: 48)
+                    .contentShape(Circle())
+            } primaryAction: {
+                model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
+            }
+            .menuStyle(.button)
+            .buttonStyle(.glassProminent)
+            .accessibilityLabel("Eintrag hinzufügen")
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
+    }
+
+    // System navigation and settings items remain available in the iPhone Duo vertical bar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }
         }
 
-        if !model.unsortedItems.isEmpty {
-            ToolbarItem(placement: .bottomBar) {
-                Button("Zuordnen (\(model.unsortedItems.count))", systemImage: "tray.and.arrow.down") {
-                    model.startTriage()
-                }
-            }
-        }
-
-        ToolbarSpacer(.flexible, placement: .bottomBar)
-
-        ToolbarItem(placement: .bottomBar) {
-            Menu {
-                Section("Hinzufügen zu …") {
-                    Button("Unsortiert", systemImage: "tray") { model.startComposer(on: .unsorted) }
-                    ForEach(model.stores.sorted { $0.sortIndex < $1.sortIndex }) { store in
-                        Button(store.name) { model.startComposer(on: .store(store.id)) }
+        ToolbarTitleMenu {
+            Section("Listen") {
+                ForEach(model.lists.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }) { list in
+                    Button {
+                        Task { await model.selectList(list.id) }
+                    } label: {
+                        if list.id == model.selectedListID {
+                            Label(list.title, systemImage: "checkmark")
+                        } else {
+                            Text(list.title)
+                        }
                     }
+                    .disabled(!list.allowsModifications)
                 }
-            } label: {
-                Label("Hinzufügen", systemImage: "plus")
-            } primaryAction: {
-                model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
             }
-            .menuStyle(.button)
-            .buttonStyle(.glassProminent)
-            .tint(.accentColor)
+            Button("Neue Liste anlegen", systemImage: "plus") {
+                newListName = ""
+                showsNewListPrompt = true
+            }
         }
     }
 }

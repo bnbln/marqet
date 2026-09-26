@@ -5,17 +5,34 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var confirmsReset = false
 
     var body: some View {
         @Bindable var model = model
         NavigationStack {
             List {
-                Section("Einkaufsliste") {
-                    NavigationLink {
-                        ListPickerView(embedded: true)
-                    } label: {
-                        LabeledContent("Liste", value: model.selectedList?.title ?? "–")
+                Section("Erscheinungsbild") {
+                    ForEach(AppAccentPalette.allCases) { palette in
+                        Button {
+                            accentPaletteKey = palette.rawValue
+                        } label: {
+                            HStack(spacing: 12) {
+                                Circle()
+                                    .fill(palette.color)
+                                    .frame(width: 22, height: 22)
+                                Text(palette.title)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                if accentPaletteKey == palette.rawValue {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(palette.color)
+                                }
+                            }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
 
@@ -68,6 +85,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Einstellungen")
             .navigationBarTitleDisplayMode(.inline)
+            .tint(AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(role: .confirm) { dismiss() }

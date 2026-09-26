@@ -4,19 +4,71 @@
     "" : {
 
     },
-    "%lld Läden hinzufügen" : {
+    "%@ löschen?" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld Einträge" : {
+
+    },
+    "%lld Einträge automatisch zugeordnet" : {
+
+    },
+    "%lld Einträge zugeordnet" : {
+
+    },
+    "%lld neue Einträge" : {
 
     },
     "%lld offen" : {
 
     },
+    "%lld offene Einträge werden unsortiert. Gelernte Zuordnungen für diesen Laden gehen verloren." : {
+
+    },
     "%lld ohne Laden" : {
+
+    },
+    "%lld planen" : {
+
+    },
+    "%lld von %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld von %2$lld"
+          }
+        }
+      }
+    },
+    "1 Eintrag automatisch zugeordnet" : {
+
+    },
+    "1 Eintrag zugeordnet" : {
+
+    },
+    "1 neuer Eintrag" : {
 
     },
     "Abbrechen" : {
 
     },
     "Abhaken" : {
+
+    },
+    "Abschnitte" : {
+
+    },
+    "Abschnitte sortieren" : {
+
+    },
+    "Alle Vorschläge übernehmen (%lld)" : {
+
+    },
+    "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
 
     },
     "Alles eingekauft 🎉" : {
@@ -34,6 +86,15 @@
     "Apotheke" : {
 
     },
+    "Apple Intelligence ist auf diesem Gerät nicht verfügbar. Marqet schlägt Läden dann anhand der Ladenart vor." : {
+
+    },
+    "Apple Intelligence läuft auf deinem Gerät. Marqet erfasst keine Nutzungsdaten." : {
+
+    },
+    "Apple Intelligence läuft auf deinem Gerät. Nichts verlässt dein iPhone." : {
+
+    },
     "Art" : {
 
     },
@@ -46,16 +107,55 @@
     "Ausgewählt" : {
 
     },
+    "Auswählen und auf einen Laden tippen – oder einen Eintrag direkt auf den Laden ziehen." : {
+
+    },
+    "Automatisch zuordnen" : {
+
+    },
+    "Automatisch zuordnen, Vorschläge mit Apple Intelligence und Sortierung nach deinem Laufweg. Einmalkauf, mit der Familie teilbar." : {
+
+    },
+    "Baby" : {
+
+    },
     "Bäckerei" : {
+
+    },
+    "Backzutaten" : {
 
     },
     "Baumarkt" : {
 
     },
+    "Beim Umbenennen passt Marqet die Zeile „🛒 %@“ in allen offenen Einträgen an." : {
+
+    },
+    "Bernstein" : {
+
+    },
     "Bioladen" : {
 
     },
+    "Blattgrün" : {
+
+    },
+    "Board" : {
+
+    },
+    "Brot & Backwaren" : {
+
+    },
     "Das hat nicht geklappt" : {
+
+    },
+    "Datenschutz" : {
+
+    },
+    "Deine Einkaufsliste, nach Läden sortiert" : {
+
+    },
+    "Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung." : {
 
     },
     "Deine Erinnerungslisten" : {
@@ -64,7 +164,19 @@
     "Deine Läden" : {
 
     },
+    "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch." : {
+
+    },
+    "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in dessen Notizen – sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst." : {
+
+    },
     "Deutschland" : {
+
+    },
+    "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
+
+    },
+    "Die Reihenfolge hier ist die Reihenfolge der Cards." : {
 
     },
     "Diesen Laden gibt es schon." : {
@@ -76,6 +188,12 @@
     "Drogerie" : {
 
     },
+    "Drogerie & Pflege" : {
+
+    },
+    "Eigenen Laden anlegen" : {
+
+    },
     "Eigener Laden" : {
 
     },
@@ -85,10 +203,25 @@
     "Einkaufsliste" : {
 
     },
+    "Einstellungen" : {
+
+    },
     "Einstellungen öffnen" : {
 
     },
     "Eintrag hinzufügen" : {
+
+    },
+    "Einträge links auswählen oder ziehen, dann auf einen Laden tippen." : {
+
+    },
+    "Eintragen mit Siri" : {
+
+    },
+    "Einzeln" : {
+
+    },
+    "Erledigt" : {
 
     },
     "Erledigt, tippen zum Rückgängigmachen" : {
@@ -100,10 +233,34 @@
     "Erledigte ausblenden" : {
 
     },
+    "Erscheinungsbild" : {
+
+    },
+    "Erstellen" : {
+
+    },
     "Farbe" : {
 
     },
     "Fertig" : {
+
+    },
+    "Fisch" : {
+
+    },
+    "Fleisch & Wurst" : {
+
+    },
+    "Frühstück & Aufstriche" : {
+
+    },
+    "Gelernte Zuordnungen für diesen Laden gehen verloren." : {
+
+    },
+    "Gelerntes zurücksetzen" : {
+
+    },
+    "Gelerntes zurücksetzen?" : {
 
     },
     "Geplant" : {
@@ -112,7 +269,7 @@
     "Getränke" : {
 
     },
-    "Hinzufügen" : {
+    "Haushalt" : {
 
     },
     "Hinzufügen zu …" : {
@@ -121,16 +278,34 @@
     "Hinzugefügt" : {
 
     },
+    "Im Laden in der Reihenfolge deines Wegs – mit jedem Einkauf besser." : {
+
+    },
     "In den letzten 7 Tagen nichts erledigt." : {
+
+    },
+    "Intelligenz" : {
+
+    },
+    "Käse" : {
 
     },
     "Katalog" : {
 
     },
+    "Kategorie ändern" : {
+
+    },
     "Kette suchen" : {
 
     },
+    "Koralle" : {
+
+    },
     "Laden" : {
+
+    },
+    "Läden" : {
 
     },
     "Laden ändern" : {
@@ -145,13 +320,34 @@
     "Laden hinzufügen" : {
 
     },
+    "Läden sortieren" : {
+
+    },
+    "Läden verwalten" : {
+
+    },
+    "Läden zuordnen" : {
+
+    },
     "Laden-Optionen" : {
+
+    },
+    "Lädenreihenfolge ändern" : {
+
+    },
+    "Laufweg lernen" : {
 
     },
     "Leer" : {
 
     },
-    "Liste wechseln" : {
+    "Listen" : {
+
+    },
+    "Listenname" : {
+
+    },
+    "Los geht’s" : {
 
     },
     "Löschen" : {
@@ -160,34 +356,79 @@
     "Markt" : {
 
     },
+    "Marqet" : {
+
+    },
     "Marqet braucht vollen Zugriff auf deine Erinnerungen. Du kannst ihn in den Einstellungen unter „Marqet“ erteilen." : {
+
+    },
+    "Marqet hat kein Konto, keinen Server und keine Werbung. Deine Einträge liegen in Apple Erinnerungen, deine Läden und alles Gelernte auf deinem Gerät." : {
 
     },
     "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen – auf deinem Gerät und in deinem iCloud." : {
 
     },
+    "Marqet liest die Liste, die du gleich auswählst." : {
+
+    },
+    "Marqet Pro" : {
+
+    },
+    "Marqet Pro ist aktiv" : {
+
+    },
+    "Marqet sortiert sie in Cards für Aldi, dm, den Markt und alle deine Läden." : {
+
+    },
     "Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
 
     },
-    "Mehrere planen" : {
+    "Marqet vergisst gelernte Zuordnungen und Laufwege. Deine Kategorie-Korrekturen und selbst sortierten Abschnitte bleiben." : {
+
+    },
+    "Mehrere Läden planen" : {
+
+    },
+    "Mehrfachauswahl beenden" : {
 
     },
     "Metzgerei" : {
 
     },
+    "Milchprodukte & Eier" : {
+
+    },
+    "Mit Marqet Pro wäre einer davon automatisch zugeordnet worden." : {
+
+    },
+    "Mit Marqet Pro wären %lld davon automatisch zugeordnet worden." : {
+
+    },
     "Möbel & Einrichtung" : {
+
+    },
+    "Modus" : {
+
+    },
+    "Name" : {
 
     },
     "Name, z. B. Hofladen Maier" : {
 
     },
+    "Neue Einträge landen in „Unsortiert“ – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
+
+    },
     "Neue Liste „Einkaufen“ anlegen" : {
 
     },
-    "Neuer Eintrag (unsortiert)" : {
+    "Neue Liste anlegen" : {
 
     },
-    "Neuer Eintrag für %@" : {
+    "Neuer Eintrag" : {
+
+    },
+    "Noch keinem Laden zugeordnet" : {
 
     },
     "Noch leer" : {
@@ -196,16 +437,22 @@
     "Nochmal kaufen" : {
 
     },
+    "Obst & Gemüse" : {
+
+    },
     "OK" : {
 
     },
     "Online" : {
 
     },
-    "Optionen" : {
+    "Österreich" : {
 
     },
-    "Österreich" : {
+    "Ozeanblau" : {
+
+    },
+    "Passt zum Laden" : {
 
     },
     "Plane deinen nächsten Einkauf: Tippe auf einen Laden." : {
@@ -214,13 +461,25 @@
     "Region" : {
 
     },
+    "Rückgängig" : {
+
+    },
+    "Sag: „Hey Siri, setz Milch auf die Liste %@“." : {
+
+    },
     "Schweiz" : {
 
     },
     "Sichern" : {
 
     },
+    "Snacks & Süßes" : {
+
+    },
     "Sonstiges" : {
+
+    },
+    "Später" : {
 
     },
     "Supermarkt" : {
@@ -229,7 +488,16 @@
     "Symbol" : {
 
     },
+    "Tiefkühl" : {
+
+    },
+    "Tier" : {
+
+    },
     "Tippe auf +, um etwas für %@ hinzuzufügen." : {
+
+    },
+    "Tippe auf den Laden für den Eintrag links." : {
 
     },
     "Tippe auf einen Laden, um etwas für ihn einzutragen." : {
@@ -238,10 +506,28 @@
     "Titel" : {
 
     },
+    "Trag Einkäufe wie gewohnt ein – mit Siri, in Erinnerungen oder in Marqet." : {
+
+    },
+    "Über Marqet" : {
+
+    },
+    "Überspringen" : {
+
+    },
     "Umbenennen" : {
 
     },
     "Unsortiert" : {
+
+    },
+    "Version" : {
+
+    },
+    "Violett" : {
+
+    },
+    "Vorrat" : {
 
     },
     "Vorschlag" : {
@@ -250,19 +536,58 @@
     "Vorschläge" : {
 
     },
+    "Vorschläge aus deinen bisherigen Zuordnungen gibt es auch ohne Pro." : {
+
+    },
+    "Vorschläge mit Apple Intelligence" : {
+
+    },
+    "Wähle deine Läden in der Reihenfolge, in der du sie am häufigsten besuchst. Du kannst später jederzeit weitere hinzufügen." : {
+
+    },
     "Wähle die Liste, in die du – oder Siri – deine Einkäufe einträgst." : {
+
+    },
+    "Wein, Bier & Spirituosen" : {
+
+    },
+    "Weiter (%lld)" : {
 
     },
     "Weitere Läden" : {
 
     },
+    "Wie zuletzt" : {
+
+    },
+    "Wische zwischen den Läden, tippe + für neue Einträge." : {
+
+    },
     "Wo kaufst du ein?" : {
+
+    },
+    "Ziehe die Abschnitte in die Reihenfolge deines Wegs durch %@." : {
+
+    },
+    "Ziehe die Abschnitte in die Reihenfolge deines Wegs durch %@. Marqet lernt beim Abhaken weiter mit." : {
+
+    },
+    "Zu %@ zuordnen" : {
 
     },
     "Zugriff auf Erinnerungen" : {
 
     },
     "Zugriff erlauben" : {
+
+    },
+    "Zuordnen" : {
+
+    },
+    "Zuordnen startet mit" : {
+
+    },
+    "Zurücksetzen" : {
 
     }
   },

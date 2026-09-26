@@ -42,10 +42,7 @@ struct ComposerBar: View {
     }
 
     private var placeholder: String {
-        switch model.composerTarget {
-        case .store(let id): String(localized: "Neuer Eintrag für \(model.store(id)?.name ?? "")")
-        default: String(localized: "Neuer Eintrag (unsortiert)")
-        }
+        String(localized: "Neuer Eintrag")
     }
 
     private var chips: some View {
@@ -70,6 +67,7 @@ struct ComposerBar: View {
                 .padding(.horizontal, 4)
             }
             .scrollIndicators(.hidden)
+            .padding(.trailing, -12)
             .onAppear {
                 if let target = model.composerTarget { proxy.scrollTo(target, anchor: .center) }
             }

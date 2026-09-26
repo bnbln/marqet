@@ -61,3 +61,36 @@ struct LearningRepositoryTests {
         #expect(try repository.categoryPositions(storeID: aldi).isEmpty)
     }
 }
+
+@Suite("LocationRepository")
+@MainActor
+struct LocationRepositoryTests {
+    let repository = LocationRepository(container: try! PersistenceContainer.make(inMemory: true))
+    let store = UUID()
+
+    func location(_ name: String, preferred: Bool = false) -> StoreLocation {
+        StoreLocation(storeID: store, name: name, address: "\(name)straße 1",
+                      coordinate: GeoPoint(latitude: 48.1, longitude: 11.5), mapItemIdentifier: "id-\(name)", isPreferred: preferred)
+    }
+
+    @Test func roundTripAndSinglePreferredBranch() throws {
+        let first = location("Nord", preferred: true)
+        let second = location("Süd")
+        try repository.save(first)
+        try repository.save(second)
+        #expect(try repository.all() == [first, second])
+
+        var promoted = second
+        promoted.isPreferred = true
+        try repository.save(promoted)
+        let all = try repository.all()
+        #expect(all.filter(\.isPreferred).map(\.name) == ["Süd"])
+    }
+
+    @Test func deleteAllOfAStore() throws {
+        try repository.save(location("A"))
+        try repository.save(StoreLocation(storeID: UUID(), name: "Other", coordinate: GeoPoint(latitude: 0, longitude: 0)))
+        try repository.deleteAll(storeID: store)
+        #expect(try repository.all().map(\.name) == ["Other"])
+    }
+}

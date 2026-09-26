@@ -117,6 +117,21 @@ final class AppModel {
     var routeLearningEnabled: Bool {
         didSet { defaults.set(routeLearningEnabled, forKey: Keys.routeLearning) }
     }
+    // MARK: Places (KONZEPT §14, v1.0 "Orte")
+
+    /// Branches of the user's stores.
+    var locations: [StoreLocation] = []
+    var storeSortMode: StoreSortMode {
+        didSet { defaults.set(storeSortMode.rawValue, forKey: Keys.storeSortMode) }
+    }
+    var travelMode: TravelMode {
+        didSet { defaults.set(travelMode.rawValue, forKey: Keys.travelMode) }
+    }
+    /// Last known position (only with location access).
+    var userLocation: GeoPoint?
+    /// Card order for distance/smart, computed on open – never while the user looks at the cards.
+    var storeOrderSnapshot: [Store.ID]?
+
     var preferredTriageMode: TriageSession.Mode {
         didSet { defaults.set(preferredTriageMode.rawValue, forKey: Keys.triageMode) }
     }
@@ -131,6 +146,9 @@ final class AppModel {
     @ObservationIgnored let gateway: any ReminderGateway
     @ObservationIgnored let storeRepository: StoreRepository
     @ObservationIgnored let learning: LearningRepository
+    @ObservationIgnored let locationRepository: LocationRepository
+    @ObservationIgnored let locationProvider: any LocationProviding
+    @ObservationIgnored let placeSearch: any PlaceSearching
     @ObservationIgnored let intelligence: any IntelligenceService
     @ObservationIgnored let defaults: UserDefaults
     @ObservationIgnored private var changeObservation: Task<Void, Never>?
@@ -152,11 +170,18 @@ final class AppModel {
         intelligence: any IntelligenceService = FoundationModelsService(),
         defaults: UserDefaults = .standard,
         catalog: StoreCatalog? = try? StoreCatalog.bundled(),
-        dictionary: CategoryDictionary? = try? CategoryDictionary.bundled()
+        dictionary: CategoryDictionary? = try? CategoryDictionary.bundled(),
+        location: (any LocationProviding)? = nil,
+        placeSearch: (any PlaceSearching)? = nil
     ) {
         self.gateway = gateway
         self.storeRepository = StoreRepository(container: container)
         self.learning = LearningRepository(container: container)
+        self.locationRepository = LocationRepository(container: container)
+        self.locationProvider = location ?? LocationService()
+        self.placeSearch = placeSearch ?? MapKitPlaceSearch()
+        self.storeSortMode = StoreSortMode(rawValue: defaults.string(forKey: Keys.storeSortMode) ?? "") ?? .manual
+        self.travelMode = TravelMode(rawValue: defaults.string(forKey: Keys.travelMode) ?? "") ?? .driving
         self.intelligence = intelligence
         self.defaults = defaults
         self.catalog = catalog
@@ -176,6 +201,7 @@ final class AppModel {
         }
         do {
             stores = try storeRepository.all()
+            locations = try locationRepository.all()
             classifier.learned = try learning.categoryMemory()
             assignmentMemory = try learning.assignmentMemory()
         } catch {
@@ -195,7 +221,8 @@ final class AppModel {
         return CardBuilder.deck(
             items: items,
             stores: stores,
-            context: .init(retainedPages: retained, emptiedInSession: emptiedInSession)
+            context: .init(retainedPages: retained, emptiedInSession: emptiedInSession),
+            storeOrder: storeSortMode == .manual ? nil : storeOrderSnapshot
         )
     }
 
@@ -236,6 +263,7 @@ final class AppModel {
             }
             phase = .ready
             await reload()
+            await refreshStoreOrder()
         } catch {
             present(error)
         }
@@ -603,6 +631,8 @@ final class AppModel {
         static let intelligence = "intelligenceEnabled"
         static let routeLearning = "routeLearningEnabled"
         static let triageMode = "triageMode"
+        static let storeSortMode = "storeSortMode"
+        static let travelMode = "travelMode"
         static let sessionTracker = "routeSessionTracker"
     }
 }

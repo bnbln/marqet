@@ -41,7 +41,9 @@ public enum CardBuilder {
         }
     }
 
-    public static func deck(items: [ShoppingItem], stores: [Store], context: Context = Context()) -> CardDeck {
+    /// - Parameter storeOrder: Card order from `StoreSorter` (distance/smart). `nil` uses the
+    ///   manual order; stores missing from it follow in manual order.
+    public static func deck(items: [ShoppingItem], stores: [Store], context: Context = Context(), storeOrder: [Store.ID]? = nil) -> CardDeck {
         let knownIDs = Set(stores.map(\.id))
         var itemsByPage: [PageID: [ShoppingItem]] = [:]
         for item in items {
@@ -56,7 +58,7 @@ public enum CardBuilder {
         var pages: [PageID] = [.unsorted]
 
         var states: [Store.ID: StoreCardState] = [:]
-        for store in stores.sorted(by: { $0.sortIndex < $1.sortIndex }) {
+        for store in ordered(stores, by: storeOrder) {
             guard let state = state(of: store, hasItems: itemsByPage[.store(store.id)] != nil, context: context) else {
                 continue
             }
@@ -66,6 +68,19 @@ public enum CardBuilder {
         pages.append(.more)
 
         return CardDeck(pages: pages, itemsByPage: itemsByPage, storeStates: states)
+    }
+
+    private static func ordered(_ stores: [Store], by order: [Store.ID]?) -> [Store] {
+        let manual = stores.sorted { $0.sortIndex < $1.sortIndex }
+        guard let order else { return manual }
+        let rank = Dictionary(order.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        return manual.enumerated()
+            .sorted { lhs, rhs in
+                let l = rank[lhs.element.id] ?? order.count + lhs.offset
+                let r = rank[rhs.element.id] ?? order.count + rhs.offset
+                return l < r
+            }
+            .map(\.element)
     }
 
     /// `nil` means the store is hidden and listed on the "Weitere Läden" card.

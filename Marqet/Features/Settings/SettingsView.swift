@@ -77,6 +77,33 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Picker("Reihenfolge", selection: Binding(
+                        get: { model.storeSortMode },
+                        set: { mode in Task { await model.setStoreSortMode(mode) } }
+                    )) {
+                        ForEach(StoreSortMode.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }
+                    if model.storeSortMode != .manual {
+                        Picker("Unterwegs", selection: Binding(
+                            get: { model.travelMode },
+                            set: { mode in
+                                model.travelMode = mode
+                                Task {
+                                    await model.refreshStoreOrder()
+                                    model.pageRequest = model.activePage
+                                }
+                            }
+                        )) {
+                            ForEach(TravelMode.allCases, id: \.self) { Label($0.title, systemImage: $0.systemImage).tag($0) }
+                        }
+                    }
+                } header: {
+                    Text("Reihenfolge der Cards")
+                } footer: {
+                    Text(sortFooter)
+                }
+
+                Section {
                     proRow
                     proToggle("Automatisch zuordnen", isOn: $model.autoAssignEnabled)
                     proToggle("Vorschläge mit Apple Intelligence", isOn: $model.intelligenceEnabled)
@@ -168,6 +195,14 @@ struct SettingsView: View {
                 }
             }
             .foregroundStyle(.primary)
+        }
+    }
+
+    private var sortFooter: String {
+        switch model.storeSortMode {
+        case .manual: String(localized: "Du bestimmst die Reihenfolge selbst. Entfernung und Smart nutzen deinen Standort nur, während Marqet offen ist.")
+        case .distance: String(localized: "Der nächste Laden steht vorn. Läden ohne Filiale folgen in deiner Reihenfolge.")
+        case .smart: String(localized: "Viele offene Einträge und kurze Wege stehen vorn. Die Reihenfolge ändert sich nur beim Öffnen, nicht beim Wischen.")
         }
     }
 

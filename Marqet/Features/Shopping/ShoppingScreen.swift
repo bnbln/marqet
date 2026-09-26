@@ -7,6 +7,7 @@ struct ShoppingScreen: View {
     @State private var showsAddStore = false
     @State private var showsSettings = false
     @State private var showsStoreOrder = false
+    @State private var showsMap = false
     @State private var isComposerFocused = false
     /// Bumped by the add button and undo; each drives a light haptic tap.
     @State private var addFeedback = 0
@@ -45,6 +46,9 @@ struct ShoppingScreen: View {
                 }
                 .sheet(isPresented: $showsStoreOrder) {
                     StoreOrderSheet().leadingSheetPlacement()
+                }
+                .sheet(isPresented: $showsMap) {
+                    MapScreen()
                 }
                 .fullScreenCover(isPresented: triageBinding) {
                     TriageScreen()
@@ -138,6 +142,9 @@ struct ShoppingScreen: View {
             } label: {
                 Label("Anzeigeoptionen", systemImage: "line.3.horizontal.decrease")
             }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button("Karte", systemImage: "map") { showsMap = true }
         }
         ToolbarItem(placement: .topBarTrailing) {
             Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }

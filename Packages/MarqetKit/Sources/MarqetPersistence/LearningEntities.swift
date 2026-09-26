@@ -61,16 +61,34 @@ public final class OrderEntity {
     }
 }
 
+/// Schema version 1 – the first released model (PLAN B6). Every later model change adds a new
+/// `VersionedSchema` and a stage in `MarqetMigrationPlan`, never an unversioned edit.
+public enum MarqetSchemaV1: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(1, 0, 0) }
+
+    public static var models: [any PersistentModel.Type] {
+        [StoreEntity.self, CategoryMemoryEntity.self, AssignmentMemoryEntity.self, OrderEntity.self, StoreLocationEntity.self]
+    }
+}
+
+public enum MarqetMigrationPlan: SchemaMigrationPlan {
+    public static var schemas: [any VersionedSchema.Type] { [MarqetSchemaV1.self] }
+    public static var stages: [MigrationStage] { [] }
+}
+
 /// One container for everything Marqet stores itself.
 public enum PersistenceContainer {
-    public static func make(inMemory: Bool = false) throws -> ModelContainer {
-        let configuration = ModelConfiguration(
-            "Marqet",
-            isStoredInMemoryOnly: inMemory,
-            cloudKitDatabase: .none
-        )
+    /// `url` is for tests only; the app uses the default location in Application Support.
+    public static func make(inMemory: Bool = false, url: URL? = nil) throws -> ModelContainer {
+        let schema = Schema(versionedSchema: MarqetSchemaV1.self)
+        let configuration = if let url {
+            ModelConfiguration("Marqet", schema: schema, url: url, cloudKitDatabase: .none)
+        } else {
+            ModelConfiguration("Marqet", schema: schema, isStoredInMemoryOnly: inMemory, cloudKitDatabase: .none)
+        }
         return try ModelContainer(
-            for: StoreEntity.self, CategoryMemoryEntity.self, AssignmentMemoryEntity.self, OrderEntity.self,
+            for: Schema(versionedSchema: MarqetSchemaV1.self),
+            migrationPlan: MarqetMigrationPlan.self,
             configurations: configuration
         )
     }

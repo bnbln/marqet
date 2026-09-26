@@ -22,9 +22,6 @@
     "%lld Einträge zugeordnet" : {
 
     },
-    "%lld neue Einträge" : {
-
-    },
     "%lld offen" : {
 
     },
@@ -53,9 +50,6 @@
     "1 Eintrag zugeordnet" : {
 
     },
-    "1 neuer Eintrag" : {
-
-    },
     "Abbrechen" : {
 
     },
@@ -72,6 +66,9 @@
 
     },
     "Adresse & Info" : {
+
+    },
+    "Aktiv über die Familienfreigabe" : {
 
     },
     "Aktuelle Liste" : {
@@ -108,6 +105,9 @@
 
     },
     "Art" : {
+
+    },
+    "Auch für Neues schlägt Marqet den passenden Laden und die Kategorie vor – direkt auf deinem Gerät." : {
 
     },
     "Aus Übersicht entfernen" : {
@@ -176,10 +176,16 @@
     "Deine Läden" : {
 
     },
+    "Deinen Standort nutzt Marqet nur, wenn du es erlaubst: für Filialen in der Nähe und die Sortierung nach Entfernung. Er wird weder gespeichert noch übertragen." : {
+
+    },
     "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch." : {
 
     },
     "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in dessen Notizen – sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst." : {
+
+    },
+    "Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“." : {
 
     },
     "Deutschland" : {
@@ -216,6 +222,12 @@
 
     },
     "Einkaufsliste" : {
+
+    },
+    "Einmal kaufen, über die Familienfreigabe mit bis zu fünf Personen teilen." : {
+
+    },
+    "Einmalkauf, kein Abo. Deine Einkaufsliste funktioniert auch ohne Pro vollständig." : {
 
     },
     "Einstellungen" : {
@@ -275,7 +287,16 @@
     "Fleisch & Wurst" : {
 
     },
+    "Freischalten" : {
+
+    },
     "Frühstück & Aufstriche" : {
+
+    },
+    "Für %@ freischalten" : {
+
+    },
+    "Für die ganze Familie" : {
 
     },
     "Gelernte Zuordnungen für diesen Laden gehen verloren." : {
@@ -315,6 +336,12 @@
 
     },
     "Kategorie ändern" : {
+
+    },
+    "Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten." : {
+
+    },
+    "Käufe wiederherstellen" : {
 
     },
     "Kette suchen" : {
@@ -380,6 +407,9 @@
     "Marqet hat kein Konto, keinen Server und keine Werbung. Deine Einträge liegen in Apple Erinnerungen, deine Läden und alles Gelernte auf deinem Gerät." : {
 
     },
+    "Marqet lernt beim Abhaken, in welcher Reihenfolge du durch jeden Laden gehst." : {
+
+    },
     "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen – auf deinem Gerät und in deinem iCloud." : {
 
     },
@@ -389,7 +419,13 @@
     "Marqet Pro" : {
 
     },
+    "Marqet Pro freischalten" : {
+
+    },
     "Marqet Pro ist aktiv" : {
+
+    },
+    "Marqet Pro ist gerade nicht verfügbar." : {
 
     },
     "Marqet sortiert sie in Cards für Aldi, dm, den Markt und alle deine Läden." : {
@@ -399,6 +435,9 @@
 
     },
     "Marqet vergisst gelernte Zuordnungen und Laufwege. Deine Kategorie-Korrekturen und selbst sortierten Abschnitte bleiben." : {
+
+    },
+    "Mehr über Marqet Pro" : {
 
     },
     "Mehrere Läden planen" : {
@@ -443,13 +482,13 @@
     "Noch keine Einträge" : {
 
     },
-    "Noch keinem Laden zugeordnet" : {
-
-    },
     "Noch leer" : {
 
     },
     "Nochmal kaufen" : {
+
+    },
+    "Nutzungsbedingungen" : {
 
     },
     "Obst & Gemüse" : {
@@ -494,7 +533,7 @@
     "Sonstiges" : {
 
     },
-    "Später" : {
+    "Sortiert nach deinem Laufweg" : {
 
     },
     "Supermarkt" : {
@@ -548,6 +587,9 @@
     "Wähle deine Läden in der Reihenfolge, in der du sie am häufigsten besuchst. Du kannst später jederzeit weitere hinzufügen." : {
 
     },
+    "Was du schon zweimal im selben Laden gekauft hast, landet von selbst dort." : {
+
+    },
     "Wein, Bier & Spirituosen" : {
 
     },
@@ -558,6 +600,9 @@
 
     },
     "Weitere Läden" : {
+
+    },
+    "Weniger sortieren, schneller einkaufen." : {
 
     },
     "Wie zuletzt" : {

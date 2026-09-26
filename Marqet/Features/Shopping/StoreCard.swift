@@ -90,8 +90,10 @@ struct StoreCard: View {
         if store == nil {
             return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
         }
-        if let address = store?.address, !address.isEmpty { return address }
-        if let detail = store?.detail, !detail.isEmpty { return detail }
+        let distance = store.flatMap { model.distanceText(to: $0.id) }
+        if let address = store?.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
+        if let detail = store?.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
+        if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }
         switch state {
         case .shoppedEmpty: return String(localized: "Alles erledigt")
         case .planned where open == 0: return String(localized: "Noch keine Einträge")
@@ -304,8 +306,13 @@ private struct StoreDetailsSheet: View {
                 } header: {
                     Text("Filiale")
                 } footer: {
-                    Text("Die Adresse oder Info erscheint unter dem Ladennamen auf der Karte.")
+                    Text("Die Adresse oder Info erscheint unter dem Ladennamen auf der Card.")
                 }
+                BranchPickerSection(store: store)
+            }
+            .onChange(of: model.store(store.id)?.address) { _, new in
+                // Choosing a preferred branch fills in its address.
+                if let new { address = new }
             }
             .navigationTitle(store.name)
             .navigationBarTitleDisplayMode(.inline)

@@ -147,6 +147,8 @@ extension AppModel {
         do {
             try storeRepository.delete(id: id)
             try learning.forget(storeID: id)
+            try locationRepository.deleteAll(storeID: id)
+            locations.removeAll { $0.storeID == id }
         } catch {
             present(error)
         }

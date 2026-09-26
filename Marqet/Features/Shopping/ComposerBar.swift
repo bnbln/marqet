@@ -4,17 +4,33 @@ import SwiftUI
 /// Serial entry above the keyboard (KONZEPT §7.3).
 ///
 /// One text field for all stores: switching the target store via the chips never moves focus,
-/// so the keyboard stays up while the pager follows to the target card. Return adds the item
-/// and keeps the keyboard open (`ComposerTextField`).
+/// so the keyboard stays up while the pager follows to the target card. Return or the send
+/// button adds the item and keeps the keyboard open (`ComposerTextField`). The bar stays open
+/// for further entries until it is swiped down.
 struct ComposerBar: View {
     @Binding var isFocused: Bool
     @Binding var showsAddStore: Bool
 
     @Environment(AppModel.self) private var model
+    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
+    @State private var dragOffset: CGFloat = 0
+
+    private var accentColor: Color {
+        AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
+    }
+
+    private var canSend: Bool {
+        !model.composerText.trimmingCharacters(in: .whitespaces).isEmpty
+    }
 
     var body: some View {
         @Bindable var model = model
         VStack(spacing: 10) {
+            Capsule()
+                .fill(Color(.tertiaryLabel))
+                .frame(width: 36, height: 5)
+                .padding(.bottom, -2)
+                .accessibilityHidden(true)
             chips
             HStack(spacing: 10) {
                 ComposerTextField(
@@ -23,18 +39,59 @@ struct ComposerBar: View {
                     placeholder: placeholder,
                     onCommit: commit
                 )
-                Button("Fertig") { isFocused = false }
-                    .font(.body.weight(.semibold))
+                Button("Senden", systemImage: "arrow.up.circle.fill", action: send)
+                    .labelStyle(.iconOnly)
+                    .font(.system(size: 30))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        canSend ? Color.white : Color(.tertiaryLabel),
+                        canSend ? accentColor : Color(.tertiarySystemFill)
+                    )
+                    .disabled(!canSend)
+                    .animation(.snappy, value: canSend)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.leading, 16)
+            .padding(.trailing, 8)
+            .padding(.vertical, 6)
             .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 22, style: .continuous))
         }
-        .padding(12)
+        .padding(.horizontal, 12)
+        .padding(.top, 6)
+        .padding(.bottom, 12)
         .clipShape(.rect(cornerRadius: 30, style: .continuous))
         .glassEffect(.regular, in: .rect(cornerRadius: 30, style: .continuous))
         .padding(.horizontal, 10)
         .padding(.bottom, 6)
+        .offset(y: dragOffset)
+        .simultaneousGesture(dismissGesture)
+        .accessibilityAction(.escape, close)
+    }
+
+    /// Swiping the bar down closes the composer; horizontal drags stay with the chip row.
+    private var dismissGesture: some Gesture {
+        DragGesture(minimumDistance: 12)
+            .onChanged { value in
+                guard value.translation.height > abs(value.translation.width) else { return }
+                dragOffset = value.translation.height
+            }
+            .onEnded { value in
+                let isVertical = value.translation.height > abs(value.translation.width)
+                if isVertical, value.translation.height > 60 || value.predictedEndTranslation.height > 160 {
+                    close()
+                }
+                withAnimation(.snappy) { dragOffset = 0 }
+            }
+    }
+
+    private func send() {
+        guard canSend else { return }
+        commit(model.composerText)
+        model.composerText = ""
+    }
+
+    private func close() {
+        isFocused = false
+        model.endComposer()
     }
 
     private func commit(_ line: String) {

@@ -4,6 +4,19 @@ import SwiftUI
 extension Store {
     var color: Color { Color(hex: colorHex) }
 
+    /// Store color for text and symbols on the card surface: darkened in light mode, lightened
+    /// in dark mode until it reaches WCAG AA (4.5:1) against `secondarySystemGroupedBackground`.
+    var readableColor: Color {
+        let base = RGBColor(hex: colorHex) ?? RGBColor(red: 0.557, green: 0.557, blue: 0.576)
+        return Color(UIColor { traits in
+            let background = UIColor.secondarySystemGroupedBackground.resolvedColor(with: traits)
+            var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+            background.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            let adjusted = base.adjusted(forContrast: 4.5, on: RGBColor(red: red, green: green, blue: blue))
+            return UIColor(red: adjusted.red, green: adjusted.green, blue: adjusted.blue, alpha: 1)
+        })
+    }
+
     /// Text and symbols on top of the store color (black on yellow chains, white otherwise).
     var foregroundOnColor: Color {
         RGBColor(hex: colorHex)?.prefersDarkForeground == true ? .black.opacity(0.85) : .white

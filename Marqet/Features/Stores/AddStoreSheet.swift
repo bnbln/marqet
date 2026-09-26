@@ -13,6 +13,8 @@ struct AddStoreSheet: View {
     @State private var mode = Mode.catalog
     @State private var search = ""
     @State private var lastAdded: Store?
+    /// Stores created in this sheet; tapping them again removes them.
+    @State private var addedHere: Set<Store.ID> = []
 
     // Custom store form
     @State private var name = ""
@@ -68,7 +70,7 @@ struct AddStoreSheet: View {
                 ForEach(filteredEntries) { entry in
                     let added = model.stores.contains { $0.catalogKey == entry.key }
                     Button {
-                        lastAdded = model.addStore(from: entry, planned: opensComposer)
+                        toggle(entry)
                     } label: {
                         HStack(spacing: 14) {
                             StoreBadge(store: entry.makeStore(sortIndex: 0), size: 36)
@@ -91,6 +93,21 @@ struct AddStoreSheet: View {
             }
         }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Kette suchen")
+    }
+
+    private func toggle(_ entry: StoreCatalog.Entry) {
+        guard let existing = model.stores.first(where: { $0.catalogKey == entry.key }) else {
+            let store = model.addStore(from: entry, planned: opensComposer)
+            addedHere.insert(store.id)
+            lastAdded = store
+            return
+        }
+        if lastAdded?.id == existing.id { lastAdded = nil }
+        if addedHere.remove(existing.id) != nil {
+            Task { await model.deleteStore(existing.id) }
+        } else {
+            model.hide(existing.id)
+        }
     }
 
     private var filteredEntries: [StoreCatalog.Entry] {

@@ -64,6 +64,20 @@ struct RGBColorTests {
         #expect(try #require(RGBColor(hex: "#F5C400")).prefersDarkForeground)   // Edeka-like yellow
         #expect(try !#require(RGBColor(hex: "#243C8C")).prefersDarkForeground)  // Aldi-like blue
     }
+
+    @Test(arguments: ["#F5C400", "#243C8C", "#E0662B", "#5E9E3C", "#23879B"])
+    func readableAdjustment(_ hex: String) throws {
+        let color = try #require(RGBColor(hex: hex))
+        let lightCard = RGBColor.white
+        let darkCard = try #require(RGBColor(hex: "#1C1C1E"))
+        #expect(color.adjusted(forContrast: 4.5, on: lightCard).contrastRatio(with: lightCard) >= 4.5)
+        #expect(color.adjusted(forContrast: 4.5, on: darkCard).contrastRatio(with: darkCard) >= 4.5)
+    }
+
+    @Test func readableAdjustmentKeepsSufficientColors() throws {
+        let blue = try #require(RGBColor(hex: "#243C8C"))
+        #expect(blue.adjusted(forContrast: 4.5, on: .white) == blue)
+    }
 }
 
 @Suite("Mapping & heuristics")

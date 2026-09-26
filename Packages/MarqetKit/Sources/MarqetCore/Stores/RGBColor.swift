@@ -43,6 +43,27 @@ public struct RGBColor: Hashable, Sendable {
         contrastRatio(with: .black) > contrastRatio(with: .white)
     }
 
+    /// This color, mixed toward black (light background) or white (dark background) just far
+    /// enough to reach `minimumContrast` against `background` – used for store-colored text.
+    public func adjusted(forContrast minimumContrast: Double, on background: RGBColor) -> RGBColor {
+        let target = background.prefersDarkForeground ? RGBColor.black : RGBColor.white
+        var amount = 0.0
+        var result = self
+        while result.contrastRatio(with: background) < minimumContrast, amount < 1 {
+            amount = min(1, amount + 0.02)
+            result = mixed(with: target, amount: amount)
+        }
+        return result
+    }
+
+    public func mixed(with other: RGBColor, amount: Double) -> RGBColor {
+        RGBColor(
+            red: red + (other.red - red) * amount,
+            green: green + (other.green - green) * amount,
+            blue: blue + (other.blue - blue) * amount
+        )
+    }
+
     public static let white = RGBColor(red: 1, green: 1, blue: 1)
     public static let black = RGBColor(red: 0, green: 0, blue: 0)
 }

@@ -7,6 +7,7 @@ struct TriageScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showsAddStore = false
+    @State private var undoFeedback = 0
 
     var body: some View {
         NavigationStack {
@@ -47,6 +48,7 @@ struct TriageScreen: View {
             .navigationTitle("Zuordnen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
+            .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
             .sheet(isPresented: $showsAddStore) {
                 AddStoreSheet(opensComposer: false).leadingSheetPlacement()
             }
@@ -73,6 +75,7 @@ struct TriageScreen: View {
         if !(model.triage?.history.isEmpty ?? true) {
             ToolbarItem(placement: .bottomBar) {
                 Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                    undoFeedback += 1
                     Task { await model.triageUndo() }
                 }
             }

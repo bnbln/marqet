@@ -11,10 +11,13 @@ struct StoreCard: View {
     var isFocused = false
 
     @Environment(AppModel.self) private var model
+    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsSectionOrder = false
     @State private var showsStoreDetails = false
 
     private var tint: Color { store?.color ?? .gray }
+    /// Store color for text and symbols on the card surface (WCAG AA in light and dark mode).
+    private var readableTint: Color { store?.readableColor ?? .secondary }
     private var completedItems: [ShoppingItem] {
         model.recentlyCompleted.filter { $0.storeID == store?.id && !items.contains($0) }
     }
@@ -65,7 +68,6 @@ struct StoreCard: View {
                     .minimumScaleFactor(0.7)
                 Text(subtitle)
                     .font(.subheadline.weight(.medium))
-                    .opacity(0.85)
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
@@ -121,14 +123,11 @@ struct StoreCard: View {
     private var itemList: some View {
         ScrollViewReader { proxy in
             List {
-                if store == nil, !items.isEmpty {
-                    triageButton
-                }
                 // Category sections in walking order for grocery stores, one flat list otherwise (KONZEPT §6.3).
                 ForEach(model.sections(for: page, items: items)) { section in
                     Section {
                         ForEach(section.items) { item in
-                            ItemRow(item: item, tint: tint)
+                            ItemRow(item: item, tint: readableTint)
                             .listRowBackground(Color(.secondarySystemGroupedBackground))
                             .listRowSeparator(.visible, edges: .bottom)
                             .listRowSeparatorTint(Color(.separator).opacity(0.4))
@@ -137,9 +136,9 @@ struct StoreCard: View {
                     } header: {
                         if let category = section.category {
                             Label(category.displayName, systemImage: category.symbol)
-                                .font(.footnote.weight(.semibold))
-                                .textCase(.uppercase)
-                                .foregroundStyle(tint)
+                                .font(.subheadline.weight(.semibold))
+                                .textCase(nil)
+                                .foregroundStyle(readableTint)
                         }
                     }
                 }
@@ -149,7 +148,11 @@ struct StoreCard: View {
             .scrollContentBackground(.hidden)
             .scrollIndicators(.visible)
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                Color.clear.frame(height: 54)
+                if store == nil, !items.isEmpty {
+                    triageFooter
+                } else {
+                    Color.clear.frame(height: 54)
+                }
             }
             // No keyboard dismissal on scroll here: the scroll to a new item would close the composer.
             .onChange(of: items.count) { old, new in
@@ -161,19 +164,28 @@ struct StoreCard: View {
         }
     }
 
-    /// Entry into the triage flow from the unsorted card (KONZEPT §7.4).
-    private var triageButton: some View {
-        Button {
-            model.startTriage()
-        } label: {
-            Label("Läden zuordnen", systemImage: "tray.and.arrow.down.fill")
-                .font(.subheadline.weight(.semibold))
-                .frame(maxWidth: .infinity)
+    /// Entry into the triage flow, pinned to the bottom of the unsorted card (KONZEPT §7.4).
+    /// Leaves the trailing corner free for the add button that overlaps the card.
+    private var triageFooter: some View {
+        HStack {
+            Button {
+                model.startTriage()
+            } label: {
+                Label("Läden zuordnen", systemImage: "tray.and.arrow.down.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .tint(AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color)
+            .foregroundStyle(.white)
+            Spacer(minLength: 72)
         }
-        .buttonStyle(.borderedProminent)
-        .tint(.gray)
-        .listRowBackground(Color(.secondarySystemGroupedBackground))
-        .listRowSeparator(.hidden)
+        .padding(.horizontal, 18)
+        .padding(.top, 10)
+        .padding(.bottom, 34)
+        .background(Color(.secondarySystemGroupedBackground))
     }
 
     @ViewBuilder
@@ -188,7 +200,7 @@ struct StoreCard: View {
                         HStack(spacing: 14) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.title2)
-                                .foregroundStyle(tint.opacity(0.72))
+                                .foregroundStyle(readableTint)
                             Text(item.title)
                                 .strikethrough()
                                 .foregroundStyle(.secondary)
@@ -222,19 +234,19 @@ struct StoreCard: View {
             case .shoppedEmpty:
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 52))
-                    .foregroundStyle(tint)
+                    .foregroundStyle(readableTint)
                 Text("Alles erledigt bei \(store?.name ?? "")")
                     .font(.title3.bold())
                     .multilineTextAlignment(.center)
                 if let store {
                     Button("Ausblenden") { model.hide(store.id) }
                         .buttonStyle(.bordered)
-                        .tint(tint)
+                        .tint(readableTint)
                 }
             case .planned:
                 Image(systemName: "cart.badge.plus")
                     .font(.system(size: 48))
-                    .foregroundStyle(tint)
+                    .foregroundStyle(readableTint)
                 Text("Noch leer")
                     .font(.title3.bold())
                 Text("Tippe auf +, um etwas für \(store?.name ?? "") hinzuzufügen.")
@@ -244,6 +256,7 @@ struct StoreCard: View {
                 Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
                     .buttonStyle(.borderedProminent)
                     .tint(tint)
+                    .foregroundStyle(store?.foregroundOnColor ?? .white)
             default:
                 if store == nil {
                     Image(systemName: "tray")
@@ -377,7 +390,10 @@ struct ItemRow: View {
         }
         .padding(.vertical, 2)
         .animation(.snappy, value: item.isCompleted)
-        .sensoryFeedback(.impact(weight: .light), trigger: item.isCompleted)
+        // A noticeable tap for checking off; un-checking stays silent (undo has its own feedback).
+        .sensoryFeedback(trigger: item.isCompleted) { old, new in
+            !old && new ? .impact(weight: .heavy, intensity: 0.9) : nil
+        }
         .draggable(item.id)
         .contextMenu {
             Menu("Laden ändern", systemImage: "storefront") {

@@ -9,6 +9,9 @@ struct ShoppingScreen: View {
     @State private var showsSettings = false
     @State private var showsStoreOrder = false
     @State private var isComposerFocused = false
+    /// Bumped by the add button and undo; each drives a light haptic tap.
+    @State private var addFeedback = 0
+    @State private var undoFeedback = 0
 
     private var accentColor: Color {
         AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
@@ -31,6 +34,8 @@ struct ShoppingScreen: View {
                     }
                 }
                 .animation(.snappy, value: model.composerTarget == nil)
+                .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
+                .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbar }
@@ -73,16 +78,13 @@ struct ShoppingScreen: View {
                     }
                     #endif
                 }
-                .onChange(of: isComposerFocused) { _, focused in
-                    if !focused, model.composerTarget != nil { model.endComposer() }
-                }
         }
     }
 
     private var bottomControls: some View {
-        ZStack {
+        // The dots sit bottom-aligned with the add button, on the background below the cards.
+        ZStack(alignment: .bottom) {
             PageIndicator()
-                .glassEffect(.regular, in: .capsule)
             HStack {
                 Spacer()
                 Menu {
@@ -97,9 +99,10 @@ struct ShoppingScreen: View {
                         .font(.headline.weight(.semibold))
                         .foregroundStyle(.white)
                         .frame(width: 52, height: 52)
-                        .glassEffect(.regular.tint(accentColor), in: .circle)
+                        .glassEffect(.regular.tint(accentColor).interactive(), in: .circle)
                         .contentShape(.circle)
                 } primaryAction: {
+                    addFeedback += 1
                     model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
                 }
                 .menuStyle(.button)
@@ -130,6 +133,7 @@ struct ShoppingScreen: View {
         if model.lastUndoAction != nil {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                    undoFeedback += 1
                     Task { await model.undoLastAction() }
                 }
             }
@@ -168,6 +172,7 @@ extension ShoppingScreen {
 /// "5 automatisch zugeordnet · Rückgängig" (Pro, KONZEPT §7.4). Disappears after a few seconds.
 private struct AutoAssignToast: View {
     @Environment(AppModel.self) private var model
+    @State private var undoFeedback = 0
 
     var body: some View {
         let count = model.autoAssignReport?.assignments.count ?? 0
@@ -175,14 +180,18 @@ private struct AutoAssignToast: View {
             Image(systemName: "sparkles")
             Text(count == 1 ? "1 Eintrag automatisch zugeordnet" : "\(count) Einträge automatisch zugeordnet")
                 .font(.subheadline.weight(.medium))
-            Button("Rückgängig") { Task { await model.undoAutoAssign() } }
-                .font(.subheadline.weight(.semibold))
+            Button("Rückgängig") {
+                undoFeedback += 1
+                Task { await model.undoAutoAssign() }
+            }
+            .font(.subheadline.weight(.semibold))
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
         .glassEffect(.regular, in: .capsule)
         .padding(.top, 8)
         .transition(.move(edge: .top).combined(with: .opacity))
+        .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
         .task(id: count) {
             try? await Task.sleep(for: .seconds(6))
             model.autoAssignReport = nil

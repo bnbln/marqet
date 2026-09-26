@@ -7,6 +7,8 @@ struct StorePager: View {
     @SceneStorage("selectedPageV2") private var storedActivePage = ""
     @State private var position = ScrollPosition(idType: String.self)
     @State private var leadingIndex = 0
+    /// Bumped when a swipe settles on another card; drives a light haptic tick.
+    @State private var swipeFeedback = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -28,6 +30,7 @@ struct StorePager: View {
                 .scrollTargetLayout()
             }
             .scrollPosition($position)
+            .sensoryFeedback(.selection, trigger: swipeFeedback)
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
             .scrollIndicators(.hidden)
             .scrollClipDisabled()
@@ -100,6 +103,7 @@ struct StorePager: View {
 
         guard leading != leadingIndex else { return }
         leadingIndex = leading
+        swipeFeedback += 1
         let pages = content.compactMap { $0.isGhost ? nil : $0.page }
         guard let anchored = SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) else { return }
         // Duo: the right-hand card is always the active one. iPad: keep a tapped card while visible.
@@ -143,8 +147,10 @@ struct PageIndicator: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let pages = model.deck.pages
-        let activeIndex = pages.firstIndex(of: model.activePage) ?? 0
+        // The trailing "+" page is reachable by swiping; it gets no dot of its own.
+        let pages = model.deck.pages.filter { $0 != .more }
+        let activeIndex = pages.firstIndex(of: model.activePage)
+            ?? (model.activePage == .more ? pages.count - 1 : 0)
         let start = max(0, min(activeIndex - 2, pages.count - 5))
         let visible = Array(pages.dropFirst(start).prefix(5))
         HStack(spacing: 8) {
@@ -153,7 +159,7 @@ struct PageIndicator: View {
                     model.pageRequest = page
                 } label: {
                     dot(for: page)
-                        .opacity(model.visiblePages.contains(page) ? 1 : 0.35)
+                        .opacity(model.visiblePages.contains(page) ? 1 : 0.5)
                         .scaleEffect(page == model.activePage ? 1.35 : 1)
                         .frame(width: 18, height: 18)
                         .contentShape(.rect)
@@ -176,7 +182,6 @@ struct PageIndicator: View {
             )
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 4)
     }
 
     @ViewBuilder
@@ -191,7 +196,7 @@ struct PageIndicator: View {
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
         case .store(let id):
-            Circle().fill(model.store(id)?.color ?? .gray).frame(width: 7, height: 7)
+            Circle().fill(model.store(id)?.readableColor ?? .gray).frame(width: 7, height: 7)
         }
     }
 

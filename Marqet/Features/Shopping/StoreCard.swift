@@ -11,9 +11,8 @@ struct StoreCard: View {
     var isFocused = false
 
     @Environment(AppModel.self) private var model
-    @State private var renaming: ShoppingItem?
-    @State private var renameText = ""
     @State private var showsSectionOrder = false
+    @State private var showsStoreDetails = false
 
     private var tint: Color { store?.color ?? .gray }
     private var completedItems: [ShoppingItem] {
@@ -42,12 +41,8 @@ struct StoreCard: View {
         .sheet(isPresented: $showsSectionOrder) {
             if let store { SectionOrderSheet(store: store).leadingSheetPlacement() }
         }
-        .alert("Umbenennen", isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })) {
-            TextField("Titel", text: $renameText)
-            Button("Abbrechen", role: .cancel) {}
-            Button("Sichern") {
-                if let renaming { Task { await model.rename(renaming, to: renameText) } }
-            }
+        .sheet(isPresented: $showsStoreDetails) {
+            if let store { StoreDetailsSheet(store: store).leadingSheetPlacement() }
         }
     }
 
@@ -71,6 +66,7 @@ struct StoreCard: View {
                 Text(subtitle)
                     .font(.subheadline.weight(.medium))
                     .opacity(0.85)
+                    .lineLimit(1)
             }
             Spacer(minLength: 0)
             if let store {
@@ -89,10 +85,14 @@ struct StoreCard: View {
 
     private var subtitle: String {
         let open = items.filter { !$0.isCompleted }.count
-        if store == nil { return String(localized: "\(open) ohne Laden") }
+        if store == nil {
+            return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
+        }
+        if let address = store?.address, !address.isEmpty { return address }
+        if let detail = store?.detail, !detail.isEmpty { return detail }
         switch state {
         case .shoppedEmpty: return String(localized: "Alles erledigt")
-        case .planned where open == 0: return String(localized: "Geplant")
+        case .planned where open == 0: return String(localized: "Noch keine Einträge")
         default: return String(localized: "\(open) offen")
         }
     }
@@ -100,6 +100,7 @@ struct StoreCard: View {
     private func cardMenu(for store: Store) -> some View {
         Menu {
             Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
+            Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
             if store.type.showsCategorySections {
                 Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
             }
@@ -127,10 +128,7 @@ struct StoreCard: View {
                 ForEach(model.sections(for: page, items: items)) { section in
                     Section {
                         ForEach(section.items) { item in
-                            ItemRow(item: item, tint: tint, onRename: {
-                                renameText = item.title
-                                renaming = item
-                            })
+                            ItemRow(item: item, tint: tint)
                             .listRowBackground(Color(.secondarySystemGroupedBackground))
                             .listRowSeparator(.visible, edges: .bottom)
                             .listRowSeparatorTint(Color(.separator).opacity(0.4))
@@ -276,13 +274,57 @@ struct StoreCard: View {
     }
 }
 
+private struct StoreDetailsSheet: View {
+    let store: Store
+    @Environment(AppModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
+    @State private var address = ""
+    @State private var detail = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Adresse", text: $address)
+                        .textContentType(.fullStreetAddress)
+                    TextField("Weitere Info", text: $detail)
+                } header: {
+                    Text("Filiale")
+                } footer: {
+                    Text("Die Adresse oder Info erscheint unter dem Ladennamen auf der Karte.")
+                }
+            }
+            .navigationTitle(store.name)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abbrechen") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Sichern") {
+                        model.updateDetails(of: store.id, address: address, detail: detail)
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                address = store.address ?? ""
+                detail = store.detail ?? ""
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
 /// A shopping item row, Reminders-style: circle to check off, 1.5 s undo window.
 struct ItemRow: View {
     let item: ShoppingItem
     let tint: Color
-    var onRename: () -> Void = {}
 
     @Environment(AppModel.self) private var model
+    @State private var isEditing = false
+    @State private var draftTitle = ""
+    @FocusState private var isTitleFocused: Bool
 
     var body: some View {
         HStack(spacing: 14) {
@@ -300,9 +342,30 @@ struct ItemRow: View {
             .accessibilityLabel(item.isCompleted ? "Erledigt, tippen zum Rückgängigmachen" : "Abhaken")
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.title)
-                    .strikethrough(item.isCompleted)
-                    .foregroundStyle(item.isCompleted ? Color.secondary : Color.primary)
+                if isEditing {
+                    TextField("Eintrag", text: $draftTitle)
+                        .focused($isTitleFocused)
+                        .submitLabel(.done)
+                        .onSubmit(finishEditing)
+                        .onChange(of: isTitleFocused) { _, focused in
+                            if !focused { finishEditing() }
+                        }
+                } else {
+                    Button(action: startEditing) {
+                        let parts = ItemTitleParts(item.title)
+                        HStack(spacing: 6) {
+                            if let prefix = parts.prefix { quantityTag(prefix) }
+                            Text(parts.name)
+                                .strikethrough(item.isCompleted)
+                                .foregroundStyle(item.isCompleted ? Color.secondary : Color.primary)
+                            if let suffix = parts.suffix { quantityTag(suffix) }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("\(item.title), bearbeiten")
+                }
                 if let notes = item.userNotes {
                     Text(notes)
                         .font(.footnote)
@@ -325,7 +388,6 @@ struct ItemRow: View {
                     Button(store.name, systemImage: item.storeID == store.id ? "checkmark" : "circle.fill") {
                         Task { await model.assign(item, to: store) }
                     }
-                    .tint(store.color)
                 }
             }
             Menu("Kategorie ändern", systemImage: "square.grid.2x2") {
@@ -336,15 +398,72 @@ struct ItemRow: View {
                     }
                 }
             }
-            Button("Umbenennen", systemImage: "pencil", action: onRename)
+            Button("Bearbeiten", systemImage: "pencil", action: startEditing)
             Button("Löschen", systemImage: "trash", role: .destructive) {
                 Task { await model.delete(item) }
             }
         }
-        .swipeActions(edge: .trailing) {
-            Button("Löschen", systemImage: "trash", role: .destructive) {
-                Task { await model.delete(item) }
-            }
+        .tint(.primary)
+    }
+
+    private func quantityTag(_ value: String) -> some View {
+        Text(value)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(Color(.tertiarySystemFill), in: .capsule)
+    }
+
+    private func startEditing() {
+        draftTitle = item.title
+        isEditing = true
+        DispatchQueue.main.async { isTitleFocused = true }
+    }
+
+    private func finishEditing() {
+        guard isEditing else { return }
+        isEditing = false
+        isTitleFocused = false
+        let title = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !title.isEmpty && title != item.title {
+            Task { await model.rename(item, to: title) }
         }
     }
+}
+
+private struct ItemTitleParts {
+    let name: String
+    let prefix: String?
+    let suffix: String?
+
+    init(_ title: String) {
+        var remaining = title
+        var leading: String?
+        var trailing: String?
+        if let match = Self.prefixPattern.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
+           let tagRange = Range(match.range(at: 1), in: remaining),
+           let nameRange = Range(match.range(at: 2), in: remaining) {
+            leading = String(remaining[tagRange])
+            remaining = String(remaining[nameRange])
+        }
+        if let match = Self.suffixPattern.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
+           let nameRange = Range(match.range(at: 1), in: remaining),
+           let tagRange = Range(match.range(at: 2), in: remaining) {
+            trailing = String(remaining[tagRange])
+            remaining = String(remaining[nameRange])
+        }
+        name = remaining
+        prefix = leading
+        suffix = trailing
+    }
+
+    private static let prefixPattern = try! NSRegularExpression(
+        pattern: #"^((?:\d+(?:[.,]\d+)?\s*)?(?:x|×|kg|g|mg|l|ml|Stück|Stk\.?))\s+(.+)$"#,
+        options: [.caseInsensitive]
+    )
+    private static let suffixPattern = try! NSRegularExpression(
+        pattern: #"^(.+?)\s+((?:\d+(?:[.,]\d+)?\s*)?(?:x|×|kg|g|mg|l|ml|Stück|Stk\.?))$"#,
+        options: [.caseInsensitive]
+    )
 }

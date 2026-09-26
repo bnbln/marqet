@@ -25,9 +25,21 @@ struct OnboardingFlow: View {
             .animation(.snappy, value: step)
             .toolbar {
                 if step != .welcome {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Zurück", systemImage: "chevron.left") { goBack() }
+                            .tint(.primary)
+                    }
+                }
+                if step != .welcome {
                     ToolbarItem(placement: .principal) {
                         ProgressView(value: Double(step.rawValue), total: Double(Step.allCases.count - 1))
                             .frame(width: 160)
+                    }
+                }
+                if canSkip {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Überspringen") { skip() }
+                            .tint(.primary)
                     }
                 }
             }
@@ -43,6 +55,37 @@ struct OnboardingFlow: View {
 
     private func advance(to next: Step) {
         withAnimation(.snappy) { step = next }
+    }
+
+    private var canSkip: Bool {
+        switch step {
+        case .welcome, .stores, .siri: true
+        case .access: model.phase == .needsList || model.phase == .ready
+        case .list: true
+        }
+    }
+
+    private func skip() {
+        switch step {
+        case .welcome: advance(to: model.phase == .needsList || model.phase == .ready ? .list : .access)
+        case .access: advance(to: .list)
+        case .list:
+            if model.selectedListID != nil {
+                advance(to: .stores)
+            } else {
+                Task {
+                    await model.createShoppingList()
+                    if model.selectedListID != nil { advance(to: .stores) }
+                }
+            }
+        case .stores: advance(to: .siri)
+        case .siri: model.completeOnboarding()
+        }
+    }
+
+    private func goBack() {
+        guard let previous = Step(rawValue: step.rawValue - 1) else { return }
+        advance(to: previous)
     }
 
     // MARK: Steps
@@ -168,7 +211,7 @@ private struct OnboardingStoresView: View {
                 }
                 onContinue()
             } label: {
-                Text(selection.isEmpty && model.stores.isEmpty ? "Überspringen" : "Weiter (\(selection.count + model.stores.count))")
+                Text("Weiter")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.glassProminent)

@@ -8,8 +8,6 @@ struct ShoppingScreen: View {
     @State private var showsAddStore = false
     @State private var showsSettings = false
     @State private var showsStoreOrder = false
-    @State private var showsNewListPrompt = false
-    @State private var newListName = ""
     @State private var isComposerFocused = false
 
     private var accentColor: Color {
@@ -37,7 +35,7 @@ struct ShoppingScreen: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { toolbar }
                 .toolbarVerticalCompressionPreferringItems()
-                .tint(accentColor)
+                .tint(.primary)
                 .sheet(isPresented: $showsAddStore) {
                     AddStoreSheet()
                         .leadingSheetPlacement()
@@ -47,14 +45,6 @@ struct ShoppingScreen: View {
                 }
                 .sheet(isPresented: $showsStoreOrder) {
                     StoreOrderSheet().leadingSheetPlacement()
-                }
-                .alert("Neue Liste anlegen", isPresented: $showsNewListPrompt) {
-                    TextField("Listenname", text: $newListName)
-                    Button("Abbrechen", role: .cancel) {}
-                    Button("Erstellen") {
-                        Task { await model.createShoppingList(named: newListName) }
-                    }
-                    .disabled(newListName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 .sheet(isPresented: triagePromptBinding) {
                     if let ids = model.triagePrompt { TriagePromptSheet(itemIDs: ids) }
@@ -106,7 +96,7 @@ struct ShoppingScreen: View {
                     Image(systemName: "plus")
                         .font(.headline.weight(.semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 52, height: 52)
                         .glassEffect(.regular.tint(accentColor), in: .circle)
                         .contentShape(.circle)
                 } primaryAction: {
@@ -125,49 +115,26 @@ struct ShoppingScreen: View {
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarLeading) {
-            Menu {
-                Section("Listen") {
-                    ForEach(model.lists.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }) { list in
-                        Button {
-                            Task { await model.selectList(list.id) }
-                        } label: {
-                            if list.id == model.selectedListID {
-                                Label(list.title, systemImage: "checkmark")
-                            } else {
-                                Text(list.title)
-                            }
-                        }
-                        .disabled(!list.allowsModifications)
-                    }
-                }
-                Button("Neue Liste anlegen", systemImage: "plus") {
-                    newListName = ""
-                    showsNewListPrompt = true
-                }
-            } label: {
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(spacing: 3) {
-                        Text("Marqet")
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                        Image(systemName: "chevron.down")
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 24, height: 24)
-                            .glassEffect(.regular, in: .circle)
-                    }
-                    Text(model.selectedList?.title ?? "Liste wählen")
-                        .lineLimit(1)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(.rect)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Marqet")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Text(model.selectedList?.title ?? "Liste wählen")
+                    .lineLimit(1)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .accessibilityLabel("Liste wechseln")
-            .buttonStyle(.plain)
-            .tint(.primary)
+            .fixedSize(horizontal: true, vertical: false)
         }
         .sharedBackgroundVisibility(.hidden)
+        if model.lastUndoAction != nil {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                    Task { await model.undoLastAction() }
+                }
+            }
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+        }
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Button(model.showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen",

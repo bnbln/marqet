@@ -19,6 +19,8 @@ public final class StoreEntity {
     public var originRaw: String = Store.Origin.custom.rawValue
     public var typeRaw: String = StoreType.other.rawValue
     public var plannedAt: Date?
+    public var address: String?
+    public var detail: String?
     public var createdAt: Date = Date.now
 
     public init(_ store: Store) {
@@ -43,6 +45,8 @@ public final class StoreEntity {
         originRaw = store.origin.rawValue
         typeRaw = store.type.rawValue
         plannedAt = store.plannedAt
+        address = store.address
+        detail = store.detail
     }
 
     public var store: Store {
@@ -56,7 +60,9 @@ public final class StoreEntity {
             sortIndex: sortIndex,
             origin: Store.Origin(rawValue: originRaw) ?? .custom,
             type: StoreType(rawValue: typeRaw) ?? .other,
-            plannedAt: plannedAt
+            plannedAt: plannedAt,
+            address: address,
+            detail: detail
         )
     }
 }

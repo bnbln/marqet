@@ -21,7 +21,8 @@ struct StorePager: View {
                     ForEach(content) { slot in
                         slotView(slot, deck: deck, metrics: metrics)
                             .frame(width: metrics.slotWidth)
-                            .padding(.vertical, 8)
+                            .padding(.top, 8)
+                            .padding(.bottom, 32)
                     }
                 }
                 .scrollTargetLayout()
@@ -143,8 +144,11 @@ struct PageIndicator: View {
 
     var body: some View {
         let pages = model.deck.pages
+        let activeIndex = pages.firstIndex(of: model.activePage) ?? 0
+        let start = max(0, min(activeIndex - 2, pages.count - 5))
+        let visible = Array(pages.dropFirst(start).prefix(5))
         HStack(spacing: 8) {
-            ForEach(pages, id: \.self) { page in
+            ForEach(visible, id: \.self) { page in
                 Button {
                     model.pageRequest = page
                 } label: {
@@ -159,6 +163,18 @@ struct PageIndicator: View {
             }
         }
         .animation(.snappy, value: model.activePage)
+        .mask {
+            LinearGradient(
+                stops: [
+                    .init(color: .black.opacity(start > 0 ? 0.25 : 1), location: 0),
+                    .init(color: .black, location: 0.15),
+                    .init(color: .black, location: 0.85),
+                    .init(color: .black.opacity(start + visible.count < pages.count ? 0.25 : 1), location: 1),
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        }
         .padding(.horizontal, 12)
         .padding(.vertical, 4)
     }
@@ -172,7 +188,7 @@ struct PageIndicator: View {
                 .foregroundStyle(.secondary)
         case .unsorted:
             Image(systemName: "tray.fill")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
         case .store(let id):
             Circle().fill(model.store(id)?.color ?? .gray).frame(width: 7, height: 7)

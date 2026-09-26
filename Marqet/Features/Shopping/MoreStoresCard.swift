@@ -15,38 +15,31 @@ struct MoreStoresCard: View {
         case catalog(String)
     }
 
-    private let columns = [GridItem(.adaptive(minimum: 92), spacing: 12)]
-
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+        GeometryReader { proxy in
+            let columnCount = max(1, Int((proxy.size.width - 40 + 12) / 104))
+            let rowCount = max(1, Int((proxy.size.height - 40 - 52 + 16) / 112))
+            let storeCapacity = max(0, columnCount * rowCount - 1)
+            let ownCount = min(model.hiddenStores.count, storeCapacity)
+            let suggestionCount = max(0, storeCapacity - ownCount)
+
+            VStack(alignment: .leading, spacing: 12) {
                 header
-
-                if !model.hiddenStores.isEmpty {
-                    section("Deine Läden") {
-                        ForEach(model.hiddenStores) { store in
-                            tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount), spacing: 16) {
+                    ForEach(model.hiddenStores.prefix(ownCount)) { store in
+                        tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
+                    }
+                    ForEach(model.catalogSuggestions.prefix(suggestionCount)) { entry in
+                        tile(.catalog(entry.key), name: entry.name) {
+                            StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
                         }
                     }
-                }
-
-                if !model.catalogSuggestions.isEmpty {
-                    section(model.stores.isEmpty ? "Wo kaufst du ein?" : "Vorschläge") {
-                        ForEach(model.catalogSuggestions.prefix(12)) { entry in
-                            tile(.catalog(entry.key), name: entry.name) {
-                                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 48)
-                            }
-                        }
-                        addStoreTile
-                    }
-                } else {
-                    section("Läden") { addStoreTile }
+                    addStoreTile
                 }
             }
             .padding(20)
-            .padding(.bottom, 58)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .scrollIndicators(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .cardSurface(isFocused: isFocused)
         .sheet(isPresented: $showsAddStore) {
@@ -56,18 +49,22 @@ struct MoreStoresCard: View {
     }
 
     private var header: some View {
-        let nothingElse = model.deck.pages == [.unsorted, .more] && model.unsortedItems.isEmpty
-        return HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(isSelecting ? "Läden auswählen" : (nothingElse ? "Alles eingekauft 🎉" : "Weitere Läden"))
-                    .font(.title2.bold())
-                Text(nothingElse
-                     ? "Plane deinen nächsten Einkauf: Tippe auf einen Laden."
-                     : "Tippe auf einen Laden, um etwas für ihn einzutragen.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
+        return HStack(alignment: .center, spacing: 8) {
+            Text(model.hiddenStores.isEmpty ? "Weitere Läden" : "Deine Läden")
+                .font(.title2.bold())
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             Spacer(minLength: 0)
+            if isSelecting {
+                Button("\(selection.count) planen") { planSelection() }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(Color(.tertiarySystemFill), in: .capsule)
+                    .buttonStyle(.plain)
+                    .disabled(selection.isEmpty)
+            }
             if !model.hiddenStores.isEmpty || !model.catalogSuggestions.isEmpty {
                 Button {
                     isSelecting.toggle()
@@ -80,11 +77,6 @@ struct MoreStoresCard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(isSelecting ? "Mehrfachauswahl beenden" : "Mehrere Läden planen")
-            }
-            if isSelecting {
-                Button("\(selection.count) planen") { planSelection() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(selection.isEmpty)
             }
         }
     }
@@ -105,16 +97,6 @@ struct MoreStoresCard: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-    }
-
-    private func section(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
-            LazyVGrid(columns: columns, spacing: 16) {
-                content()
-            }
-        }
     }
 
     private func tile(_ tile: Tile, name: String, @ViewBuilder badge: () -> some View) -> some View {

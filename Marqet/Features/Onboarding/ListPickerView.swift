@@ -20,37 +20,35 @@ struct ListPickerView: View {
     }
 
     private var list: some View {
-            List {
-                Section {
-                    ForEach(sortedLists) { list in
-                        Button {
-                            Task {
-                                await model.selectList(list.id)
-                                onSelected?()
-                            }
-                        } label: {
-                            ListRow(list: list, isSelected: list.id == model.selectedListID)
-                        }
-                        .disabled(!list.allowsModifications)
-                    }
-                } header: {
-                    Text("Deine Erinnerungslisten")
-                } footer: {
-                    Text("Wähle die Liste, in die du – oder Siri – deine Einkäufe einträgst.")
-                }
-
-                Section {
+        List {
+            Section {
+                ForEach(sortedLists) { list in
                     Button {
-                        Task {
-                            await model.createShoppingList()
-                            onSelected?()
-                        }
+                        Task { await model.selectList(list.id) }
                     } label: {
-                        Label("Neue Liste „Einkaufen“ anlegen", systemImage: "plus.circle.fill")
+                        ListRow(list: list, isSelected: list.id == model.selectedListID)
                     }
+                    .disabled(!list.allowsModifications)
+                }
+                Button {
+                    Task { await model.createShoppingList() }
+                } label: {
+                    Label("Neue Liste anlegen", systemImage: "plus")
+                        .foregroundStyle(.primary)
                 }
             }
-            .navigationTitle("Einkaufsliste")
+        }
+        .navigationTitle("Einkaufsliste")
+        .safeAreaInset(edge: .bottom) {
+            if embedded {
+                Button("Weiter") { onSelected?() }
+                    .frame(maxWidth: .infinity)
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
+                    .disabled(model.selectedListID == nil)
+                    .padding(20)
+            }
+        }
     }
 
     private var sortedLists: [ReminderList] {
@@ -72,26 +70,12 @@ private struct ListRow: View {
             Circle()
                 .fill(Color(hex: list.colorHex ?? "#8E8E93"))
                 .frame(width: 14, height: 14)
-            VStack(alignment: .leading, spacing: 2) {
-                // Explicit colors: inside a List button, hierarchical styles pick up the tint.
-                Text(list.title)
-                    .foregroundStyle(Color.primary)
-                Text(list.sourceTitle)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondary)
-            }
+            Text(list.title)
+                .foregroundStyle(Color.primary)
             Spacer()
-            if ShoppingListHeuristics.isLikelyShoppingList(list.title) {
-                Text("Vorschlag")
-                    .font(.caption.weight(.medium))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(.tint.opacity(0.15), in: .capsule)
-                    .foregroundStyle(.tint)
-            }
             if isSelected {
                 Image(systemName: "checkmark")
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(.primary)
                     .accessibilityLabel("Ausgewählt")
             }
         }

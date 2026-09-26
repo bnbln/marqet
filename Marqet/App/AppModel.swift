@@ -30,6 +30,8 @@ final class AppModel {
     var items: [ShoppingItem] = []
     var stores: [Store] = []
     private(set) var recentlyCompleted: [ShoppingItem] = []
+    private(set) var lastUndoAction: UndoAction?
+    @ObservationIgnored private var isUndoing = false
     var showsCompleted = false
     var hasLoadedItems = false
     var errorMessage: String?
@@ -120,6 +122,15 @@ final class AppModel {
     @ObservationIgnored private var changeObservation: Task<Void, Never>?
     @ObservationIgnored private var pendingReload: Task<Void, Never>?
     @ObservationIgnored private var completionTasks: [ShoppingItem.ID: Task<Void, Never>] = [:]
+
+    enum UndoAction {
+        case completion(ShoppingItem)
+        case assignment(ShoppingItem)
+        case rename(ShoppingItem)
+        case deletion(ShoppingItem)
+        case creation(ShoppingItem)
+        case stores([Store], PageID)
+    }
 
     init(
         gateway: any ReminderGateway = EventKitGateway(),
@@ -228,6 +239,7 @@ final class AppModel {
     // MARK: List selection
 
     func selectList(_ id: String) async {
+        lastUndoAction = nil
         selectedListID = id
         hasLoadedItems = false
         recentlyCompleted = []
@@ -280,6 +292,7 @@ final class AppModel {
             )
             let item = ShoppingItemMapper.item(from: snapshot, matcher: StoreMatcher(stores: stores))
             items.append(item)
+            if !isUndoing { lastUndoAction = .creation(item) }
             // Typing it into a store's card is an assignment, too.
             if let store { rememberAssignment(of: item, to: store) }
             seenUnsorted.insert(item.id)
@@ -290,6 +303,7 @@ final class AppModel {
 
     /// Moves an item to a store (or back to unsorted) and learns from it.
     func assign(_ item: ShoppingItem, to store: Store?, learn: Bool = true) async {
+        if !isUndoing, item.storeID != store?.id { lastUndoAction = .assignment(item) }
         update(item.id) { $0.storeRef = store.map { .known($0.id) } }
         if learn, let store { rememberAssignment(of: item, to: store) }
         await perform { try await $0.setStore(named: store?.name, forReminder: item.id) }
@@ -298,6 +312,7 @@ final class AppModel {
     func rename(_ item: ShoppingItem, to title: String) async {
         let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty, title != item.title else { return }
+        if !isUndoing { lastUndoAction = .rename(item) }
         update(item.id) { $0.title = title }
         await perform { _ = try await $0.updateTitle(title, ofReminder: item.id) }
     }
@@ -305,6 +320,7 @@ final class AppModel {
     /// Checks an item off – or, within the undo window, back on (KONZEPT §7.2).
     /// The EventKit write happens immediately so household members see it in real time.
     func toggleCompletion(_ item: ShoppingItem) async {
+        if !isUndoing { lastUndoAction = .completion(item) }
         if pendingCompletions.contains(item.id) {
             cancelPendingCompletion(of: item.id)
             if let storeID = item.storeID {
@@ -348,8 +364,60 @@ final class AppModel {
     }
 
     func delete(_ item: ShoppingItem) async {
+        if !isUndoing { lastUndoAction = .deletion(item) }
         items.removeAll { $0.id == item.id }
         await perform { try await $0.deleteReminder(id: item.id) }
+    }
+
+    func undoLastAction() async {
+        guard let action = lastUndoAction else { return }
+        lastUndoAction = nil
+        isUndoing = true
+        defer { isUndoing = false }
+        switch action {
+        case .completion(let before):
+            if let current = items.first(where: { $0.id == before.id }), current.isCompleted != before.isCompleted {
+                await toggleCompletion(current)
+            } else if let current = recentlyCompleted.first(where: { $0.id == before.id }), !before.isCompleted {
+                await restore(current)
+            }
+        case .assignment(let before):
+            if let current = items.first(where: { $0.id == before.id }) {
+                await assign(current, to: before.storeID.flatMap(store(_:)), learn: false)
+            }
+        case .rename(let before):
+            if let current = items.first(where: { $0.id == before.id }) {
+                await rename(current, to: before.title)
+            }
+        case .deletion(let before):
+            guard let listID = selectedListID else { return }
+            let notes = StoreMarker.write(storeName: before.storeID.flatMap(store(_:))?.name, into: before.userNotes)
+            await perform { _ = try await $0.createReminder(title: before.title, notes: notes, in: listID) }
+            await reload()
+        case .creation(let created):
+            if let current = items.first(where: { $0.id == created.id }) {
+                await delete(current)
+            }
+        case .stores(let previous, let page):
+            for old in previous {
+                guard let index = stores.firstIndex(where: { $0.id == old.id }) else { continue }
+                let renamed = stores[index].name != old.name
+                stores[index] = old
+                persist(old)
+                if renamed {
+                    for item in items where item.storeID == old.id {
+                        await perform { try await $0.setStore(named: old.name, forReminder: item.id) }
+                    }
+                }
+            }
+            dismissedPages = []
+            activePage = page
+            pageRequest = page
+        }
+    }
+
+    func recordStoresUndo() {
+        if !isUndoing { lastUndoAction = .stores(stores, activePage) }
     }
 
     func loadRecentlyCompleted() async {

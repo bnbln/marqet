@@ -8,31 +8,26 @@ struct StoreBadge: View {
 
     var body: some View {
         Group {
-            if let key = store.catalogKey, ["rewe", "edeka"].contains(key) {
-                Image(key)
+            if store.catalogKey == "edeka" {
+                Image("edeka")
                     .resizable()
                     .scaledToFit()
+                    .frame(width: size * 0.82, height: size)
+                    .clipShape(.rect(cornerRadius: size * 0.1, style: .continuous))
                     .frame(width: size, height: size)
-                    .clipShape(.rect(cornerRadius: size * 0.18, style: .continuous))
-            } else if store.catalogKey == "billa-plus", size > 28 {
-                Image("billa-plus-wordmark")
-                    .resizable()
-                    .scaledToFit()
-                    .padding(.horizontal, size * 0.08)
-                    .frame(width: size * 1.7, height: size * 0.7)
-                    .background(.white, in: .rect(cornerRadius: size * 0.14, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: size * 0.14, style: .continuous)
-                            .strokeBorder(.black.opacity(0.08), lineWidth: 0.5)
-                    }
             } else {
                 ZStack {
-                    if let logoAsset {
+                    if store.catalogKey == "netto" {
+                        Circle().fill(Color(red: 0.88, green: 0.02, blue: 0.08))
+                        Text("N")
+                            .font(.system(size: size * 0.67, weight: .black, design: .rounded).italic())
+                            .foregroundStyle(.yellow)
+                    } else if let logoAsset {
                         Circle().fill(.white)
                         Image(logoAsset)
                             .resizable()
                             .scaledToFit()
-                            .padding(size * 0.12)
+                            .padding(size * (Self.fullBleedLogos.contains(logoAsset) ? 0 : 0.06))
                     } else {
                         Circle().fill(Color(hex: store.colorHex))
                         symbol.foregroundStyle(foreground)
@@ -40,11 +35,16 @@ struct StoreBadge: View {
                 }
                 .frame(width: size, height: size)
                 .clipShape(Circle())
-                .overlay(Circle().strokeBorder(.black.opacity(0.08), lineWidth: 0.5))
+                .overlay(Circle().strokeBorder(.black.opacity(0.1), lineWidth: 0.5))
             }
         }
         .accessibilityHidden(true)
     }
+
+    private static let fullBleedLogos: Set<String> = [
+        "rewe", "lidl", "ikea", "penny", "billa", "bipa", "norma", "aldi-suisse",
+        "bio-company", "tegut", "volg", "obi", "hornbach",
+    ]
 
     private var logoAsset: String? {
         guard let key = store.catalogKey, StoreBrandLogos.keys.contains(key) else { return nil }

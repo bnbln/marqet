@@ -23,6 +23,10 @@ public struct Store: Identifiable, Hashable, Sendable, Codable {
     public var sortIndex: Int
     public var origin: Origin
     public var type: StoreType
+    /// Optional branch location shown below the store name.
+    public var address: String?
+    /// A short personal note, e.g. "Eingang im Hof".
+    public var detail: String?
     /// Set when the user explicitly adds the store as a (possibly empty) card.
     public var plannedAt: Date?
 
@@ -36,7 +40,9 @@ public struct Store: Identifiable, Hashable, Sendable, Codable {
         sortIndex: Int,
         origin: Origin,
         type: StoreType,
-        plannedAt: Date? = nil
+        plannedAt: Date? = nil,
+        address: String? = nil,
+        detail: String? = nil
     ) {
         self.id = id
         self.catalogKey = catalogKey
@@ -48,6 +54,8 @@ public struct Store: Identifiable, Hashable, Sendable, Codable {
         self.origin = origin
         self.type = type
         self.plannedAt = plannedAt
+        self.address = address
+        self.detail = detail
     }
 }
 

@@ -7,6 +7,9 @@
     "%@ löschen?" : {
 
     },
+    "%@, bearbeiten" : {
+
+    },
     "%lld" : {
 
     },
@@ -28,9 +31,6 @@
     "%lld offene Einträge werden unsortiert. Gelernte Zuordnungen für diesen Laden gehen verloren." : {
 
     },
-    "%lld ohne Laden" : {
-
-    },
     "%lld planen" : {
 
     },
@@ -43,6 +43,9 @@
           }
         }
       }
+    },
+    "%lld zum Zuordnen" : {
+
     },
     "1 Eintrag automatisch zugeordnet" : {
 
@@ -65,13 +68,19 @@
     "Abschnitte sortieren" : {
 
     },
+    "Adresse" : {
+
+    },
+    "Adresse & Info" : {
+
+    },
+    "Aktuelle Liste" : {
+
+    },
     "Alle Vorschläge übernehmen (%lld)" : {
 
     },
     "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
-
-    },
-    "Alles eingekauft 🎉" : {
 
     },
     "Alles erledigt" : {
@@ -131,6 +140,9 @@
     "Baumarkt" : {
 
     },
+    "Bearbeiten" : {
+
+    },
     "Beim Umbenennen passt Marqet die Zeile „🛒 %@“ in allen offenen Einträgen an." : {
 
     },
@@ -161,9 +173,6 @@
     "Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung." : {
 
     },
-    "Deine Erinnerungslisten" : {
-
-    },
     "Deine Läden" : {
 
     },
@@ -174,6 +183,9 @@
 
     },
     "Deutschland" : {
+
+    },
+    "Die Adresse oder Info erscheint unter dem Ladennamen auf der Karte." : {
 
     },
     "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
@@ -210,6 +222,9 @@
 
     },
     "Einstellungen öffnen" : {
+
+    },
+    "Eintrag" : {
 
     },
     "Eintrag hinzufügen" : {
@@ -251,6 +266,9 @@
     "Fertig" : {
 
     },
+    "Filiale" : {
+
+    },
     "Fisch" : {
 
     },
@@ -267,9 +285,6 @@
 
     },
     "Gelerntes zurücksetzen?" : {
-
-    },
-    "Geplant" : {
 
     },
     "Getränke" : {
@@ -320,9 +335,6 @@
     "Laden anlegen" : {
 
     },
-    "Läden auswählen" : {
-
-    },
     "Laden hinzufügen" : {
 
     },
@@ -342,9 +354,6 @@
 
     },
     "Leer" : {
-
-    },
-    "Liste wechseln" : {
 
     },
     "Listen" : {
@@ -413,6 +422,9 @@
     "Möbel & Einrichtung" : {
 
     },
+    "N" : {
+
+    },
     "Name" : {
 
     },
@@ -422,13 +434,13 @@
     "Neue Einträge landen in „Unsortiert“ – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
 
     },
-    "Neue Liste „Einkaufen“ anlegen" : {
-
-    },
     "Neue Liste anlegen" : {
 
     },
     "Neuer Eintrag" : {
+
+    },
+    "Noch keine Einträge" : {
 
     },
     "Noch keinem Laden zugeordnet" : {
@@ -456,9 +468,6 @@
 
     },
     "Passt zum Laden" : {
-
-    },
-    "Plane deinen nächsten Einkauf: Tippe auf einen Laden." : {
 
     },
     "Region" : {
@@ -503,12 +512,6 @@
     "Tippe auf den Laden für den Eintrag links." : {
 
     },
-    "Tippe auf einen Laden, um etwas für ihn einzutragen." : {
-
-    },
-    "Titel" : {
-
-    },
     "Trag Einkäufe wie gewohnt ein – mit Siri, in Erinnerungen oder in Marqet." : {
 
     },
@@ -516,9 +519,6 @@
 
     },
     "Überspringen" : {
-
-    },
-    "Umbenennen" : {
 
     },
     "Unsortiert" : {
@@ -536,9 +536,6 @@
     "Vorschlag" : {
 
     },
-    "Vorschläge" : {
-
-    },
     "Vorschläge aus deinen bisherigen Zuordnungen gibt es auch ohne Pro." : {
 
     },
@@ -548,13 +545,13 @@
     "Wähle deine Läden in der Reihenfolge, in der du sie am häufigsten besuchst. Du kannst später jederzeit weitere hinzufügen." : {
 
     },
-    "Wähle die Liste, in die du – oder Siri – deine Einkäufe einträgst." : {
-
-    },
     "Wein, Bier & Spirituosen" : {
 
     },
-    "Weiter (%lld)" : {
+    "Weiter" : {
+
+    },
+    "Weitere Info" : {
 
     },
     "Weitere Läden" : {
@@ -588,6 +585,9 @@
 
     },
     "Zuordnen startet mit" : {
+
+    },
+    "Zurück" : {
 
     },
     "Zurücksetzen" : {

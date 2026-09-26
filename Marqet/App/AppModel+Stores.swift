@@ -58,12 +58,14 @@ extension AppModel {
     /// Keeps an (empty) store card on screen until shopped there or removed (KONZEPT §7.2).
     func plan(_ id: Store.ID) {
         guard let index = stores.firstIndex(where: { $0.id == id }), stores[index].plannedAt == nil else { return }
+        recordStoresUndo()
         stores[index].plannedAt = .now
         persist(stores[index])
     }
 
     /// "Ausblenden" / "Aus Übersicht entfernen": the card goes back to "Weitere Läden".
     func hide(_ id: Store.ID) {
+        recordStoresUndo()
         let page = PageID.store(id)
         let oldIndex = deck.pages.firstIndex(of: page) ?? 0
         emptiedInSession.remove(id)
@@ -83,9 +85,20 @@ extension AppModel {
     /// Color, symbol and type. Renaming goes through `rename(_:to:)` because of the markers.
     func updateAppearance(of id: Store.ID, colorHex: String, systemImage: String?, type: StoreType) {
         guard let index = stores.firstIndex(where: { $0.id == id }) else { return }
+        recordStoresUndo()
         stores[index].colorHex = colorHex
         if let systemImage { stores[index].symbol = .systemImage(systemImage) }
         stores[index].type = type
+        persist(stores[index])
+    }
+
+    func updateDetails(of id: Store.ID, address: String, detail: String) {
+        guard let index = stores.firstIndex(where: { $0.id == id }) else { return }
+        recordStoresUndo()
+        let address = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        let detail = detail.trimmingCharacters(in: .whitespacesAndNewlines)
+        stores[index].address = address.isEmpty ? nil : address
+        stores[index].detail = detail.isEmpty ? nil : detail
         persist(stores[index])
     }
 
@@ -95,6 +108,7 @@ extension AppModel {
         let newName = String(newName.trimmingCharacters(in: .whitespacesAndNewlines).prefix(StoreMarker.maxNameLength))
         guard !newName.isEmpty, let index = stores.firstIndex(where: { $0.id == id }), stores[index].name != newName,
               !isNameTaken(newName, except: id) else { return }
+        recordStoresUndo()
         let oldName = stores[index].name
         stores[index].name = newName
         if !stores[index].aliases.contains(oldName) { stores[index].aliases.append(oldName) }
@@ -107,6 +121,7 @@ extension AppModel {
 
     /// Applies a drag-and-drop reorder from the store settings.
     func moveStores(from source: IndexSet, to destination: Int) {
+        recordStoresUndo()
         var ordered = sortedStores
         ordered.move(fromOffsets: source, toOffset: destination)
         for (index, store) in ordered.enumerated() {

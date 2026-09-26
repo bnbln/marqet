@@ -14,6 +14,10 @@ struct ShoppingScreen: View {
     @State private var addFeedback = 0
     @State private var undoFeedback = 0
     @Namespace private var cardZoom
+    @State private var hinge: HingeState = .none
+
+    /// Duo inside: the composer is a sheet on one half instead of a bar across the crease.
+    private var composerAsSheet: Bool { hinge.isUnfolded }
     /// Height of large title + briefing card; the pager moves down by it.
     @State private var briefingHeight: CGFloat = 0
 
@@ -39,7 +43,7 @@ struct ShoppingScreen: View {
                 }
                 .safeAreaInset(edge: .bottom) {
                     // Full screen, the focus screen has its own composer.
-                    if model.composerTarget != nil, model.focusedPage == nil {
+                    if model.composerTarget != nil, model.focusedPage == nil, !composerAsSheet {
                         ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -62,6 +66,18 @@ struct ShoppingScreen: View {
                 .sheet(isPresented: $showsStoreOrder) {
                     StoreOrderSheet().leadingSheetPlacement()
                 }
+                // Duo inside: like a sheet on the leading half (the active card stays visible on the
+                // right), the cards behind it stay usable. Sheets avoid the crease on their own.
+                .sheet(isPresented: composerSheetBinding) {
+                    ComposerBar(isFocused: $isComposerFocused, showsAddStore: $showsAddStore)
+                        .presentationDetents([.height(150)])
+                        .presentationBackgroundInteraction(.enabled)
+                        .presentationDragIndicator(.hidden)
+                        .interactiveDismissDisabled(false)
+                        .leadingSheetPlacement()
+                        .sheet(isPresented: $showsAddStore) { AddStoreSheet() }
+                }
+                .observeHinge($hinge)
                 .sheet(isPresented: $showsMap) {
                     MapScreen()
                 }
@@ -87,6 +103,7 @@ struct ShoppingScreen: View {
                 }
                 .onChange(of: model.composerTarget) { _, target in
                     if target != nil, model.focusedPage == nil { isComposerFocused = true }
+                    if target == nil { isComposerFocused = false }
                 }
                 .onChange(of: model.hasLoadedItems) { _, loaded in
                     #if DEBUG
@@ -134,8 +151,19 @@ struct ShoppingScreen: View {
             PageIndicator()
                 .offset(y: 12 + briefingAmount * 60)
                 .opacity(1 - briefingAmount)
-            HStack {
-                Spacer()
+            if !hinge.hasHinge {
+                HStack {
+                    Spacer()
+                    addMenu
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
+    }
+
+    /// Add button: tap adds to the active card, long press picks the target (KONZEPT §7.3).
+    private var addMenu: some View {
                 Menu {
                     Section("Hinzufügen zu …") {
                         Button("Inbox", systemImage: "tray") { model.startComposer(on: .unsorted) }
@@ -157,15 +185,32 @@ struct ShoppingScreen: View {
                 .menuStyle(.button)
                 .buttonStyle(.plain)
                 .accessibilityLabel("Eintrag hinzufügen")
+    }
+
+    /// Duo: the add action as the favored item in the system bar (bottom, next to where tabs sit);
+    /// the system places it in every pose – vertically at the thumb outside, in the bar inside.
+    private var addToolbarMenu: some View {
+        Menu {
+            Section("Hinzufügen zu …") {
+                Button("Inbox", systemImage: "tray") { model.startComposer(on: .unsorted) }
+                ForEach(model.sortedStores) { store in
+                    Button(store.name) { model.startComposer(on: .store(store.id)) }
+                }
             }
+        } label: {
+            Label("Hinzufügen", systemImage: "plus")
+        } primaryAction: {
+            addFeedback += 1
+            model.startComposer(on: model.deck.pages.contains(model.activePage) ? model.activePage : .unsorted)
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 4)
     }
 
     // System navigation and settings items remain available in the iPhone Duo vertical bar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
+        if hinge.hasHinge, model.composerTarget == nil {
+            ToolbarItem(placement: .bottomBar) { addToolbarMenu }
+        }
         ToolbarItem(placement: .topBarLeading) {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Marqet")
@@ -224,6 +269,13 @@ extension ShoppingScreen {
     }
 
     /// Triage started from the full-screen card is presented there, so closing it returns there.
+    private var composerSheetBinding: Binding<Bool> {
+        Binding(
+            get: { composerAsSheet && model.composerTarget != nil && model.focusedPage == nil },
+            set: { if !$0, model.composerTarget != nil { model.endComposer() } }
+        )
+    }
+
     private var triageBinding: Binding<Bool> {
         Binding(get: { model.triage != nil && model.focusedPage == nil }, set: { if !$0 { model.endTriage() } })
     }

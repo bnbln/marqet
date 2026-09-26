@@ -4,15 +4,21 @@ import SwiftUI
 /// Reads the iPhone Duo fold (KONZEPT-DUO-IPAD §2.4). `nil` without a fold or before iOS 27.1.
 enum FoldGeometry {
     /// A vertical fold crossing the container, in the container's coordinates.
-    /// Inactive regions count too, so the layout does not jump when the device is angled.
-    static func verticalFold(in proxy: GeometryProxy) -> CGRect? {
+    /// Inactive regions count too, so the layout does not jump when the device is laid flat.
+    static func verticalFold(in proxy: GeometryProxy) -> Fold? {
         guard #available(iOS 27.1, *) else { return nil }
         let width = proxy.size.width
         return proxy
             .reservedRegions(kind: .division, options: .includeInactive, layoutDirectionBehavior: .fixed)
-            .map(\.frame)
-            .first { $0.height >= $0.width && $0.minX > width * 0.25 && $0.maxX < width * 0.75 }
+            .first { $0.frame.height >= $0.frame.width && $0.frame.minX > width * 0.25 && $0.frame.maxX < width * 0.75 }
+            .map { Fold(frame: $0.frame, isActive: $0.isActive) }
     }
+}
+
+struct Fold: Equatable {
+    let frame: CGRect
+    /// Angled like a book: the crease is a real edge, cards keep more distance.
+    let isActive: Bool
 }
 
 /// Frames of the pager: how many cards, how wide, where the scroll view sits.
@@ -29,13 +35,14 @@ struct PagerMetrics: Equatable {
 
     var scrollWidth: CGFloat { CGFloat(slots) * slotWidth + CGFloat(slots - 1) * spacing }
 
-    init(size: CGSize, fold: CGRect?) {
+    init(size: CGSize, fold: Fold?) {
         let width = size.width
         let slots = SpreadLayout.slotCount(availableWidth: width, hasFold: fold != nil)
 
-        if let fold, slots == 2 {
-            // One card per half; the gap sits exactly on the fold.
-            let gapToFold: CGFloat = 6
+        if let isActive = fold?.isActive, let fold = fold?.frame, slots == 2 {
+            // One card per half; the gap sits exactly on the fold. Angled like a book, the cards
+            // move a bit further away from the crease so nothing bends over its edge.
+            let gapToFold: CGFloat = isActive ? 22 : 6
             let outerMargin: CGFloat = 12
             let cardWidth = max(min(fold.minX - gapToFold - outerMargin, width - fold.maxX - gapToFold - outerMargin), 100)
             self.slots = 2

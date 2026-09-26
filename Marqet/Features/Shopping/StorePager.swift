@@ -6,13 +6,16 @@ struct StorePager: View {
     @Binding var isComposerFocused: Bool
     @Binding var showsAddStore: Bool
     @Environment(AppModel.self) private var model
-    @SceneStorage("selectedPageV2") private var storedActivePage = ""
-    @State private var position = ScrollPosition(idType: String.self)
+    // The inbox is the first visible target from the very first layout. The deck keeps
+    // Prospekte before it for paging, but that must never become the launch position.
+    @State private var position = ScrollPosition(id: PageID.unsorted.rawValue, anchor: .leading)
     @State private var leadingIndex = 0
     /// Bumped when a swipe crosses the midpoint to another card; drives a light haptic tick.
     @State private var swipeFeedback = 0
     /// Only the user's own swipes tick, not programmatic scrolls (launch, page dots).
     @State private var isUserScrolling = false
+    /// Index of the card nearest to the scroll offset (the leading card of the visible spread).
+    @State private var scrolledIndex = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -35,14 +38,24 @@ struct StorePager: View {
             }
             .scrollPosition($position)
             .sensoryFeedback(.selection, trigger: swipeFeedback)
-            .onScrollPhaseChange { _, phase in
+            .onScrollPhaseChange { oldPhase, phase in
                 isUserScrolling = phase == .interacting || phase == .decelerating
+                // A swipe ends: its card becomes the active one. Only the user's swipe picks the
+                // active card – layout changes (Duo book ↔ flat, rotation, keyboard) briefly show
+                // the old offset under the new card widths and would make a neighbor active.
+                if !isUserScrolling, oldPhase == .interacting || oldPhase == .decelerating {
+                    adoptScrolledPage(content: content, metrics: metrics)
+                }
             }
-            // Tick as soon as the nearest card changes, not when the next one is fully in view.
+            // The nearest card by offset, not by visibility: with the composer and keyboard up,
+            // no card is 80 % visible any more. Ticks as soon as the nearest card changes.
             .onScrollGeometryChange(for: Int.self) { geometry in
                 Int((geometry.contentOffset.x / (metrics.slotWidth + metrics.spacing)).rounded())
-            } action: { _, _ in
+            } action: { _, index in
+                scrolledIndex = index
                 if isUserScrolling { swipeFeedback += 1 }
+                let visible = Set(SpreadLayout.visiblePages(leadingIndex: clamped(index, in: content), content: content, slots: metrics.slots))
+                if model.visiblePages != visible { model.visiblePages = visible }
             }
             // How far the pager is from the inbox toward the next card – the briefing follows it.
             .onScrollGeometryChange(for: Double.self) { geometry in
@@ -57,6 +70,13 @@ struct StorePager: View {
             .scrollClipDisabled()
             // The scroll view is narrower than the screen; its edge effect would draw a box under the bar.
             .scrollEdgeEffectHidden(true, for: .all)
+            // The composer is nonmodal behind this pager. A tap on the cards dismisses it; a
+            // horizontal drag fails the tap recognizer and continues paging underneath. Attached
+            // before the composer inset on purpose: a tap on a chip must not end the composer,
+            // or the keyboard drops and the cards grow before the composer starts again.
+            .simultaneousGesture(TapGesture().onEnded {
+                if model.composerTarget != nil { model.endComposer() }
+            })
             .frame(width: metrics.scrollWidth)
             .offset(x: metrics.scrollX)
             .frame(width: proxy.size.width, alignment: .leading)
@@ -65,34 +85,31 @@ struct StorePager: View {
             // the layout and pushes the composer's text field behind the keyboard.
             .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if model.composerTarget != nil, model.focusedPage == nil {
-                    if metrics.slots == 1 {
-                        ComposerBar(
-                            isFocused: $isComposerFocused,
-                            showsAddStore: $showsAddStore,
-                            horizontalSafeAreaInsets: proxy.safeAreaInsets
-                        )
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                    } else {
+                Group {
+                    if model.composerTarget != nil, model.focusedPage == nil {
                         let activeIndex = content.firstIndex { $0.page == model.activePage && !$0.isGhost } ?? leadingIndex
                         let offset = min(max(activeIndex - leadingIndex, 0), metrics.slots - 1)
-                        HStack(spacing: 0) {
-                            Color.clear
-                                .frame(width: metrics.scrollX + CGFloat(offset) * (metrics.slotWidth + metrics.spacing))
+                        let horizontalOffset = metrics.slots == 1
+                            ? 0
+                            : metrics.scrollX + CGFloat(offset) * (metrics.slotWidth + metrics.spacing)
+
+                        ZStack(alignment: .leading) {
                             ComposerBar(
                                 isFocused: $isComposerFocused,
                                 showsAddStore: $showsAddStore,
                                 horizontalSafeAreaInsets: proxy.safeAreaInsets
                             )
-                            .frame(width: metrics.slotWidth)
-                            Spacer(minLength: 0)
+                            .frame(maxWidth: metrics.slots == 1 ? .infinity : metrics.slotWidth)
+                            .offset(x: horizontalOffset)
+                            .animation(.smooth, value: horizontalOffset)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
-            }
-            .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.8) { ids in
-                didScroll(toVisible: ids, content: content, metrics: metrics)
+                // Animate the footer's entrance in isolation. A parent animation here also
+                // animates the pager's keyboard-driven height change and lifts the cards.
+                .animation(.snappy, value: model.composerTarget == nil)
             }
             .onChange(of: layoutKey) {
                 reposition(content: content, pages: deck.pages, metrics: metrics)
@@ -102,42 +119,14 @@ struct StorePager: View {
                 model.pageRequest = nil
                 navigate(to: request, content: content, pages: deck.pages, metrics: metrics)
             }
-            .onChange(of: model.activePage) { _, page in
-                if model.hasLoadedItems { storedActivePage = page.rawValue }
-            }
             .onChange(of: model.hasLoadedItems) { _, loaded in
                 if loaded {
-                    selectInitialPage(pages: deck.pages)
                     reposition(content: content, pages: deck.pages, metrics: metrics)
                 }
             }
-            .onChange(of: model.selectedListID) { _, _ in
-                storedActivePage = ""
-            }
             .onAppear {
-                if model.hasLoadedItems { selectInitialPage(pages: deck.pages) }
                 reposition(content: content, pages: deck.pages, metrics: metrics)
             }
-            // The composer is nonmodal behind this pager. A background tap dismisses it;
-            // a horizontal drag fails the tap recognizer and continues paging underneath.
-            .simultaneousGesture(TapGesture().onEnded {
-                if model.composerTarget != nil { model.endComposer() }
-            })
-        }
-    }
-
-    private func selectInitialPage(pages: [PageID]) {
-        // The briefing belongs to the inbox: start there.
-        if model.briefing != nil {
-            model.activePage = .unsorted
-            return
-        }
-        if let stored = PageID(rawValue: storedActivePage), pages.contains(stored) {
-            model.activePage = stored
-        } else if !model.unsortedItems.isEmpty {
-            model.activePage = .unsorted
-        } else {
-            model.activePage = pages.first(where: { $0.storeID != nil }) ?? .unsorted
         }
     }
 
@@ -161,14 +150,16 @@ struct StorePager: View {
 
     // MARK: Scroll ↔ active page
 
-    private func didScroll(toVisible ids: [String], content: [SpreadLayout.Slot], metrics: PagerMetrics) {
-        let indices = ids.compactMap { id in content.firstIndex { $0.id == id } }
-        guard let leading = indices.min() else { return }
-        let visible = SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: metrics.slots)
-        if model.visiblePages != Set(visible) { model.visiblePages = Set(visible) }
+    private func clamped(_ index: Int, in content: [SpreadLayout.Slot]) -> Int {
+        min(max(index, 0), max(content.count - 1, 0))
+    }
 
+    private func adoptScrolledPage(content: [SpreadLayout.Slot], metrics: PagerMetrics) {
+        guard !content.isEmpty else { return }
+        let leading = clamped(scrolledIndex, in: content)
         guard leading != leadingIndex else { return }
         leadingIndex = leading
+        let visible = SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: metrics.slots)
         let pages = content.compactMap { $0.isGhost ? nil : $0.page }
         guard let anchored = SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) else { return }
         // Duo: the right-hand card is always the active one. iPad: keep a tapped card while visible.
@@ -196,7 +187,7 @@ struct StorePager: View {
         let target = SpreadLayout.leadingIndex(forActive: page, pages: pages, slots: metrics.slots, anchor: metrics.anchor)
         guard content.indices.contains(target) else { return }
         leadingIndex = target
-        withAnimation(.snappy) {
+        withAnimation(.smooth) {
             position.scrollTo(id: content[target].id, anchor: .leading)
         }
     }

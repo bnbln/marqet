@@ -40,7 +40,6 @@ struct ShoppingScreen: View {
                             bottomControls
                         }
                     }
-                    .animation(.snappy, value: model.composerTarget == nil)
                     .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
                     .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
                     .navigationTitle("")
@@ -80,7 +79,7 @@ struct ShoppingScreen: View {
                            model.composerTarget != page,
                            page == .unsorted || page.storeID != nil,
                            model.deck.pages.contains(page) {
-                            model.startComposer(on: page)
+                            withAnimation(.smooth) { model.startComposer(on: page) }
                         }
                         if page != .unsorted, model.briefing != nil {
                             withAnimation(.snappy) { model.dismissBriefing() }

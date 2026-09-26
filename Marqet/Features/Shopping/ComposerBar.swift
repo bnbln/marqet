@@ -148,7 +148,7 @@ struct ComposerBar: View {
     private func chip(page: PageID, title: String, color: Color, badge: Store?) -> some View {
         let isSelected = model.composerTarget == page
         return Button {
-            model.startComposer(on: page)
+            withAnimation(.smooth) { model.startComposer(on: page) }
         } label: {
             HStack(spacing: 6) {
                 if let badge {
@@ -166,6 +166,7 @@ struct ComposerBar: View {
             .padding(.vertical, 6)
             .foregroundStyle(isSelected ? (badge?.foregroundOnColor ?? .white) : .primary)
             .background(isSelected ? color : Color(.tertiarySystemFill), in: .capsule)
+            .animation(.smooth, value: isSelected)
         }
         .buttonStyle(.plain)
         .id(page)

@@ -1,13 +1,12 @@
 import Foundation
 
-/// Stable identity of one page in the card pager (KONZEPT §7.2).
-/// The raw value is persisted in `@SceneStorage`, so it must stay stable across launches.
+/// Stable identity of one page in the card pager and its scroll targets (KONZEPT §7.2).
 public enum PageID: Hashable, Sendable {
     /// Central collection of official retailer brochures, before Inbox.
     case brochures
     case unsorted
     case store(Store.ID)
-    /// Hidden and suggested stores – always the last page (stable persisted identity).
+    /// Hidden and suggested stores – always the last page.
     case more
 
     public var rawValue: String {

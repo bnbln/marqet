@@ -47,7 +47,13 @@ struct StoreFocusScreen: View {
 
             Group {
                 if let store = contextStore, usesSplit {
-                    splitCard(deck: deck, store: store, metrics: metrics, containerWidth: proxy.size.width)
+                    splitCard(
+                        deck: deck,
+                        store: store,
+                        metrics: metrics,
+                        containerWidth: proxy.size.width,
+                        safeAreaInsets: proxy.safeAreaInsets
+                    )
                 } else {
                     card(deck: deck)
                 }
@@ -60,22 +66,21 @@ struct StoreFocusScreen: View {
                 if model.composerTarget == nil { bottomControls(deck: deck) }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if model.composerTarget != nil {
-                    if usesSplit {
-                        HStack(spacing: 0) {
-                            Color.clear.frame(width: metrics.scrollX + metrics.slotWidth + metrics.spacing)
+                Group {
+                    if model.composerTarget != nil {
+                        let horizontalOffset = usesSplit ? metrics.scrollX + metrics.slotWidth + metrics.spacing : 0
+                        ZStack(alignment: .leading) {
                             composerBar
-                                .frame(width: metrics.slotWidth)
-                            Spacer(minLength: 0)
+                                .frame(maxWidth: usesSplit ? metrics.slotWidth : .infinity)
+                                .offset(x: horizontalOffset)
+                                .animation(.smooth, value: horizontalOffset)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
-                    } else {
-                        composerBar
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
+                .animation(.snappy, value: model.composerTarget == nil)
             }
-            .animation(.snappy, value: model.composerTarget == nil)
             .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
                 horizontalSafeAreaInsets = insets
             }
@@ -136,7 +141,13 @@ struct StoreFocusScreen: View {
         }
     }
 
-    private func splitCard(deck: CardDeck, store: Store, metrics: PagerMetrics, containerWidth: CGFloat) -> some View {
+    private func splitCard(
+        deck: CardDeck,
+        store: Store,
+        metrics: PagerMetrics,
+        containerWidth: CGFloat,
+        safeAreaInsets: EdgeInsets
+    ) -> some View {
         let storePage = PageID.store(store.id)
         let storeItems = deck.items(on: storePage)
         let listCard = StoreCard(
@@ -148,11 +159,14 @@ struct StoreFocusScreen: View {
             showsHeader: false,
             showsOffers: false
         )
-        let headerWidth = max(metrics.scrollWidth, containerWidth - metrics.scrollX + horizontalSafeAreaInsets.trailing)
+        let headerWidth = max(metrics.scrollWidth, containerWidth - metrics.scrollX + safeAreaInsets.trailing)
+        let headerBackgroundWidth = containerWidth + safeAreaInsets.leading + safeAreaInsets.trailing
+        let headerBackgroundOffset = -(metrics.scrollX + safeAreaInsets.leading)
 
         return ZStack(alignment: .topLeading) {
             LinearGradient(colors: [store.color, store.color.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .frame(width: headerWidth, height: 76)
+                .frame(width: headerBackgroundWidth, height: 76)
+                .offset(x: headerBackgroundOffset)
                 .ignoresSafeArea(edges: .top)
                 .backgroundExtensionEffect()
                 .accessibilityHidden(true)

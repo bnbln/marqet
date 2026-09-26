@@ -152,7 +152,7 @@ struct StorePager: View {
     }
 }
 
-/// Dots in store colors; the visible range is highlighted, the active page is larger.
+/// Neutral gray dots; the visible range is highlighted, the active page is larger.
 struct PageIndicator: View {
     @Environment(AppModel.self) private var model
 
@@ -206,7 +206,7 @@ struct PageIndicator: View {
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(.secondary)
         case .store(let id):
-            Circle().fill(model.store(id)?.readableColor ?? .gray).frame(width: 7, height: 7)
+            Circle().fill(.secondary).frame(width: 7, height: 7)
         }
     }
 

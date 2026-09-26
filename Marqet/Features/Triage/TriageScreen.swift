@@ -1,13 +1,16 @@
 import MarqetCore
 import SwiftUI
 
-/// Assign unsorted items to stores (KONZEPT §7.4): one item at a time, or a board to drag onto.
-/// On regular width (iPad, iPhone Duo inside) items and stores sit side by side (KONZEPT-DUO-IPAD §4.4).
+/// Assign inbox items to stores (KONZEPT §7.4): one item at a time, or a board to pick several.
+/// Both modes use the same store tiles and the same bottom bar. On regular width (iPad, iPhone Duo
+/// inside) items and stores sit side by side (KONZEPT-DUO-IPAD §4.4).
 struct TriageScreen: View {
     @Environment(AppModel.self) private var model
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showsAddStore = false
     @State private var undoFeedback = 0
+
+    private var mode: TriageSession.Mode { model.triage?.mode ?? .single }
 
     var body: some View {
         NavigationStack {
@@ -18,14 +21,18 @@ struct TriageScreen: View {
                     AdaptiveSplit {
                         itemsPane
                     } secondary: {
-                        StoreTargets(showsAddStore: $showsAddStore)
+                        ScrollView {
+                            StoreTileGrid(showsAddStore: $showsAddStore).padding(20)
+                        }
                     }
-                } else if model.triage?.mode == .board {
+                } else if mode == .board {
                     VStack(spacing: 0) {
-                        StoreTargets(showsAddStore: $showsAddStore, compact: true)
-                            .frame(maxHeight: 260)
-                        Divider()
                         TriageBoardList()
+                        ScrollView {
+                            StoreTileGrid(showsAddStore: $showsAddStore).padding(16)
+                        }
+                        .frame(maxHeight: 250)
+                        .background(Color(.secondarySystemGroupedBackground).opacity(0.6))
                     }
                 } else {
                     SingleTriageView(showsAddStore: $showsAddStore)
@@ -33,19 +40,9 @@ struct TriageScreen: View {
             }
             .background(Color(.systemGroupedBackground))
             .safeAreaInset(edge: .bottom) {
-                if !model.triageSuggestions.isEmpty {
-                    Button {
-                        Task { await model.triageAcceptAllSuggestions() }
-                    } label: {
-                        Label("Alle Vorschläge übernehmen (\(model.triageSuggestions.count))", systemImage: "sparkles")
-                            .frame(maxWidth: 420)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
-                    .padding(.bottom, 8)
-                }
+                if !model.triageQueue.isEmpty { TriageBottomBar() }
             }
-            .navigationTitle("Zuordnen")
+            .animation(.snappy, value: mode)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
@@ -57,7 +54,7 @@ struct TriageScreen: View {
 
     @ViewBuilder
     private var itemsPane: some View {
-        if model.triage?.mode == .board {
+        if mode == .board {
             TriageBoardList()
         } else {
             SingleTriageView(showsAddStore: $showsAddStore, showsStoreGrid: false)
@@ -69,19 +66,26 @@ struct TriageScreen: View {
         ToolbarItem(placement: .cancellationAction) {
             Button(role: .close) { model.endTriage() }
         }
-        ToolbarItem(placement: .confirmationAction) {
-            Button(role: .confirm) { model.endTriage() }
-        }
-        if !(model.triage?.history.isEmpty ?? true) {
-            ToolbarItem(placement: .bottomBar) {
-                Button("Rückgängig", systemImage: "arrow.uturn.backward") {
-                    undoFeedback += 1
-                    Task { await model.triageUndo() }
+        ToolbarItem(placement: .principal) {
+            if model.triageQueue.isEmpty {
+                Text("Zuordnen").font(.headline)
+            } else {
+                Picker("Modus", selection: Binding(get: { mode }, set: { model.triage?.mode = $0 })) {
+                    Text("Einzeln").tag(TriageSession.Mode.single)
+                    Text("Mehrere").tag(TriageSession.Mode.board)
                 }
+                .pickerStyle(.segmented)
+                .frame(width: 200)
             }
         }
+        ToolbarItem(placement: .primaryAction) {
+            Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                undoFeedback += 1
+                Task { await model.triageUndo() }
+            }
+            .disabled(model.triage?.history.isEmpty ?? true)
+        }
     }
-
 }
 
 // MARK: - Single item
@@ -100,12 +104,8 @@ private struct SingleTriageView: View {
                         .id(item.id)
                         .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .scale(scale: 0.8).combined(with: .opacity)))
                     if showsStoreGrid {
-                        StoreGrid(item: item, showsAddStore: $showsAddStore)
+                        StoreTileGrid(showsAddStore: $showsAddStore)
                     }
-                    Button("Überspringen") {
-                        withAnimation(.snappy) { model.triageSkip(item) }
-                    }
-                    .foregroundStyle(.secondary)
                 }
                 .padding(20)
                 .animation(.snappy, value: item.id)
@@ -149,68 +149,66 @@ private struct ItemCardView: View {
     }
 }
 
-/// Store buttons in a fixed order (muscle memory); the suggestion is only highlighted.
-/// Even column count, so the fold never splits a button (KONZEPT-DUO-IPAD §4.4).
-private struct StoreGrid: View {
-    let item: ShoppingItem
+// MARK: - Store tiles
+
+/// Store tiles in a fixed order (muscle memory); a suggestion is only highlighted.
+/// Single mode: a tap assigns the current item. Board: a tap assigns the selection, and items can be
+/// dragged onto a tile.
+private struct StoreTileGrid: View {
     @Binding var showsAddStore: Bool
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let suggestion = model.suggestion(for: item)
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+        let isBoard = model.triage?.mode == .board
+        let selectionEmpty = model.triage?.selection.isEmpty ?? true
+        let highlighted = highlightedSuggestion(isBoard: isBoard)
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 84, maximum: 140), spacing: 10)], spacing: 10) {
             ForEach(model.sortedStores) { store in
-                StoreTargetButton(store: store, suggestion: suggestion?.storeID == store.id ? suggestion : nil) {
-                    Task { await model.triageAssign(item, to: store) }
+                let suggestion = highlighted?.storeID == store.id ? highlighted : nil
+                Button {
+                    Task { await assign(to: store, isBoard: isBoard) }
+                } label: {
+                    StoreTile(
+                        store: store,
+                        caption: suggestion?.label,
+                        captionSymbol: suggestion?.symbol,
+                        highlight: suggestion == nil ? nil : store.readableColor,
+                        isDimmed: isBoard && selectionEmpty,
+                        fill: Color(.secondarySystemGroupedBackground)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(suggestion == nil ? "" : String(localized: "Vorschlag"))
+                .dropDestination(for: String.self) { ids, _ in
+                    let items = model.triageQueue.filter { ids.contains($0.id) }
+                    guard !items.isEmpty else { return false }
+                    Task { for item in items { await model.triageAssign(item, to: store) } }
+                    return true
                 }
             }
-            Button {
-                showsAddStore = true
-            } label: {
-                Label("Laden", systemImage: "plus")
-                    .frame(maxWidth: .infinity, minHeight: 56)
+            Button { showsAddStore = true } label: {
+                AddStoreTile(fill: Color(.secondarySystemGroupedBackground))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
         }
     }
-}
 
-private struct StoreTargetButton: View {
-    let store: Store
-    var suggestion: StoreSuggestion?
-    var count: Int?
-    let action: () -> Void
+    /// Single: the current item's suggestion. Board: the store all selected items point to, if any.
+    private func highlightedSuggestion(isBoard: Bool) -> StoreSuggestion? {
+        guard isBoard else { return model.triageQueue.first.flatMap(model.suggestion(for:)) }
+        let selected = model.triageQueue.filter { model.triage?.selection.contains($0.id) == true }
+        let suggestions = selected.map(model.suggestion(for:))
+        guard let first = suggestions.first ?? nil,
+              suggestions.allSatisfy({ $0?.storeID == first.storeID }) else { return nil }
+        return first
+    }
 
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                StoreBadge(store: store, size: 30)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(store.name)
-                        .font(.body.weight(.semibold))
-                        .lineLimit(1)
-                    if let suggestion {
-                        Label(suggestion.label, systemImage: suggestion.symbol)
-                            .font(.caption2.weight(.medium))
-                            .labelStyle(.titleAndIcon)
-                    } else if let count, count > 0 {
-                        Text("\(count) Einträge")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 12)
-            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
-            .background(store.color.opacity(suggestion == nil ? 0.12 : 0.28), in: .rect(cornerRadius: 16))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16).strokeBorder(store.color, lineWidth: suggestion == nil ? 0 : 2.5)
-            }
-            .foregroundStyle(.primary)
+    private func assign(to store: Store, isBoard: Bool) async {
+        if isBoard {
+            await model.triageAssignSelection(to: store)
+        } else if let item = model.triageQueue.first {
+            await model.triageAssign(item, to: store)
         }
-        .buttonStyle(.plain)
-        .accessibilityHint(suggestion == nil ? "" : "Vorschlag")
     }
 }
 
@@ -231,56 +229,71 @@ extension StoreSuggestion {
     }
 }
 
-// MARK: - Board
+// MARK: - Bottom bar
 
-/// Store drop zones; tap assigns the board selection (tap fallback, KONZEPT §7.4).
-private struct StoreTargets: View {
-    @Binding var showsAddStore: Bool
-    var compact = false
+/// Same in both modes: "Überspringen" (single) right above the main action, which takes over all
+/// suggestions. A plain glass button, not a prominent one – it is an offer, not the next step.
+private struct TriageBottomBar: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                ForEach(model.sortedStores) { store in
-                    StoreTargetButton(store: store, count: model.openItemCount(of: store.id)) {
-                        Task { await assignFocused(to: store) }
-                    }
-                    .dropDestination(for: String.self) { ids, _ in
-                        let items = model.triageQueue.filter { ids.contains($0.id) }
-                        guard !items.isEmpty else { return false }
-                        Task { for item in items { await model.triageAssign(item, to: store) } }
-                        return true
-                    }
+        let suggestions = model.triageSuggestions
+        VStack(spacing: 10) {
+            if model.triage?.mode != .board, let item = model.triageQueue.first {
+                Button("Überspringen") {
+                    withAnimation(.snappy) { model.triageSkip(item) }
                 }
-                Button {
-                    showsAddStore = true
-                } label: {
-                    Label("Laden", systemImage: "plus").frame(maxWidth: .infinity, minHeight: 56)
-                }
-                .buttonStyle(.bordered)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
             }
-            .padding(compact ? 12 : 20)
-            if !compact {
-                Text(model.triage?.mode == .board
-                     ? "Einträge links auswählen oder ziehen, dann auf einen Laden tippen."
-                     : "Tippe auf den Laden für den Eintrag links.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 20)
+            if !suggestions.isEmpty {
+                Button {
+                    Task { await model.triageAcceptAllSuggestions() }
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "sparkles")
+                            .font(.title3)
+                            .foregroundStyle(.tint)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(suggestions.count == 1
+                                 ? "1 Eintrag wie vorgeschlagen zuordnen"
+                                 : "\(suggestions.count) Einträge wie vorgeschlagen zuordnen")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                            Text(summary(of: suggestions))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 18)
+                    .frame(maxWidth: 420, minHeight: 56)
+                    .glassEffect(.regular.interactive(), in: .capsule)
+                    .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
             }
         }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 8)
     }
 
-    /// Board: assigns the selection. Single mode (side by side): assigns the current item.
-    private func assignFocused(to store: Store) async {
-        if model.triage?.mode == .board {
-            await model.triageAssignSelection(to: store)
-        } else if let item = model.triageQueue.first {
-            await model.triageAssign(item, to: store)
+    /// "Rewe 3 · dm 2"
+    private func summary(of suggestions: [(item: ShoppingItem, store: Store)]) -> String {
+        var counts: [(store: Store, count: Int)] = []
+        for (_, store) in suggestions {
+            if let index = counts.firstIndex(where: { $0.store.id == store.id }) {
+                counts[index].count += 1
+            } else {
+                counts.append((store, 1))
+            }
         }
+        return counts.map { "\($0.store.name) \($0.count)" }.joined(separator: " · ")
     }
 }
+
+// MARK: - Board
 
 private struct TriageBoardList: View {
     @Environment(AppModel.self) private var model
@@ -319,8 +332,11 @@ private struct TriageBoardList: View {
                         }
                     }
                 }
-            } footer: {
-                Text("Auswählen und auf einen Laden tippen – oder einen Eintrag direkt auf den Laden ziehen.")
+            } header: {
+                Text("Wähle Artikel und füge sie unten einem Laden hinzu.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .textCase(nil)
             }
         }
     }

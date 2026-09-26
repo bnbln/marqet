@@ -38,8 +38,8 @@ struct StoreFocusScreen: View {
         card(deck: deck)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
-            .overlay(alignment: .bottomTrailing) {
-                if model.composerTarget == nil { addButton }
+            .overlay(alignment: .bottom) {
+                if model.composerTarget == nil { bottomControls(deck: deck) }
             }
             .safeAreaInset(edge: .bottom) {
                 if model.composerTarget != nil {
@@ -60,6 +60,26 @@ struct StoreFocusScreen: View {
                 if model.composerTarget != nil { model.endComposer() }
             }
             .sheet(isPresented: $showsAddStore) { AddStoreSheet() }
+            // Zuordnen opens on top of this screen and returns here – the inbox stays open,
+            // even when it is empty afterwards.
+            .fullScreenCover(isPresented: Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })) {
+                TriageScreen()
+            }
+    }
+
+    /// "Läden zuordnen" centered at the height of the add button (inbox only).
+    private func bottomControls(deck: CardDeck) -> some View {
+        ZStack(alignment: .bottom) {
+            if page == .unsorted, !deck.items(on: page).isEmpty {
+                TriageButton()
+            }
+            HStack {
+                Spacer()
+                addButton
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
     }
 
     @ViewBuilder
@@ -90,8 +110,6 @@ struct StoreFocusScreen: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Eintrag hinzufügen")
-        .padding(.trailing, 20)
-        .padding(.bottom, 4)
     }
 }
 
@@ -144,10 +162,6 @@ struct OffersSection: View {
                     .font(.subheadline.weight(.semibold))
                     .textCase(nil)
                     .foregroundStyle(store.readableColor)
-            } footer: {
-                Text("Öffnet die offizielle Seite von \(store.name). Dort wählst du deinen Markt.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
             .sheet(isPresented: $showsLeaflet) {
                 SafariView(url: leafletURL).ignoresSafeArea()

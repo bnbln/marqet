@@ -18,14 +18,14 @@ struct MoreStoresCard: View {
     var body: some View {
         GeometryReader { proxy in
             let columnCount = max(1, Int((proxy.size.width - 40 + 12) / 104))
-            let rowCount = max(1, Int((proxy.size.height - 40 - 52 + 16) / 112))
+            let rowCount = max(1, Int((proxy.size.height - 40 - 52 + 12) / 126))
             let storeCapacity = max(0, columnCount * rowCount - 1)
             let ownCount = min(model.hiddenStores.count, storeCapacity)
             let suggestionCount = max(0, storeCapacity - ownCount)
 
             VStack(alignment: .leading, spacing: 12) {
                 header
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount), spacing: 16) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: columnCount), spacing: 12) {
                     ForEach(model.hiddenStores.prefix(ownCount)) { store in
                         tile(.own(store.id), name: store.name) { StoreBadge(store: store, size: 48) }
                     }
@@ -82,25 +82,13 @@ struct MoreStoresCard: View {
     }
 
     private var addStoreTile: some View {
-        Button { showsAddStore = true } label: {
-            VStack(spacing: 8) {
-                Image(systemName: "plus")
-                    .font(.title2.weight(.medium))
-                    .frame(width: 48, height: 48)
-                    .background(Color(.tertiarySystemFill), in: .circle)
-                Text("Laden hinzufügen")
-                    .font(.caption.weight(.medium))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity, minHeight: 96, alignment: .top)
-            .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
+        Button { showsAddStore = true } label: { AddStoreTile() }
+            .buttonStyle(.plain)
     }
 
     private func tile(_ tile: Tile, name: String, @ViewBuilder badge: () -> some View) -> some View {
         let isSelected = selection.contains(tile)
+        let badge = badge()
         return Button {
             if isSelecting {
                 if isSelected { selection.remove(tile) } else { selection.insert(tile) }
@@ -108,25 +96,7 @@ struct MoreStoresCard: View {
                 open(tile)
             }
         } label: {
-            VStack(spacing: 8) {
-                badge()
-                    .overlay(alignment: .topTrailing) {
-                        if isSelecting {
-                            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundStyle(isSelected ? Color.accentColor : .secondary)
-                                .background(Circle().fill(Color(.systemBackground)))
-                                .offset(x: 6, y: -6)
-                        }
-                    }
-                Text(name)
-                    .font(.caption.weight(.medium))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.primary)
-            }
-            .frame(maxWidth: .infinity, minHeight: 96, alignment: .top)
-            .contentShape(.rect)
+            StoreTile(name: name, isSelected: isSelecting ? isSelected : nil) { badge }
         }
         .buttonStyle(.plain)
     }

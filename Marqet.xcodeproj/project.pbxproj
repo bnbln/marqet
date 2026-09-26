@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		013A6F32AC3C118BE686C668 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 430383FFE1EF017C76C1C765 /* Assets.xcassets */; };
 		0321B39B103F92366C02DDBD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A201C9C48A4C086168C0474 /* SettingsView.swift */; };
+		038DB2893059C807DB6E7A91 /* StoreTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9717E76FB70665C520368F /* StoreTile.swift */; };
 		07C2E085A543D3710EC87FE6 /* AdaptiveSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD6E5F8B4968F49192DF3E3 /* AdaptiveSplit.swift */; };
 		0839964C3278686B5FD118A3 /* MarqetCore in Frameworks */ = {isa = PBXBuildFile; productRef = 190B3E4E6E007D68641F33C1 /* MarqetCore */; };
 		0A6627C042705B2267ABD612 /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */; };
@@ -90,6 +91,7 @@
 		41A0D276169913633F5710AA /* MarqetKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MarqetKit; path = Packages/MarqetKit; sourceTree = SOURCE_ROOT; };
 		422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitRoundTripTests.swift; sourceTree = "<group>"; };
 		430383FFE1EF017C76C1C765 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4C9717E76FB70665C520368F /* StoreTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTile.swift; sourceTree = "<group>"; };
 		511AB2999B3A3E759DDAB14C /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
 		56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCard.swift; sourceTree = "<group>"; };
 		68440EB6E1E9D12D43C573CF /* BranchPickerSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerSection.swift; sourceTree = "<group>"; };
@@ -283,6 +285,7 @@
 				DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */,
 				23B92F2AB1F42A1299049632 /* StoreBadge.swift */,
 				81FD1AA7953B020E2F971793 /* StoreStyle.swift */,
+				4C9717E76FB70665C520368F /* StoreTile.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -509,6 +512,7 @@
 				67B40B5BD20A6C9B73086212 /* StoreOrderSheet.swift in Sources */,
 				11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */,
 				B5C40E5BA2742DB2FBCF99D4 /* StoreStyle.swift in Sources */,
+				038DB2893059C807DB6E7A91 /* StoreTile.swift in Sources */,
 				5C5087B9348C11AEDDCEC9CC /* StoresSettingsView.swift in Sources */,
 				38B193C69F2E7033A3EA453F /* TriageScreen.swift in Sources */,
 			);

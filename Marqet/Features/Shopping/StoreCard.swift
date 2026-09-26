@@ -14,7 +14,6 @@ struct StoreCard: View {
 
     @Environment(AppModel.self) private var model
     @Environment(\.cardZoomNamespace) private var zoomNamespace
-    @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     @State private var showsSectionOrder = false
     @State private var showsStoreDetails = false
     /// The user's finger is on the list – only then does pulling up open the card full screen.
@@ -186,7 +185,7 @@ struct StoreCard: View {
             .scrollContentBackground(.hidden)
             .scrollIndicators(.visible)
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if store == nil, !items.isEmpty {
+                if store == nil, !items.isEmpty, !isExpanded {
                     triageFooter
                 } else {
                     Color.clear.frame(height: isExpanded ? 72 : 54)
@@ -212,27 +211,13 @@ struct StoreCard: View {
     }
 
     /// Entry into the triage flow, pinned to the bottom of the inbox card (KONZEPT §7.4), centered.
+    /// Full screen, `StoreFocusScreen` shows it next to the add button instead.
     private var triageFooter: some View {
-        HStack {
-            Spacer(minLength: 0)
-            Button {
-                model.startTriage()
-            } label: {
-                Label("Läden zuordnen", systemImage: "tray.and.arrow.down.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 4)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
-            .tint(AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color)
-            .foregroundStyle(.white)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 18)
-        .padding(.top, 10)
-        .padding(.bottom, 34)
-        .background(Color(.secondarySystemGroupedBackground))
+        TriageButton()
+            .frame(maxWidth: .infinity)
+            .padding(.top, 10)
+            .padding(.bottom, 30)
+            .background(Color(.secondarySystemGroupedBackground))
     }
 
     @ViewBuilder

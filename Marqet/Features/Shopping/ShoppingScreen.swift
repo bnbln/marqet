@@ -169,8 +169,9 @@ extension ShoppingScreen {
         Binding(get: { model.focusedPage.map(FocusedPage.init) }, set: { model.focusedPage = $0?.page })
     }
 
+    /// Triage started from the full-screen card is presented there, so closing it returns there.
     private var triageBinding: Binding<Bool> {
-        Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })
+        Binding(get: { model.triage != nil && model.focusedPage == nil }, set: { if !$0 { model.endTriage() } })
     }
 }
 

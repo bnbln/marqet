@@ -222,7 +222,7 @@ struct AppModelTests {
 
     // MARK: Briefing (KONZEPT #40)
 
-    @Test func briefingSummarizesStoresAndInboxOncePerLaunch() async throws {
+    @Test(.disabled("Briefing vorerst deaktiviert")) func briefingSummarizesStoresAndInboxOncePerLaunch() async throws {
         let model = try await makeModel(items: [("Milch", "🛒 Rewe"), ("Butter", "🛒 Rewe"), ("Zahnpasta", "🛒 dm"), ("Batterien", nil)])
         let briefing = try #require(model.briefing)
         #expect(briefing.stores.map(\.store.name) == ["Rewe", "dm"])
@@ -243,7 +243,7 @@ struct AppModelTests {
         #expect(model.briefing == nil)
     }
 
-    @Test func briefingGoesAwayWhenTheUserActs() async throws {
+    @Test(.disabled("Briefing vorerst deaktiviert")) func briefingGoesAwayWhenTheUserActs() async throws {
         let model = try await makeModel(items: [("Milch", "🛒 Rewe"), ("Batterien", nil)])
         #expect(model.briefing != nil)
         model.startComposer(on: .unsorted)

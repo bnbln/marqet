@@ -323,7 +323,8 @@ final class AppModel {
         do {
             apply(try await gateway.openReminders(in: selectedListID))
             await afterReload()
-            if !hasLoadedItems { prepareBriefing() }
+            // Briefing (KONZEPT #40) vorerst deaktiviert – zurück zur alten Startansicht.
+            // if !hasLoadedItems { prepareBriefing() }
             hasLoadedItems = true
         } catch {
             present(error)

@@ -4,8 +4,31 @@
     "" : {
 
     },
+    "%@ ist am nächsten (%@)." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ ist am nächsten (%2$@)."
+          }
+        }
+      }
+    },
+    "%@ ist geplant, die Liste ist noch leer." : {
+
+    },
     "%@ löschen?" : {
 
+    },
+    "%@, %lld offen" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld offen"
+          }
+        }
+      }
     },
     "%@, bearbeiten" : {
 
@@ -14,6 +37,19 @@
 
     },
     "%lld Einträge automatisch zugeordnet" : {
+
+    },
+    "%lld Einträge für %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld Einträge für %2$@."
+          }
+        }
+      }
+    },
+    "%lld Einträge warten in der Inbox." : {
 
     },
     "%lld Einträge wie vorgeschlagen zuordnen" : {
@@ -58,6 +94,12 @@
 
     },
     "1 Eintrag automatisch zugeordnet" : {
+
+    },
+    "1 Eintrag für %@." : {
+
+    },
+    "1 Eintrag wartet in der Inbox." : {
 
     },
     "1 Eintrag wie vorgeschlagen zuordnen" : {
@@ -255,6 +297,15 @@
     "Eigener Laden" : {
 
     },
+    "Einkauf bei %@" : {
+
+    },
+    "Einkauf starten" : {
+
+    },
+    "Einkäufe bei %lld Läden" : {
+
+    },
     "Einkaufen" : {
 
     },
@@ -354,7 +405,22 @@
     "Gelerntes zurücksetzen?" : {
 
     },
+    "geplant" : {
+
+    },
     "Getränke" : {
+
+    },
+    "Guten Abend" : {
+
+    },
+    "Guten Morgen" : {
+
+    },
+    "Guten Tag" : {
+
+    },
+    "Hallo" : {
 
     },
     "Haushalt" : {

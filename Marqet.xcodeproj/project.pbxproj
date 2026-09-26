@@ -1,0 +1,617 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		013A6F32AC3C118BE686C668 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 430383FFE1EF017C76C1C765 /* Assets.xcassets */; };
+		0839964C3278686B5FD118A3 /* MarqetCore in Frameworks */ = {isa = PBXBuildFile; productRef = 190B3E4E6E007D68641F33C1 /* MarqetCore */; };
+		0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */; };
+		0FFDCC78B7EBBA1E52D5E44E /* ListPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */; };
+		11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8662B64170332932ED37FE06 /* StorePager.swift */; };
+		2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B307E22CA868870A6E3000A8 /* MarqetApp.swift */; };
+		2D56704CCCBB3B2AC6F58B75 /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = D12C6C9AEC2562DE4F0D5503 /* MarqetReminders */; };
+		5D487AB91EE9FB25BD647637 /* MarqetCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB9BA9BB8675621A77EF71D0 /* MarqetCore */; };
+		613773694FB25CCEBA86DA75 /* ComposerTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */; };
+		61EAEFF8182EDF2AFC6EF4F0 /* MarqetPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 322638D8297418C684AE6F29 /* MarqetPersistence */; };
+		64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */; };
+		71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */; };
+		88167E848566A767ED3889AC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3044CC8DBA6E48095569D /* RootView.swift */; };
+		913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B92F2AB1F42A1299049632 /* StoreBadge.swift */; };
+		96BFCE1F769A71C3791B4226 /* AddStoreSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */; };
+		9C93206531726357A9CDC613 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1D792C9DC89E371EA48BE6 /* AppModel.swift */; };
+		9F79D0ADA8B58BFCCA3472BB /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = 4838E0B9757FE4E7524F1BE4 /* MarqetReminders */; };
+		B5C40E5BA2742DB2FBCF99D4 /* StoreStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FD1AA7953B020E2F971793 /* StoreStyle.swift */; };
+		CB9B39B46AB12BB24FE61916 /* ComposerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D403846165703592E11F /* ComposerBar.swift */; };
+		D230CCE7489CAC2E4CC5C198 /* EventKitRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */; };
+		EF10BED0FD28122A5247DA7A /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1335C97D860751574A63AE6 /* Color+Hex.swift */; };
+		EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */; };
+		F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */; };
+		F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6B188C882550895185523D8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16262FFA6416983C287E3765 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B57C97E7B88B33900EAB3896;
+			remoteInfo = Marqet;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		0D1D792C9DC89E371EA48BE6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		23B92F2AB1F42A1299049632 /* StoreBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreBadge.swift; sourceTree = "<group>"; };
+		2CD3044CC8DBA6E48095569D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingScreen.swift; sourceTree = "<group>"; };
+		41A0D276169913633F5710AA /* MarqetKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MarqetKit; path = Packages/MarqetKit; sourceTree = SOURCE_ROOT; };
+		422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitRoundTripTests.swift; sourceTree = "<group>"; };
+		430383FFE1EF017C76C1C765 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCard.swift; sourceTree = "<group>"; };
+		81FD1AA7953B020E2F971793 /* StoreStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreStyle.swift; sourceTree = "<group>"; };
+		8662B64170332932ED37FE06 /* StorePager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePager.swift; sourceTree = "<group>"; };
+		939362CED74CE9DC640A9D19 /* Marqet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Marqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		997698A631A4635B7AE98F19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MarqetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreSheet.swift; sourceTree = "<group>"; };
+		B307E22CA868870A6E3000A8 /* MarqetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetApp.swift; sourceTree = "<group>"; };
+		C843D403846165703592E11F /* ComposerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerBar.swift; sourceTree = "<group>"; };
+		D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPickerView.swift; sourceTree = "<group>"; };
+		DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldGeometry.swift; sourceTree = "<group>"; };
+		E1335C97D860751574A63AE6 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerTextField.swift; sourceTree = "<group>"; };
+		F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreStoresCard.swift; sourceTree = "<group>"; };
+		F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		297263E493983CFEA23CA7CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0839964C3278686B5FD118A3 /* MarqetCore in Frameworks */,
+				2D56704CCCBB3B2AC6F58B75 /* MarqetReminders in Frameworks */,
+				61EAEFF8182EDF2AFC6EF4F0 /* MarqetPersistence in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		44BC05ABA3C4585A1D6B979D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5D487AB91EE9FB25BD647637 /* MarqetCore in Frameworks */,
+				9F79D0ADA8B58BFCCA3472BB /* MarqetReminders in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		55BB4C700D214B0CCC4FB8AA /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */,
+				F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		57770E1FF46D8827E03140E5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				430383FFE1EF017C76C1C765 /* Assets.xcassets */,
+				01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		6264ED2C19EC4099099BF46E /* Marqet */ = {
+			isa = PBXGroup;
+			children = (
+				EDCC8A6A54220E0712BCFF79 /* App */,
+				C3B4E92304770B1AA8BABB84 /* DesignSystem */,
+				C80E4BB84CCE5DB3737363AA /* Features */,
+				57770E1FF46D8827E03140E5 /* Resources */,
+				997698A631A4635B7AE98F19 /* Info.plist */,
+			);
+			path = Marqet;
+			sourceTree = "<group>";
+		};
+		64AC9F8E12AD1FB3541251F4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				939362CED74CE9DC640A9D19 /* Marqet.app */,
+				99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8CA21F32286B30ABFC41794F /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		8F00E56301DEC8995117BFDC /* MarqetTests */ = {
+			isa = PBXGroup;
+			children = (
+				422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */,
+			);
+			path = MarqetTests;
+			sourceTree = "<group>";
+		};
+		C3B4E92304770B1AA8BABB84 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				E1335C97D860751574A63AE6 /* Color+Hex.swift */,
+				DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */,
+				23B92F2AB1F42A1299049632 /* StoreBadge.swift */,
+				81FD1AA7953B020E2F971793 /* StoreStyle.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		C80E4BB84CCE5DB3737363AA /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				55BB4C700D214B0CCC4FB8AA /* Onboarding */,
+				ED741428305A056F5C2E53B3 /* Shopping */,
+				8CA21F32286B30ABFC41794F /* Stores */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		D0FAC9993A6A43A3BC7097F4 = {
+			isa = PBXGroup;
+			children = (
+				6264ED2C19EC4099099BF46E /* Marqet */,
+				8F00E56301DEC8995117BFDC /* MarqetTests */,
+				F3476EDDC27852D171EC2117 /* Packages */,
+				64AC9F8E12AD1FB3541251F4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		ED741428305A056F5C2E53B3 /* Shopping */ = {
+			isa = PBXGroup;
+			children = (
+				C843D403846165703592E11F /* ComposerBar.swift */,
+				EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */,
+				F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */,
+				3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */,
+				56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */,
+				8662B64170332932ED37FE06 /* StorePager.swift */,
+			);
+			path = Shopping;
+			sourceTree = "<group>";
+		};
+		EDCC8A6A54220E0712BCFF79 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				0D1D792C9DC89E371EA48BE6 /* AppModel.swift */,
+				B307E22CA868870A6E3000A8 /* MarqetApp.swift */,
+				2CD3044CC8DBA6E48095569D /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F3476EDDC27852D171EC2117 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				41A0D276169913633F5710AA /* MarqetKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2286EB055C2BEBDF29EB8994 /* MarqetTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0530B1A682D8F5180068517B /* Build configuration list for PBXNativeTarget "MarqetTests" */;
+			buildPhases = (
+				925E2DEEC9F3EAAC2BD3286A /* Sources */,
+				44BC05ABA3C4585A1D6B979D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E674E1C5F3916A52F1E1B3E4 /* PBXTargetDependency */,
+			);
+			name = MarqetTests;
+			packageProductDependencies = (
+				BB9BA9BB8675621A77EF71D0 /* MarqetCore */,
+				4838E0B9757FE4E7524F1BE4 /* MarqetReminders */,
+			);
+			productName = MarqetTests;
+			productReference = 99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B57C97E7B88B33900EAB3896 /* Marqet */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 750BD92906FAC38EEBB5E5BF /* Build configuration list for PBXNativeTarget "Marqet" */;
+			buildPhases = (
+				51FBE193218367CD38B5F3B1 /* Sources */,
+				E48959D83D1C7F550E65B7B0 /* Resources */,
+				297263E493983CFEA23CA7CE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Marqet;
+			packageProductDependencies = (
+				190B3E4E6E007D68641F33C1 /* MarqetCore */,
+				D12C6C9AEC2562DE4F0D5503 /* MarqetReminders */,
+				322638D8297418C684AE6F29 /* MarqetPersistence */,
+			);
+			productName = Marqet;
+			productReference = 939362CED74CE9DC640A9D19 /* Marqet.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		16262FFA6416983C287E3765 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					B57C97E7B88B33900EAB3896 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C287CC3FE11A0BA65C0DCAFA /* Build configuration list for PBXProject "Marqet" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = de;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				de,
+			);
+			mainGroup = D0FAC9993A6A43A3BC7097F4;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F6D6148A8957996070DC673E /* XCLocalSwiftPackageReference "Packages/MarqetKit" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B57C97E7B88B33900EAB3896 /* Marqet */,
+				2286EB055C2BEBDF29EB8994 /* MarqetTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E48959D83D1C7F550E65B7B0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				013A6F32AC3C118BE686C668 /* Assets.xcassets in Resources */,
+				EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		51FBE193218367CD38B5F3B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				96BFCE1F769A71C3791B4226 /* AddStoreSheet.swift in Sources */,
+				9C93206531726357A9CDC613 /* AppModel.swift in Sources */,
+				EF10BED0FD28122A5247DA7A /* Color+Hex.swift in Sources */,
+				CB9B39B46AB12BB24FE61916 /* ComposerBar.swift in Sources */,
+				613773694FB25CCEBA86DA75 /* ComposerTextField.swift in Sources */,
+				71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */,
+				0FFDCC78B7EBBA1E52D5E44E /* ListPickerView.swift in Sources */,
+				2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */,
+				F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */,
+				F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */,
+				88167E848566A767ED3889AC /* RootView.swift in Sources */,
+				0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */,
+				913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */,
+				64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */,
+				11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */,
+				B5C40E5BA2742DB2FBCF99D4 /* StoreStyle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		925E2DEEC9F3EAAC2BD3286A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D230CCE7489CAC2E4CC5C198 /* EventKitRoundTripTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E674E1C5F3916A52F1E1B3E4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B57C97E7B88B33900EAB3896 /* Marqet */;
+			targetProxy = 6B188C882550895185523D8F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1BD361130B430587EA994959 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		8EA1369CAAAEC9484C2CDD69 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.MarqetTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Marqet.app/Marqet";
+			};
+			name = Debug;
+		};
+		ACEDD704B3E9300D047D0A5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C4VHG63LL9;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Marqet/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F0CB3AE8B7FD1EC13B9BB694 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = C4VHG63LL9;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Marqet/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F65A491AC0711EA626C4706E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		F8F8F4183978065543231087 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.MarqetTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Marqet.app/Marqet";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0530B1A682D8F5180068517B /* Build configuration list for PBXNativeTarget "MarqetTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EA1369CAAAEC9484C2CDD69 /* Debug */,
+				F8F8F4183978065543231087 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		750BD92906FAC38EEBB5E5BF /* Build configuration list for PBXNativeTarget "Marqet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ACEDD704B3E9300D047D0A5C /* Debug */,
+				F0CB3AE8B7FD1EC13B9BB694 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C287CC3FE11A0BA65C0DCAFA /* Build configuration list for PBXProject "Marqet" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F65A491AC0711EA626C4706E /* Debug */,
+				1BD361130B430587EA994959 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F6D6148A8957996070DC673E /* XCLocalSwiftPackageReference "Packages/MarqetKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MarqetKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		190B3E4E6E007D68641F33C1 /* MarqetCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetCore;
+		};
+		322638D8297418C684AE6F29 /* MarqetPersistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetPersistence;
+		};
+		4838E0B9757FE4E7524F1BE4 /* MarqetReminders */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetReminders;
+		};
+		BB9BA9BB8675621A77EF71D0 /* MarqetCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetCore;
+		};
+		D12C6C9AEC2562DE4F0D5503 /* MarqetReminders */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetReminders;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 16262FFA6416983C287E3765 /* Project object */;
+}

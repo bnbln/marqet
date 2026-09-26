@@ -1,0 +1,270 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "" : {
+
+    },
+    "%lld Läden hinzufügen" : {
+
+    },
+    "%lld offen" : {
+
+    },
+    "%lld ohne Laden" : {
+
+    },
+    "Abbrechen" : {
+
+    },
+    "Abhaken" : {
+
+    },
+    "Alles eingekauft 🎉" : {
+
+    },
+    "Alles erledigt" : {
+
+    },
+    "Alles erledigt bei %@" : {
+
+    },
+    "Alles zugeordnet" : {
+
+    },
+    "Apotheke" : {
+
+    },
+    "Art" : {
+
+    },
+    "Aus Übersicht entfernen" : {
+
+    },
+    "Ausblenden" : {
+
+    },
+    "Ausgewählt" : {
+
+    },
+    "Bäckerei" : {
+
+    },
+    "Baumarkt" : {
+
+    },
+    "Bioladen" : {
+
+    },
+    "Das hat nicht geklappt" : {
+
+    },
+    "Deine Erinnerungslisten" : {
+
+    },
+    "Deine Läden" : {
+
+    },
+    "Deutschland" : {
+
+    },
+    "Diesen Laden gibt es schon." : {
+
+    },
+    "Discounter" : {
+
+    },
+    "Drogerie" : {
+
+    },
+    "Eigener Laden" : {
+
+    },
+    "Einkaufen" : {
+
+    },
+    "Einkaufsliste" : {
+
+    },
+    "Einstellungen öffnen" : {
+
+    },
+    "Eintrag hinzufügen" : {
+
+    },
+    "Erledigt, tippen zum Rückgängigmachen" : {
+
+    },
+    "Erledigte anzeigen" : {
+
+    },
+    "Erledigte ausblenden" : {
+
+    },
+    "Farbe" : {
+
+    },
+    "Fertig" : {
+
+    },
+    "Geplant" : {
+
+    },
+    "Getränke" : {
+
+    },
+    "Hinzufügen" : {
+
+    },
+    "Hinzufügen zu …" : {
+
+    },
+    "Hinzugefügt" : {
+
+    },
+    "In den letzten 7 Tagen nichts erledigt." : {
+
+    },
+    "Katalog" : {
+
+    },
+    "Kette suchen" : {
+
+    },
+    "Laden" : {
+
+    },
+    "Laden ändern" : {
+
+    },
+    "Laden anlegen" : {
+
+    },
+    "Läden auswählen" : {
+
+    },
+    "Laden hinzufügen" : {
+
+    },
+    "Laden-Optionen" : {
+
+    },
+    "Leer" : {
+
+    },
+    "Liste wechseln" : {
+
+    },
+    "Löschen" : {
+
+    },
+    "Markt" : {
+
+    },
+    "Marqet braucht vollen Zugriff auf deine Erinnerungen. Du kannst ihn in den Einstellungen unter „Marqet“ erteilen." : {
+
+    },
+    "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen – auf deinem Gerät und in deinem iCloud." : {
+
+    },
+    "Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
+
+    },
+    "Mehrere planen" : {
+
+    },
+    "Metzgerei" : {
+
+    },
+    "Möbel & Einrichtung" : {
+
+    },
+    "Name, z. B. Hofladen Maier" : {
+
+    },
+    "Neue Liste „Einkaufen“ anlegen" : {
+
+    },
+    "Neuer Eintrag (unsortiert)" : {
+
+    },
+    "Neuer Eintrag für %@" : {
+
+    },
+    "Noch leer" : {
+
+    },
+    "Nochmal kaufen" : {
+
+    },
+    "OK" : {
+
+    },
+    "Online" : {
+
+    },
+    "Optionen" : {
+
+    },
+    "Österreich" : {
+
+    },
+    "Plane deinen nächsten Einkauf: Tippe auf einen Laden." : {
+
+    },
+    "Region" : {
+
+    },
+    "Schweiz" : {
+
+    },
+    "Sichern" : {
+
+    },
+    "Sonstiges" : {
+
+    },
+    "Supermarkt" : {
+
+    },
+    "Symbol" : {
+
+    },
+    "Tippe auf +, um etwas für %@ hinzuzufügen." : {
+
+    },
+    "Tippe auf einen Laden, um etwas für ihn einzutragen." : {
+
+    },
+    "Titel" : {
+
+    },
+    "Umbenennen" : {
+
+    },
+    "Unsortiert" : {
+
+    },
+    "Vorschlag" : {
+
+    },
+    "Vorschläge" : {
+
+    },
+    "Wähle die Liste, in die du – oder Siri – deine Einkäufe einträgst." : {
+
+    },
+    "Weitere Läden" : {
+
+    },
+    "Wo kaufst du ein?" : {
+
+    },
+    "Zugriff auf Erinnerungen" : {
+
+    },
+    "Zugriff erlauben" : {
+
+    }
+  },
+  "version" : "1.0"
+}

@@ -1,0 +1,89 @@
+# Generate the Xcode project with: xcodegen generate
+name: Marqet
+options:
+  bundleIdPrefix: app.marqet
+  deploymentTarget:
+    iOS: "26.0"
+  developmentLanguage: de
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+
+packages:
+  MarqetKit:
+    path: Packages/MarqetKit
+
+targets:
+  Marqet:
+    type: application
+    platform: iOS
+    sources:
+      - path: Marqet
+    dependencies:
+      - package: MarqetKit
+        product: MarqetCore
+      - package: MarqetKit
+        product: MarqetReminders
+      - package: MarqetKit
+        product: MarqetPersistence
+    info:
+      path: Marqet/Info.plist
+      properties:
+        CFBundleDisplayName: Marqet
+        CFBundleDevelopmentRegion: de
+        CFBundleLocalizations: [de, en]
+        NSRemindersFullAccessUsageDescription: Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        # Landscape is required: the iPhone Duo inner display opens as a landscape book (KONZEPT-DUO-IPAD §1).
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.marqet.Marqet
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        CODE_SIGN_STYLE: Automatic
+
+  MarqetTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: MarqetTests
+    dependencies:
+      - target: Marqet
+      - package: MarqetKit
+        product: MarqetCore
+      - package: MarqetKit
+        product: MarqetReminders
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.marqet.MarqetTests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Marqet:
+    build:
+      targets:
+        Marqet: all
+        MarqetTests: [test]
+    test:
+      gatherCoverageData: true
+      # Package tests run on macOS via `swift test` (fast, no simulator); see README.
+      targets:
+        - MarqetTests
+    run:
+      config: Debug

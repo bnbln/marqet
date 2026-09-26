@@ -1,0 +1,96 @@
+import MarqetCore
+import SwiftUI
+
+extension Store {
+    var color: Color { Color(hex: colorHex) }
+
+    /// Text and symbols on top of the store color (black on yellow chains, white otherwise).
+    var foregroundOnColor: Color {
+        RGBColor(hex: colorHex)?.prefersDarkForeground == true ? .black.opacity(0.85) : .white
+    }
+}
+
+extension StoreType {
+    var displayName: String {
+        switch self {
+        case .discounter: String(localized: "Discounter")
+        case .supermarket: String(localized: "Supermarkt")
+        case .drugstore: String(localized: "Drogerie")
+        case .organic: String(localized: "Bioladen")
+        case .hardware: String(localized: "Baumarkt")
+        case .furniture: String(localized: "Möbel & Einrichtung")
+        case .beverage: String(localized: "Getränke")
+        case .bakery: String(localized: "Bäckerei")
+        case .butcher: String(localized: "Metzgerei")
+        case .pharmacy: String(localized: "Apotheke")
+        case .market: String(localized: "Markt")
+        case .online: String(localized: "Online")
+        case .other: String(localized: "Sonstiges")
+        }
+    }
+
+    var defaultSymbol: String {
+        switch self {
+        case .discounter, .supermarket: "cart.fill"
+        case .drugstore: "drop.fill"
+        case .organic: "leaf.fill"
+        case .hardware: "hammer.fill"
+        case .furniture: "sofa.fill"
+        case .beverage: "wineglass.fill"
+        case .bakery: "birthday.cake.fill"
+        case .butcher: "fork.knife"
+        case .pharmacy: "cross.case.fill"
+        case .market: "carrot.fill"
+        case .online: "shippingbox.fill"
+        case .other: "bag.fill"
+        }
+    }
+}
+
+/// Curated colors and symbols for custom stores (KONZEPT §7.8). Each color carries white text.
+enum StorePalette {
+    static let colors = [
+        "#C8323C", "#E0662B", "#D99A1E", "#5E9E3C", "#2E8B6E", "#23879B",
+        "#2F6FB0", "#3F4FB5", "#7A4FBF", "#B0449A", "#8A6A4F", "#56657A",
+    ]
+
+    static let symbols = [
+        "cart.fill", "basket.fill", "bag.fill", "carrot.fill", "leaf.fill", "fish.fill",
+        "birthday.cake.fill", "cup.and.saucer.fill", "wineglass.fill", "drop.fill",
+        "pills.fill", "hammer.fill", "pawprint.fill", "gift.fill", "tshirt.fill", "shippingbox.fill",
+    ]
+}
+
+/// The rounded, opaque card surface (opaque for legibility in bright stores, KONZEPT §7.7).
+struct CardSurface: ViewModifier {
+    var isFocused = false
+    var focusColor: Color = .accentColor
+
+    func body(content: Content) -> some View {
+        content
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(.rect(cornerRadius: 30, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 30, style: .continuous)
+                    .strokeBorder(focusColor.opacity(isFocused ? 0.9 : 0), lineWidth: 3)
+            }
+            .shadow(color: .black.opacity(0.08), radius: 12, y: 4)
+    }
+}
+
+extension View {
+    func cardSurface(isFocused: Bool = false, focusColor: Color = .accentColor) -> some View {
+        modifier(CardSurface(isFocused: isFocused, focusColor: focusColor))
+    }
+
+    /// iPhone Duo / iPad: sheets open on the leading half so the active card stays visible
+    /// (KONZEPT-DUO-IPAD §4.2). No effect before iOS 27 or on compact width.
+    @ViewBuilder
+    func leadingSheetPlacement() -> some View {
+        if #available(iOS 27.0, *) {
+            presentationPlacement(.leading)
+        } else {
+            self
+        }
+    }
+}

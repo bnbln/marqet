@@ -41,6 +41,11 @@ struct StoreFocusScreen: View {
     /// The wide iPad layout keeps its own header actions; everything else uses the system bar.
     private var showsSystemBar: Bool { hinge.hasHinge || !isSplit }
 
+    /// The inbox header is gray with white text, so it takes the dark variant as well.
+    private var headerColorScheme: ColorScheme {
+        page.storeID.flatMap { model.store($0) }?.colorSchemeOnColor ?? .dark
+    }
+
     var body: some View {
         NavigationStack {
             content
@@ -48,6 +53,9 @@ struct StoreFocusScreen: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { if showsSystemBar { systemToolbar } }
                 .toolbar(showsSystemBar ? .automatic : .hidden, for: .navigationBar)
+                // Bar buttons and status bar sit on the brand color: take their light or dark
+                // variant from it, like the header text (white on Aldi, black on yellow chains).
+                .toolbarColorScheme(isSplit ? nil : headerColorScheme, for: .navigationBar)
                 .toolbarVerticalCompressionPreferringItems()
         }
         // As on Home: the stack would otherwise reset the tint to the app accent.
@@ -249,9 +257,19 @@ struct StoreFocusScreen: View {
                 }
             }
         }
-        ToolbarItem(placement: .topBarTrailing) {
-            Button("Schließen", systemImage: "chevron.down") { model.focusedPage = nil }
-                .tint(.primary)
+        if hinge.hasHinge {
+            // Duo: closing is its own action, apart from the store actions (HIG: a divided
+            // group, not first in a shared one) and shown as the system close button.
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Schließen", systemImage: "xmark", role: .close) { model.focusedPage = nil }
+                    .tint(.primary)
+            }
+        } else {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Schließen", systemImage: "chevron.down") { model.focusedPage = nil }
+                    .tint(.primary)
+            }
         }
     }
 

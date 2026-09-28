@@ -104,7 +104,7 @@ struct LoyaltyCardsSettingsView: View {
                 ContentUnavailableView {
                     Label("Keine Kundenkarten", systemImage: "wallet.pass")
                 } description: {
-                    Text("Scanne deine Karten einmal – Marqet zeigt sie im Vollbild des passenden Ladens.")
+                    Text("Scanne deine Karten einmal: Marqet zeigt sie im Vollbild des passenden Ladens.")
                 }
                 .listRowBackground(Color.clear)
             }

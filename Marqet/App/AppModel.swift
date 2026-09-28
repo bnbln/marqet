@@ -315,6 +315,13 @@ final class AppModel {
     func createShoppingList(named name: String) async {
         let title = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !title.isEmpty else { return }
+        // A second tap must not create "Einkaufen" twice: reuse a writable list of that name.
+        if let existing = lists.first(where: {
+            $0.allowsModifications && $0.title.compare(title, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
+        }) {
+            await selectList(existing.id)
+            return
+        }
         do {
             let list = try await gateway.createList(named: title)
             lists.append(list)

@@ -214,7 +214,7 @@ struct LoyaltyCardEditor: View {
         case .missingNumber: String(localized: "Scanne die Karte oder gib die Nummer ein.")
         case .invalidDigits: String(localized: "Dieser Barcode-Typ enthält nur Ziffern.")
         case .wrongLength(let expected): String(localized: "Die Nummer braucht \(expected) Ziffern.")
-        case .wrongCheckDigit: String(localized: "Die Prüfziffer passt nicht – bitte Nummer prüfen oder anderen Barcode-Typ wählen.")
+        case .wrongCheckDigit: String(localized: "Die Prüfziffer passt nicht: Prüf die Nummer oder wähle einen anderen Barcode-Typ.")
         case .unsupportedCharacters: String(localized: "Code 128 erlaubt keine Umlaute oder Sonderzeichen.")
         }
     }

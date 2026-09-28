@@ -160,3 +160,14 @@ extension AppModel {
         }
     }
 }
+
+extension AppModel {
+    /// Stores picked in onboarding, in tap order. Planned, so their cards show right away –
+    /// otherwise the first screen after onboarding is an empty inbox without the chosen stores.
+    func addOnboardingStores(_ keys: [String]) {
+        for key in keys {
+            guard let entry = catalog?.entry(forKey: key) else { continue }
+            addStore(from: entry, planned: true)
+        }
+    }
+}

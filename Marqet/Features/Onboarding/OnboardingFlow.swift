@@ -3,13 +3,17 @@ import MarqetReminders
 import SwiftUI
 
 /// First launch (KONZEPT §7.5): welcome → Reminders access → list → stores → Siri tip.
+/// Every step uses `OnboardingLayout`, so illustration, headline and text never jump.
 struct OnboardingFlow: View {
     private enum Step: Int, CaseIterable {
         case welcome, access, list, stores, siri
     }
 
     @Environment(AppModel.self) private var model
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var step = Step.welcome
+    /// Tap order of the chosen catalog stores – kept when going back and forth.
+    @State private var storeSelection: [String] = []
 
     var body: some View {
         NavigationStack {
@@ -17,28 +21,36 @@ struct OnboardingFlow: View {
                 switch step {
                 case .welcome: welcome
                 case .access: access
-                case .list: ListPickerView(embedded: true) { advance(to: .stores) }
-                case .stores: OnboardingStoresView { advance(to: .siri) }
+                case .list: OnboardingListStep { advance(to: .stores) }
+                case .stores: OnboardingStoresStep(selection: $storeSelection) {
+                    model.addOnboardingStores(storeSelection)
+                    advance(to: .siri)
+                }
                 case .siri: siri
                 }
             }
-            .animation(.snappy, value: step)
+            .id(step)
+            .transition(.asymmetric(
+                insertion: .opacity.combined(with: .offset(x: 24)),
+                removal: .opacity
+            ))
             .toolbar {
                 if step != .welcome {
                     ToolbarItem(placement: .topBarLeading) {
                         Button("Zurück", systemImage: "chevron.left") { goBack() }
                             .tint(.primary)
                     }
-                }
-                if step != .welcome {
                     ToolbarItem(placement: .principal) {
                         ProgressView(value: Double(step.rawValue), total: Double(Step.allCases.count - 1))
-                            .frame(width: 160)
+                            .frame(width: 140)
+                            .accessibilityLabel("Schritt \(step.rawValue + 1) von \(Step.allCases.count)")
                     }
                 }
                 if canSkip {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Überspringen") { skip() }
+                        // Compact: an icon button; the open Duo and the iPad have room for the word.
+                        Button("Überspringen", systemImage: "chevron.right") { skip() }
+                            .labelStyle(AdaptiveSkipLabelStyle(showsTitle: sizeClass == .regular))
                             .tint(.primary)
                     }
                 }
@@ -47,27 +59,32 @@ struct OnboardingFlow: View {
         }
         .onChange(of: model.phase) { _, phase in
             // Access granted (here or in Settings): continue with the list.
-            if step == .access, phase == .needsList || phase == .ready {
+            if step == .access, hasAccess(phase) {
                 advance(to: .list)
             }
         }
+    }
+
+    private func hasAccess(_ phase: AppModel.Phase) -> Bool {
+        phase == .needsList || phase == .ready
     }
 
     private func advance(to next: Step) {
         withAnimation(.snappy) { step = next }
     }
 
+    /// The last step has its own "Fertig"; access can only be skipped once granted.
     private var canSkip: Bool {
         switch step {
-        case .welcome, .stores, .siri: true
-        case .access: model.phase == .needsList || model.phase == .ready
-        case .list: true
+        case .welcome, .list, .stores: true
+        case .access: hasAccess(model.phase)
+        case .siri: false
         }
     }
 
     private func skip() {
         switch step {
-        case .welcome: advance(to: model.phase == .needsList || model.phase == .ready ? .list : .access)
+        case .welcome: advance(to: hasAccess(model.phase) ? .list : .access)
         case .access: advance(to: .list)
         case .list:
             if model.selectedListID != nil {
@@ -84,26 +101,29 @@ struct OnboardingFlow: View {
     }
 
     private func goBack() {
-        guard let previous = Step(rawValue: step.rawValue - 1) else { return }
+        guard var previous = Step(rawValue: step.rawValue - 1) else { return }
+        // Access already granted: going back skips the permission step.
+        if previous == .access, hasAccess(model.phase) { previous = .welcome }
         advance(to: previous)
     }
 
     // MARK: Steps
 
     private var welcome: some View {
-        OnboardingPage(
-            symbol: "cart.fill",
-            title: "Deine Einkaufsliste, nach Läden sortiert",
-            points: [
-                ("mic.fill", "Trag Einkäufe wie gewohnt ein – mit Siri, in Erinnerungen oder in Marqet."),
-                ("storefront.fill", "Marqet sortiert sie in Cards für Aldi, dm, den Markt und alle deine Läden."),
-                ("figure.walk", "Im Laden in der Reihenfolge deines Wegs – mit jedem Einkauf besser."),
-            ],
-            footnote: "Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung."
-        ) {
+        OnboardingLayout(title: "Deine Einkaufsliste, nach Läden sortiert") {
+            SortingIllustration()
+        } content: {
+            OnboardingPoints(points: [
+                ("mic.fill", "Trag Einkäufe wie gewohnt ein: mit Siri, in Erinnerungen oder in Marqet."),
+                ("square.stack.fill", "Marqet verteilt sie auf Cards für jeden Laden."),
+                ("figure.walk", "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser."),
+            ])
+            Text("Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        } action: {
             OnboardingPrimaryButton(title: "Los geht’s") {
-                let hasAccess = model.phase == .needsList || model.phase == .ready
-                advance(to: hasAccess ? .list : .access)
+                advance(to: hasAccess(model.phase) ? .list : .access)
             }
         }
     }
@@ -111,17 +131,29 @@ struct OnboardingFlow: View {
     @ViewBuilder
     private var access: some View {
         if case .needsPermission(let status) = model.phase, status != .notDetermined {
-            PermissionView(status: status)
+            // Declined: same page, the way back leads through Settings.
+            OnboardingLayout(title: "Zugriff in den Einstellungen erlauben") {
+                MarkerIllustration()
+            } content: {
+                OnboardingPoints(points: [
+                    ("gearshape.fill", "Öffne Einstellungen › Apps › Marqet › Erinnerungen und wähle „Voller Zugriff“."),
+                    ("arrow.uturn.backward", "Danach geht es hier automatisch weiter."),
+                ])
+            } action: {
+                SettingsButton()
+            }
         } else {
-            OnboardingPage(
-                symbol: "checklist",
-                title: "Zugriff auf Erinnerungen",
-                points: [
+            OnboardingLayout(title: "Zugriff auf Erinnerungen") {
+                MarkerIllustration()
+            } content: {
+                OnboardingPoints(points: [
                     ("list.bullet", "Marqet liest die Liste, die du gleich auswählst."),
-                    ("note.text", "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in dessen Notizen – sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst."),
-                ],
-                footnote: "Alles bleibt auf deinem Gerät und in deinem iCloud."
-            ) {
+                    ("note.text", "Den Laden merkt sich Marqet als Zeile „🛒 Laden“ in den Notizen, sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst."),
+                ])
+                Text("Alles bleibt auf deinem Gerät und in deinem iCloud.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } action: {
                 OnboardingPrimaryButton(title: "Zugriff erlauben") {
                     Task { await model.requestAccess() }
                 }
@@ -130,155 +162,192 @@ struct OnboardingFlow: View {
     }
 
     private var siri: some View {
-        OnboardingPage(
-            symbol: "waveform",
-            title: "Eintragen mit Siri",
-            points: [
+        OnboardingLayout(title: "Eintragen mit Siri") {
+            SiriIllustration()
+        } content: {
+            OnboardingPoints(points: [
                 ("quote.bubble.fill", "Sag: „Hey Siri, setz Milch auf die Liste \(model.selectedList?.title ?? "Einkaufen")“."),
-                ("tray.and.arrow.down.fill", "Neue Einträge landen in der Inbox – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören."),
+                ("tray.and.arrow.down.fill", "Neue Einträge landen in der Inbox. Von dort ordnest du sie mit einem Tipp einem Laden zu."),
                 ("hand.draw.fill", "Wische zwischen den Läden, tippe + für neue Einträge."),
-            ],
-            footnote: nil
-        ) {
+            ])
+        } action: {
             OnboardingPrimaryButton(title: "Fertig") { model.completeOnboarding() }
         }
     }
 }
 
-/// Step 4: pick the stores you shop at; the tap order becomes the card order (KONZEPT §7.5).
-private struct OnboardingStoresView: View {
+private struct AdaptiveSkipLabelStyle: LabelStyle {
+    let showsTitle: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        if showsTitle {
+            configuration.title
+        } else {
+            configuration.icon
+        }
+    }
+}
+
+private struct SettingsButton: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        OnboardingPrimaryButton(title: "Einstellungen öffnen") {
+            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+        }
+    }
+}
+
+/// Step 3: the Reminders list Marqet works with.
+private struct OnboardingListStep: View {
     let onContinue: () -> Void
     @Environment(AppModel.self) private var model
-    @State private var selection: [String] = []
+
+    var body: some View {
+        OnboardingLayout(
+            title: "Welche Liste ist deine Einkaufsliste?",
+            subtitle: "Marqet sortiert nur diese eine Liste. Du kannst sie später in den Einstellungen wechseln."
+        ) {
+            ListIllustration()
+        } content: {
+            VStack(spacing: 0) {
+                ForEach(sortedLists) { list in
+                    Button {
+                        Task { await model.selectList(list.id) }
+                    } label: {
+                        HStack(spacing: 12) {
+                            Circle()
+                                .fill(Color(hex: list.colorHex ?? "#8E8E93"))
+                                .frame(width: 14, height: 14)
+                            Text(list.title).foregroundStyle(.primary)
+                            Spacer()
+                            if list.id == model.selectedListID {
+                                Image(systemName: "checkmark")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                        .frame(minHeight: 50)
+                        .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!list.allowsModifications)
+                    .accessibilityAddTraits(list.id == model.selectedListID ? .isSelected : [])
+                    Divider().padding(.leading, 42)
+                }
+                Button {
+                    Task { await model.createShoppingList() }
+                } label: {
+                    Label("Neue Liste „Einkaufen“ anlegen", systemImage: "plus")
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.tint)
+            }
+            // The page is white: a gray block, like a grouped list, keeps the rows together.
+            .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 20, style: .continuous))
+        } action: {
+            OnboardingPrimaryButton(title: "Weiter", isEnabled: model.selectedListID != nil, action: onContinue)
+        }
+        .task(id: model.lists.map(\.id)) {
+            // An obvious shopping list ("Einkaufen", "Einkaufsliste" …) is preselected.
+            guard model.selectedListID == nil,
+                  let likely = sortedLists.first(where: { $0.allowsModifications && ShoppingListHeuristics.isLikelyShoppingList($0.title) })
+            else { return }
+            await model.selectList(likely.id)
+        }
+    }
+
+    private var sortedLists: [ReminderList] {
+        model.lists.sorted { lhs, rhs in
+            let lhsLikely = ShoppingListHeuristics.isLikelyShoppingList(lhs.title)
+            let rhsLikely = ShoppingListHeuristics.isLikelyShoppingList(rhs.title)
+            if lhsLikely != rhsLikely { return lhsLikely }
+            return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
+        }
+    }
+}
+
+/// Step 4: the stores you shop at; the tap order becomes the card order (KONZEPT §7.5).
+private struct OnboardingStoresStep: View {
+    @Binding var selection: [String]
+    let onContinue: () -> Void
+    @Environment(AppModel.self) private var model
     @State private var showsCustomStore = false
 
     var body: some View {
         @Bindable var model = model
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Wo kaufst du ein?")
-                        .font(.largeTitle.bold())
-                    Text("Wähle deine Läden in der Reihenfolge, in der du sie am häufigsten besuchst. Du kannst später jederzeit weitere hinzufügen.")
-                        .foregroundStyle(.secondary)
-                }
-                Picker("Region", selection: $model.region) {
-                    Text("Deutschland").tag(StoreCatalog.Region.germany)
-                    Text("Österreich").tag(StoreCatalog.Region.austria)
-                    Text("Schweiz").tag(StoreCatalog.Region.switzerland)
-                }
-                .pickerStyle(.segmented)
+        OnboardingLayout(
+            title: "Wo kaufst du ein?",
+            subtitle: "Tippe deine Läden in der Reihenfolge an, in der du sie am häufigsten besuchst."
+        ) {
+            StoresIllustration()
+        } content: {
+            Picker("Region", selection: $model.region) {
+                Text("Deutschland").tag(StoreCatalog.Region.germany)
+                Text("Österreich").tag(StoreCatalog.Region.austria)
+                Text("Schweiz").tag(StoreCatalog.Region.switzerland)
+            }
+            .pickerStyle(.segmented)
 
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 12)], spacing: 16) {
-                    ForEach(model.catalog?.entries(for: model.region) ?? []) { entry in
-                        let index = selection.firstIndex(of: entry.key)
-                        Button {
-                            if let index { selection.remove(at: index) } else { selection.append(entry.key) }
-                        } label: {
-                            VStack(spacing: 8) {
-                                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 52)
-                                    .overlay(alignment: .topTrailing) {
-                                        if let index {
-                                            Text("\(index + 1)")
-                                                .font(.caption.bold())
-                                                .foregroundStyle(.white)
-                                                .frame(width: 22, height: 22)
-                                                .background(Color.accentColor, in: .circle)
-                                                .offset(x: 6, y: -6)
-                                        }
-                                    }
-                                    .opacity(index == nil && !selection.isEmpty ? 0.55 : 1)
-                                Text(entry.name)
-                                    .font(.caption.weight(.medium))
-                                    .lineLimit(2)
-                                    .multilineTextAlignment(.center)
-                                    .foregroundStyle(.primary)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 100, alignment: .top)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(index != nil ? .isSelected : [])
-                    }
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 12)], spacing: 16) {
+                ForEach(model.catalog?.entries(for: model.region) ?? []) { entry in
+                    tile(entry)
                 }
-                Button("Eigenen Laden anlegen", systemImage: "plus") { showsCustomStore = true }
             }
-            .padding(20)
-        }
-        .safeAreaInset(edge: .bottom) {
-            OnboardingPrimaryButton(title: "Weiter") {
-                for key in selection {
-                    if let entry = model.catalog?.entry(forKey: key) { model.addStore(from: entry, planned: false) }
-                }
-                onContinue()
-            }
-            .frame(maxWidth: 560)
-            .frame(maxWidth: .infinity)
-            .padding(20)
+            Button("Eigenen Laden anlegen", systemImage: "plus") { showsCustomStore = true }
+                .foregroundStyle(.tint)
+        } action: {
+            OnboardingPrimaryButton(title: continueTitle, action: onContinue)
         }
         .sheet(isPresented: $showsCustomStore) {
             AddStoreSheet(opensComposer: false)
         }
     }
-}
 
-private struct OnboardingPage<Action: View>: View {
-    let symbol: String
-    let title: LocalizedStringKey
-    let points: [(String, LocalizedStringKey)]
-    let footnote: LocalizedStringKey?
-    @ViewBuilder var action: Action
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                Image(systemName: symbol)
-                    .font(.system(size: 56, weight: .semibold))
-                    .foregroundStyle(.tint)
-                    .padding(.top, 32)
-                Text(title)
-                    .font(.largeTitle.bold())
-                VStack(alignment: .leading, spacing: 20) {
-                    ForEach(points.indices, id: \.self) { index in
-                        HStack(alignment: .top, spacing: 16) {
-                            Image(systemName: points[index].0)
-                                .font(.title3)
-                                .foregroundStyle(.tint)
-                                .frame(width: 30)
-                            Text(points[index].1)
-                        }
-                    }
-                }
-                if let footnote {
-                    Text(footnote)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(24)
-            .frame(maxWidth: 560, alignment: .leading)
-            .frame(maxWidth: .infinity)
-        }
-        .safeAreaInset(edge: .bottom) {
-            action
-                .frame(maxWidth: 560)
-                .frame(maxWidth: .infinity)
-                .padding(20)
+    private var continueTitle: LocalizedStringKey {
+        switch selection.count {
+        case 0: "Später"
+        case 1: "Weiter mit 1 Laden"
+        default: "Weiter mit \(selection.count) Läden"
         }
     }
-}
 
-/// Identical full-width primary action for every onboarding step.
-private struct OnboardingPrimaryButton: View {
-    let title: LocalizedStringKey
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .frame(maxWidth: .infinity)
+    private func tile(_ entry: StoreCatalog.Entry) -> some View {
+        let index = selection.firstIndex(of: entry.key)
+        return Button {
+            withAnimation(.snappy) {
+                if let index { selection.remove(at: index) } else { selection.append(entry.key) }
+            }
+        } label: {
+            VStack(spacing: 8) {
+                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 52)
+                    .overlay(alignment: .topTrailing) {
+                        if let index {
+                            Text("\(index + 1)")
+                                .font(.caption.bold())
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Color.accentColor, in: .circle)
+                                .overlay(Circle().strokeBorder(Color(.systemBackground), lineWidth: 2))
+                                .offset(x: 6, y: -6)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                Text(entry.name)
+                    .font(.caption.weight(index == nil ? .medium : .semibold))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity, minHeight: 96, alignment: .top)
         }
-        .buttonStyle(.glassProminent)
-        .controlSize(.large)
-        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .accessibilityLabel(entry.name)
+        .accessibilityValue(index.map { String(localized: "Platz \($0 + 1)") } ?? "")
+        .accessibilityAddTraits(index != nil ? .isSelected : [])
     }
 }

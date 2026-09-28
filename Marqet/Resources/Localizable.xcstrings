@@ -237,7 +237,7 @@
     "Artikel" : {
 
     },
-    "Auch für Neues schlägt Marqet den passenden Laden und die Kategorie vor – direkt auf deinem Gerät." : {
+    "Auch für Neues schlägt Marqet den passenden Laden und die Kategorie vor, direkt auf deinem Gerät." : {
 
     },
     "Aus Übersicht entfernen" : {
@@ -318,9 +318,6 @@
     "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch." : {
 
     },
-    "Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in dessen Notizen – sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst." : {
-
-    },
     "Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“." : {
 
     },
@@ -342,7 +339,7 @@
     "Die Nummer braucht %lld Ziffern." : {
 
     },
-    "Die Prüfziffer passt nicht – bitte Nummer prüfen oder anderen Barcode-Typ wählen." : {
+    "Die Prüfziffer passt nicht: Prüf die Nummer oder wähle einen anderen Barcode-Typ." : {
 
     },
     "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
@@ -528,7 +525,7 @@
     "Hinzugefügt" : {
 
     },
-    "Im Laden in der Reihenfolge deines Wegs – mit jedem Einkauf besser." : {
+    "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser." : {
 
     },
     "In den letzten 7 Tagen nichts erledigt." : {
@@ -684,7 +681,7 @@
     "Marqet lernt beim Abhaken, in welcher Reihenfolge du durch jeden Laden gehst." : {
 
     },
-    "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen – auf deinem Gerät und in deinem iCloud." : {
+    "Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen, auf deinem Gerät und in deinem iCloud." : {
 
     },
     "Marqet liest die Liste, die du gleich auswählst." : {
@@ -754,9 +751,6 @@
 
     },
     "Name, z. B. Payback" : {
-
-    },
-    "Neue Einträge landen in der Inbox – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
 
     },
     "Neue Kundenkarte" : {
@@ -849,7 +843,7 @@
     "Sag: „Hey Siri, setz Milch auf die Liste %@“." : {
 
     },
-    "Scanne deine Karten einmal – Marqet zeigt sie im Vollbild des passenden Ladens." : {
+    "Scanne deine Karten einmal: Marqet zeigt sie im Vollbild des passenden Ladens." : {
 
     },
     "Scanne die Karte oder gib die Nummer ein." : {
@@ -897,7 +891,7 @@
     "Tippe auf +, um etwas für %@ hinzuzufügen." : {
 
     },
-    "Trag Einkäufe wie gewohnt ein – mit Siri, in Erinnerungen oder in Marqet." : {
+    "Trag Einkäufe wie gewohnt ein: mit Siri, in Erinnerungen oder in Marqet." : {
 
     },
     "Über Marqet" : {

@@ -74,7 +74,8 @@ struct PurchaseTests {
         try await session.buyProduct(identifier: PurchaseManager.proProductID)
         let manager = makeManager()
         await manager.start()
-        #expect(probe.entitled)
+        // Found either in the launch read or, if StoreKit lags, via Transaction.updates.
+        #expect(await eventually { probe.entitled })
     }
 
     @Test func entitlementDrivesProIndependentOfDeveloperOverride() throws {

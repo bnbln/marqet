@@ -13,7 +13,7 @@ struct PermissionView: View {
             Label("Zugriff auf Erinnerungen", systemImage: "checklist")
         } description: {
             if status == .notDetermined {
-                Text("Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen – auf deinem Gerät und in deinem iCloud.")
+                Text("Marqet liest deine Einkaufsliste aus der Erinnerungen-App und sortiert sie nach Läden. Deine Einträge bleiben in Erinnerungen, auf deinem Gerät und in deinem iCloud.")
             } else {
                 Text("Marqet braucht vollen Zugriff auf deine Erinnerungen. Du kannst ihn in den Einstellungen unter „Marqet“ erteilen.")
             }

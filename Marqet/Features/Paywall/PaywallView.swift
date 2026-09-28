@@ -28,7 +28,7 @@ struct PaywallView: View {
                         feature("wand.and.stars", "Automatisch zuordnen",
                                 "Was du schon zweimal im selben Laden gekauft hast, landet von selbst dort.")
                         feature("sparkles", "Vorschläge mit Apple Intelligence",
-                                "Auch für Neues schlägt Marqet den passenden Laden und die Kategorie vor – direkt auf deinem Gerät.")
+                                "Auch für Neues schlägt Marqet den passenden Laden und die Kategorie vor, direkt auf deinem Gerät.")
                         feature("figure.walk", "Sortiert nach deinem Laufweg",
                                 "Marqet lernt beim Abhaken, in welcher Reihenfolge du durch jeden Laden gehst.")
                         feature("person.2.fill", "Für die ganze Familie",

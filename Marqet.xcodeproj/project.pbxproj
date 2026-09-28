@@ -31,8 +31,10 @@
 		35A81383490972E451FF5ADD /* Marqet.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F618F2863408E4DA34E045C7 /* Marqet.storekit */; };
 		38B193C69F2E7033A3EA453F /* TriageScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C36556FC45F2FFF3189F223 /* TriageScreen.swift */; };
 		403ECFB3302A546326B500BF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B1750AD8E04F3D150D2585 /* BarcodeScanner.swift */; };
+		422DEA2467FDF2B9463BD0D5 /* OnboardingIllustrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */; };
 		43DE49B84637E2AEB86484AB /* PlacesStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A555236677087D1E17AECE59 /* PlacesStrings.swift */; };
 		450193FBDCD76730DB3FE4F7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */; };
+		49E2984906CF77951151D50A /* OnboardingLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484825E382AFE84E38EA5CBF /* OnboardingLayout.swift */; };
 		4D8172B6B4DA85E2884F828B /* SectionOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */; };
 		51DD3BFE4DF5111422602A2E /* AppModel+Triage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991A83F47BCCEE4CB948BC3C /* AppModel+Triage.swift */; };
 		5C5087B9348C11AEDDCEC9CC /* StoresSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFF55B4149AA06EB81000A /* StoresSettingsView.swift */; };
@@ -107,6 +109,7 @@
 		41A0D276169913633F5710AA /* MarqetKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MarqetKit; path = Packages/MarqetKit; sourceTree = SOURCE_ROOT; };
 		422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitRoundTripTests.swift; sourceTree = "<group>"; };
 		430383FFE1EF017C76C1C765 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		484825E382AFE84E38EA5CBF /* OnboardingLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLayout.swift; sourceTree = "<group>"; };
 		4C9717E76FB70665C520368F /* StoreTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTile.swift; sourceTree = "<group>"; };
 		511AB2999B3A3E759DDAB14C /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
 		56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCard.swift; sourceTree = "<group>"; };
@@ -127,6 +130,7 @@
 		991A83F47BCCEE4CB948BC3C /* AppModel+Triage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Triage.swift"; sourceTree = "<group>"; };
 		997698A631A4635B7AE98F19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MarqetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingIllustrations.swift; sourceTree = "<group>"; };
 		A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStyle.swift; sourceTree = "<group>"; };
 		A0E8B4F520039DCC556877E1 /* AppModel+Intelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Intelligence.swift"; sourceTree = "<group>"; };
 		A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreSheet.swift; sourceTree = "<group>"; };
@@ -218,6 +222,8 @@
 			children = (
 				D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */,
 				96E7161CE333347F853CDAB6 /* OnboardingFlow.swift */,
+				9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */,
+				484825E382AFE84E38EA5CBF /* OnboardingLayout.swift */,
 				F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */,
 			);
 			path = Onboarding;
@@ -552,6 +558,8 @@
 				2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */,
 				F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */,
 				1894910664A05EB40EFBD368 /* OnboardingFlow.swift in Sources */,
+				422DEA2467FDF2B9463BD0D5 /* OnboardingIllustrations.swift in Sources */,
+				49E2984906CF77951151D50A /* OnboardingLayout.swift in Sources */,
 				0F02B258C95A18D427FE79E7 /* PaywallView.swift in Sources */,
 				F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */,
 				A9D51BC9D4221685CADD44F0 /* PlaceSearch.swift in Sources */,

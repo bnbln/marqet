@@ -329,6 +329,24 @@ struct AppModelTests {
         #expect(model.deck.pages.contains(.store(dm.id)))
     }
 
+    // MARK: Onboarding
+
+    @Test func creatingTheShoppingListTwiceReusesIt() async throws {
+        let model = try await makeModel()
+        await model.createShoppingList(named: "Wocheneinkauf")
+        await model.createShoppingList(named: "wocheneinkauf ")
+        #expect(try await gateway.lists().filter { $0.title == "Wocheneinkauf" }.count == 1)
+        #expect(model.selectedList?.title == "Wocheneinkauf")
+    }
+
+    @Test func storesChosenInOnboardingShowAsCards() async throws {
+        let model = try await makeModel()
+        let keys = ["rewe", "aldi-sued"]
+        model.addOnboardingStores(keys)
+        let pages = model.deck.pages.compactMap(\.storeID).compactMap { model.store($0)?.catalogKey }
+        #expect(pages == keys)
+    }
+
     // MARK: Kundenkarten (KONZEPT #42)
 
     @Test func loyaltyCardBelongsToSeveralStoresAndSurvivesStoreDeletion() async throws {

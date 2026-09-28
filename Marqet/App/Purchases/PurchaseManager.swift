@@ -60,7 +60,11 @@ final class PurchaseManager {
             case .success(let verification):
                 let transaction = try Self.verified(verification)
                 await transaction.finish()
-                await refreshEntitlement()
+                // Unlock from the verified transaction itself: `currentEntitlements` can lag
+                // right after a purchase, and `Transaction.updates` does not repeat own purchases –
+                // re-reading here could leave a paid Pro locked until the next launch.
+                isFamilyShared = transaction.ownershipType == .familyShared
+                onEntitlementChange(transaction.productID == Self.proProductID && transaction.revocationDate == nil)
                 state = .idle
                 return true
             case .pending:

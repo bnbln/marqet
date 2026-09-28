@@ -19,7 +19,17 @@ extension Store {
 
     /// Text and symbols on top of the store color (black on yellow chains, white otherwise).
     var foregroundOnColor: Color {
-        RGBColor(hex: colorHex)?.prefersDarkForeground == true ? .black.opacity(0.85) : .white
+        prefersDarkForeground ? .black.opacity(0.85) : .white
+    }
+
+    /// Color scheme for system controls on top of the store color: the dark variant (white
+    /// symbols) on dark brand colors, the light one on bright colors such as yellow.
+    var colorSchemeOnColor: ColorScheme {
+        prefersDarkForeground ? .light : .dark
+    }
+
+    private var prefersDarkForeground: Bool {
+        RGBColor(hex: colorHex)?.prefersDarkForeground == true
     }
 }
 

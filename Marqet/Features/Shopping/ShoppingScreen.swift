@@ -123,6 +123,9 @@ struct ShoppingScreen: View {
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-voice") {
                             model.startVoice()
                         }
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-map") {
+                            model.focus(.map)
+                        }
                         #endif
                     }
             }

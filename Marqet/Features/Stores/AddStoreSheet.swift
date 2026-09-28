@@ -88,8 +88,17 @@ struct AddStoreSheet: View {
                     }
                     .accessibilityValue(added ? "Hinzugefügt" : "")
                 }
+                if !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                   filteredEntries.isEmpty {
+                    Button {
+                        name = search.trimmingCharacters(in: .whitespacesAndNewlines)
+                        mode = .custom
+                    } label: {
+                        Label("Eigenen Laden anlegen", systemImage: "plus.circle")
+                    }
+                }
             } footer: {
-                Text("Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern.")
+                Text("Jeder Laden kann als eigener Laden angelegt werden. Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern.")
             }
         }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Kette suchen")

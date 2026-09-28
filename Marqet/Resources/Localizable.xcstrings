@@ -21,6 +21,9 @@
         }
       }
     },
+    "%@" : {
+
+    },
     "%@ → %@" : {
       "localizations" : {
         "de" : {
@@ -36,6 +39,9 @@
           }
         }
       }
+    },
+    "%@ abhaken" : {
+
     },
     "%@ für %@. Tippe auf einen Eintrag, um ihn abzuwählen." : {
       "localizations" : {
@@ -98,6 +104,9 @@
           }
         }
       }
+    },
+    "%@ nochmal kaufen" : {
+
     },
     "%@ zu %@" : {
       "localizations" : {
@@ -177,6 +186,9 @@
         }
       }
     },
+    "%lld auf der Liste" : {
+
+    },
     "%lld Einträge" : {
       "localizations" : {
         "en" : {
@@ -193,6 +205,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld items assigned automatically"
+          }
+        }
+      }
+    },
+    "%lld Einträge bei %@." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld Einträge bei %2$@."
+          }
+        }
+      }
+    },
+    "%lld Einträge bei %lld Läden." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld Einträge bei %2$lld Läden."
           }
         }
       }
@@ -233,6 +265,9 @@
         }
       }
     },
+    "%lld Einträge ohne Laden" : {
+
+    },
     "%lld Einträge übersprungen" : {
       "localizations" : {
         "en" : {
@@ -262,6 +297,34 @@
           }
         }
       }
+    },
+    "%lld Einträge: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld Einträge: %2$@"
+          }
+        }
+      }
+    },
+    "%lld erledigt" : {
+
+    },
+    "%lld erledigt · läuft" : {
+
+    },
+    "%lld Filialen" : {
+
+    },
+    "%lld in der Inbox" : {
+
+    },
+    "%lld Kundenkarten" : {
+
+    },
+    "%lld Läden" : {
+
     },
     "%lld Läden mit offenen Einträgen" : {
 
@@ -298,6 +361,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld open · %2$@"
+          }
+        }
+      }
+    },
+    "%lld offen · %@ %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld offen · %2$@ %3$lld"
+          }
+        }
+      }
+    },
+    "%lld offen · %lld Läden" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld offen · %2$lld Läden"
           }
         }
       }
@@ -348,6 +431,26 @@
         }
       }
     },
+    "%lld von %lld erledigt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld von %2$lld erledigt"
+          }
+        }
+      }
+    },
+    "%lld von %lld erledigt · noch %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld von %2$lld erledigt · noch %3$lld"
+          }
+        }
+      }
+    },
     "%lld Vorschläge übernehmen" : {
       "localizations" : {
         "en" : {
@@ -358,6 +461,9 @@
         }
       }
     },
+    "%lld warten in der Inbox." : {
+
+    },
     "%lld zum Zuordnen" : {
       "localizations" : {
         "en" : {
@@ -367,6 +473,24 @@
           }
         }
       }
+    },
+    "+ %lld weitere" : {
+
+    },
+    "+ %lld weitere Läden" : {
+
+    },
+    "+ 1 weiterer" : {
+
+    },
+    "+%lld" : {
+
+    },
+    "○ %@" : {
+
+    },
+    "✓ %@" : {
+
     },
     "🛒 Markt" : {
       "localizations" : {
@@ -388,6 +512,9 @@
         }
       }
     },
+    "${list} öffnen" : {
+
+    },
     "1 Eintrag" : {
       "localizations" : {
         "en" : {
@@ -407,6 +534,9 @@
           }
         }
       }
+    },
+    "1 Eintrag bei %@." : {
+
     },
     "1 Eintrag für %@." : {
       "localizations" : {
@@ -438,6 +568,9 @@
         }
       }
     },
+    "1 Eintrag ohne Laden" : {
+
+    },
     "1 Eintrag übersprungen" : {
       "localizations" : {
         "en" : {
@@ -467,6 +600,12 @@
           }
         }
       }
+    },
+    "1 Eintrag: %@" : {
+
+    },
+    "1 Filiale" : {
+
     },
     "1 Laden mit offenen Einträgen" : {
 
@@ -584,7 +723,16 @@
         }
       }
     },
+    "Alle Geschäfte" : {
+
+    },
     "Alle Läden" : {
+
+    },
+    "Alle Läden mit offenen Einträgen auf einen Blick." : {
+
+    },
+    "Alle Läden wie die Cards in der App, mit „Einkauf starten“." : {
 
     },
     "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
@@ -606,6 +754,9 @@
           }
         }
       }
+    },
+    "Alles erledigt – gut eingekauft!" : {
+
     },
     "Alles erledigt bei %@" : {
       "localizations" : {
@@ -667,6 +818,9 @@
           }
         }
       }
+    },
+    "Am Laden" : {
+
     },
     "An der Kasse zeigen" : {
       "localizations" : {
@@ -881,6 +1035,9 @@
         }
       }
     },
+    "Automatisch" : {
+
+    },
     "Automatisch zuordnen" : {
       "localizations" : {
         "en" : {
@@ -900,6 +1057,9 @@
           }
         }
       }
+    },
+    "Automatisch: laufender Einkauf oder nächste Card" : {
+
     },
     "Baby" : {
       "localizations" : {
@@ -984,6 +1144,24 @@
     "Bearbeiten schließen" : {
 
     },
+    "Beauty & Drogerie" : {
+
+    },
+    "Beauty & Parfümerie" : {
+
+    },
+    "Beenden" : {
+
+    },
+    "bei %@" : {
+
+    },
+    "Bei Ankunft melden" : {
+
+    },
+    "Beim Abhaken automatisch starten" : {
+
+    },
     "Beim Umbenennen passt Marqet die Zeile „🛒 %@“ in allen offenen Einträgen an." : {
       "localizations" : {
         "en" : {
@@ -993,6 +1171,9 @@
           }
         }
       }
+    },
+    "Beobachtet" : {
+
     },
     "Bernstein" : {
       "localizations" : {
@@ -1039,6 +1220,9 @@
           }
         }
       }
+    },
+    "Bücher" : {
+
     },
     "Code 128 erlaubt keine Umlaute oder Sonderzeichen." : {
       "localizations" : {
@@ -1113,6 +1297,9 @@
     "Deine Filiale" : {
 
     },
+    "Deine Kundenkarte, ein Tipp bis zum Barcode an der Kasse." : {
+
+    },
     "Deine Läden" : {
       "localizations" : {
         "en" : {
@@ -1163,6 +1350,9 @@
         }
       }
     },
+    "Der Barcode für die Kasse und die Prospekte deiner Läden." : {
+
+    },
     "Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“." : {
       "localizations" : {
         "en" : {
@@ -1202,6 +1392,9 @@
           }
         }
       }
+    },
+    "Die aktuellen Prospekte deiner Läden." : {
+
     },
     "Die bevorzugte Filiale bestimmt Entfernung, Kartenpunkt und die Adresse auf der Card." : {
       "localizations" : {
@@ -1367,6 +1560,18 @@
         }
       }
     },
+    "Du bist bei %@" : {
+
+    },
+    "Du bist bei %@." : {
+
+    },
+    "Du bist hier" : {
+
+    },
+    "Du bist hier · %lld offen" : {
+
+    },
     "Eigenen Laden anlegen" : {
       "localizations" : {
         "en" : {
@@ -1387,6 +1592,15 @@
         }
       }
     },
+    "Ein Laden, die Inbox, der nächste Laden oder zuletzt Erledigtes – abhaken direkt im Widget." : {
+
+    },
+    "Eine ganze Seite des Home-Bildschirms – ideal auf dem aufgeklappten iPhone Duo." : {
+
+    },
+    "Eine Liste aus Marqet: ein Laden, die Inbox, der nächste Laden oder zuletzt Erledigtes." : {
+
+    },
     "Einen Moment …" : {
       "localizations" : {
         "en" : {
@@ -1397,6 +1611,15 @@
         }
       }
     },
+    "Eingabe schließen" : {
+
+    },
+    "Einkauf an- oder ausschalten" : {
+
+    },
+    "Einkauf beenden" : {
+
+    },
     "Einkauf bei %@" : {
       "localizations" : {
         "en" : {
@@ -1406,6 +1629,30 @@
           }
         }
       }
+    },
+    "Einkauf bei %@ beenden" : {
+
+    },
+    "Einkauf bei %@ gestartet." : {
+
+    },
+    "Einkauf bei %@ starten" : {
+
+    },
+    "Einkauf bei ${store} starten" : {
+
+    },
+    "Einkauf fertig" : {
+
+    },
+    "Einkauf jetzt starten" : {
+
+    },
+    "Einkauf läuft" : {
+
+    },
+    "Einkauf läuft · %lld erledigt" : {
+
     },
     "Einkauf starten" : {
       "localizations" : {
@@ -1507,6 +1754,9 @@
         }
       }
     },
+    "Eintrag abhaken" : {
+
+    },
     "Eintrag hinzufügen" : {
       "localizations" : {
         "en" : {
@@ -1527,6 +1777,9 @@
         }
       }
     },
+    "Einträge ohne Laden landen hier." : {
+
+    },
     "Einträge werden geladen" : {
 
     },
@@ -1539,6 +1792,9 @@
           }
         }
       }
+    },
+    "Elektronik" : {
+
     },
     "Entfernen" : {
       "localizations" : {
@@ -1570,6 +1826,9 @@
           }
         }
       }
+    },
+    "erledigt" : {
+
     },
     "Erledigt" : {
       "localizations" : {
@@ -1640,6 +1899,9 @@
           }
         }
       }
+    },
+    "Extragroß" : {
+
     },
     "Familie" : {
       "localizations" : {
@@ -1780,6 +2042,9 @@
         }
       }
     },
+    "Für Ankunftsmeldungen braucht Marqet den Standort „Immer“ und Mitteilungen. Ohne sie zeigt die App die Liste des Ladens trotzdem, sobald du sie öffnest." : {
+
+    },
     "Für deine Region sind noch keine offiziellen Angebotsseiten hinterlegt." : {
       "localizations" : {
         "en" : {
@@ -1799,6 +2064,9 @@
           }
         }
       }
+    },
+    "Für heute ist nichts offen." : {
+
     },
     "Gelernte Zuordnungen für diesen Laden gehen verloren." : {
       "localizations" : {
@@ -1839,6 +2107,12 @@
           }
         }
       }
+    },
+    "Gerade ist nichts zu besorgen." : {
+
+    },
+    "Geschäfte" : {
+
     },
     "Getränke" : {
       "localizations" : {
@@ -1970,6 +2244,9 @@
         }
       }
     },
+    "Home-Bildschirm gedrückt halten, „Bearbeiten“ › „Widget hinzufügen“ und nach Marqet suchen." : {
+
+    },
     "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser." : {
       "localizations" : {
         "en" : {
@@ -1979,6 +2256,12 @@
           }
         }
       }
+    },
+    "in %lld Läden" : {
+
+    },
+    "In den Einstellungen erlauben" : {
+
     },
     "In den letzten 7 Tagen nichts erledigt." : {
       "localizations" : {
@@ -1990,6 +2273,9 @@
         }
       }
     },
+    "in der Inbox" : {
+
+    },
     "Inbox" : {
       "localizations" : {
         "en" : {
@@ -2000,6 +2286,12 @@
         }
       }
     },
+    "Inbox %lld" : {
+
+    },
+    "Inbox zeigen" : {
+
+    },
     "Intelligenz" : {
       "localizations" : {
         "en" : {
@@ -2009,6 +2301,9 @@
           }
         }
       }
+    },
+    "Jeder Laden kann als eigener Laden angelegt werden. Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
+
     },
     "Jetzt zuordnen" : {
       "localizations" : {
@@ -2029,6 +2324,9 @@
           }
         }
       }
+    },
+    "Karte des Ladens, in dem du einkaufst" : {
+
     },
     "Karte mit der gespeicherten Filiale von %@" : {
       "localizations" : {
@@ -2097,6 +2395,9 @@
         }
       }
     },
+    "Kategorien zeigen" : {
+
+    },
     "Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten." : {
       "localizations" : {
         "en" : {
@@ -2116,6 +2417,12 @@
           }
         }
       }
+    },
+    "Kaufhaus" : {
+
+    },
+    "Kaufhäuser" : {
+
     },
     "Keine Angebote verfügbar" : {
       "localizations" : {
@@ -2167,6 +2474,9 @@
         }
       }
     },
+    "Keine Prospekte für deine Region" : {
+
+    },
     "Keine weiteren Läden" : {
       "localizations" : {
         "en" : {
@@ -2197,6 +2507,12 @@
         }
       }
     },
+    "Klein und einfarbig – für den nächsten Laden, alle Läden oder die Kundenkarte." : {
+
+    },
+    "Kontrollzentrum: „Eintrag hinzufügen“, „Kundenkarte“ und „Einkauf“ – auch für die Aktionstaste." : {
+
+    },
     "Kopieren" : {
 
     },
@@ -2219,6 +2535,9 @@
           }
         }
       }
+    },
+    "Kundenkarte & Angebote" : {
+
     },
     "Kundenkarte hinzufügen" : {
       "localizations" : {
@@ -2383,6 +2702,9 @@
         }
       }
     },
+    "Laden zuordnen" : {
+
+    },
     "Läden zuordnen" : {
       "localizations" : {
         "en" : {
@@ -2413,6 +2735,9 @@
         }
       }
     },
+    "leer" : {
+
+    },
     "Leer" : {
       "localizations" : {
         "en" : {
@@ -2433,6 +2758,15 @@
         }
       }
     },
+    "Liste" : {
+
+    },
+    "Liste des Ladens zeigen, an dem ich bin" : {
+
+    },
+    "Liste öffnen" : {
+
+    },
     "Listen" : {
       "localizations" : {
         "en" : {
@@ -2452,6 +2786,9 @@
           }
         }
       }
+    },
+    "Live-Aktivität „Einkauf“" : {
+
     },
     "Los geht’s" : {
       "localizations" : {
@@ -2684,6 +3021,9 @@
         }
       }
     },
+    "Meiste Einträge zuerst" : {
+
+    },
     "Metzgerei" : {
       "localizations" : {
         "en" : {
@@ -2764,6 +3104,12 @@
         }
       }
     },
+    "Mode" : {
+
+    },
+    "Mode & Schuhe" : {
+
+    },
     "Modus" : {
       "localizations" : {
         "en" : {
@@ -2793,6 +3139,12 @@
           }
         }
       }
+    },
+    "Nächster Laden" : {
+
+    },
+    "Nächster Laden zuerst" : {
+
     },
     "Name" : {
       "localizations" : {
@@ -2924,6 +3276,9 @@
         }
       }
     },
+    "Noch %lld offen" : {
+
+    },
     "Noch keine Einträge" : {
       "localizations" : {
         "en" : {
@@ -2967,6 +3322,9 @@
         }
       }
     },
+    "Nochmal kaufen mit ↺" : {
+
+    },
     "Notiz bearbeiten" : {
 
     },
@@ -3003,6 +3361,9 @@
         }
       }
     },
+    "offen" : {
+
+    },
     "Offen" : {
 
     },
@@ -3026,6 +3387,12 @@
         }
       }
     },
+    "Öffne Marqet einmal, um deine Einkaufsliste zu verbinden." : {
+
+    },
+    "Öffne Marqet, um deine Einkaufsliste zu verbinden." : {
+
+    },
     "Öffnet die offizielle Angebotsseite von %@" : {
       "localizations" : {
         "en" : {
@@ -3035,6 +3402,12 @@
           }
         }
       }
+    },
+    "Öffnet einen Laden, die Inbox oder zuletzt Erledigtes in Marqet." : {
+
+    },
+    "Öffnet Marqet mit der Tastatur auf der gewählten Liste." : {
+
     },
     "Ohne Benutzerkonto" : {
       "localizations" : {
@@ -3159,6 +3532,9 @@
           }
         }
       }
+    },
+    "Prospekt" : {
+
     },
     "Prospekt %@" : {
       "localizations" : {
@@ -3320,6 +3696,9 @@
         }
       }
     },
+    "Scanne sie einmal in Marqet." : {
+
+    },
     "Schließen" : {
       "localizations" : {
         "en" : {
@@ -3396,6 +3775,9 @@
         }
       }
     },
+    "So geht’s" : {
+
+    },
     "Sonstiges" : {
       "localizations" : {
         "en" : {
@@ -3426,6 +3808,12 @@
         }
       }
     },
+    "Sperrbildschirm" : {
+
+    },
+    "Sport" : {
+
+    },
     "Sprachmodell wird geladen" : {
       "localizations" : {
         "en" : {
@@ -3446,6 +3834,9 @@
         }
       }
     },
+    "Stehst du in einem deiner Läden, zeigen App und Widgets dessen Liste. Mit „Bei Ankunft melden“ beobachtet Marqet die nächsten Filialen deiner Läden mit offenen Einträgen: Läuft ein Einkauf, meldet sich die Live-Aktivität, sonst eine Mitteilung. Dein Standort bleibt auf dem Gerät." : {
+
+    },
     "Supermarkt" : {
       "localizations" : {
         "en" : {
@@ -3455,6 +3846,9 @@
           }
         }
       }
+    },
+    "Supermärkte & Lebensmittel" : {
+
     },
     "Symbol" : {
       "localizations" : {
@@ -3488,6 +3882,12 @@
           }
         }
       }
+    },
+    "Tierbedarf" : {
+
+    },
+    "Tippe +, um etwas hinzuzufügen." : {
+
     },
     "Tippe auf +, um etwas für %@ hinzuzufügen." : {
       "localizations" : {
@@ -3559,6 +3959,9 @@
         }
       }
     },
+    "Überblick" : {
+
+    },
     "Übersicht" : {
       "localizations" : {
         "en" : {
@@ -3588,6 +3991,12 @@
           }
         }
       }
+    },
+    "Unterwegs · %@" : {
+
+    },
+    "Unterwegs zu %@" : {
+
     },
     "Verschieben nach" : {
 
@@ -3752,6 +4161,12 @@
         }
       }
     },
+    "Weiter zu %@" : {
+
+    },
+    "Weiter zum nächsten Laden" : {
+
+    },
     "Weitere" : {
       "localizations" : {
         "en" : {
@@ -3761,6 +4176,9 @@
           }
         }
       }
+    },
+    "Weitere Geschäfte" : {
+
     },
     "Weitere Info" : {
       "localizations" : {
@@ -3772,6 +4190,9 @@
         }
       }
     },
+    "weitere Läden" : {
+
+    },
     "Weitere Läden" : {
       "localizations" : {
         "en" : {
@@ -3781,6 +4202,9 @@
           }
         }
       }
+    },
+    "weiterer Laden" : {
+
     },
     "Weitersprechen" : {
       "localizations" : {
@@ -3812,6 +4236,12 @@
         }
       }
     },
+    "Widget gedrückt halten › „Widget bearbeiten“: Liste, Reihenfolge oder Kundenkarte wählen." : {
+
+    },
+    "Widgets & Live-Aktivität" : {
+
+    },
     "Wie beim letzten Mal" : {
       "localizations" : {
         "en" : {
@@ -3821,6 +4251,9 @@
           }
         }
       }
+    },
+    "Wie in der App" : {
+
     },
     "Wie zuletzt" : {
       "localizations" : {
@@ -3872,6 +4305,9 @@
         }
       }
     },
+    "Wohnen & Baumarkt" : {
+
+    },
     "z. B. laktosefrei, 1,5 %" : {
 
     },
@@ -3884,6 +4320,15 @@
           }
         }
       }
+    },
+    "Zeigt auf dem Sperrbildschirm und in der Dynamic Island die nächsten Einträge im Laufweg, den Fortschritt und deine Kundenkarte. Sie wandert mit, wenn du im nächsten Laden abhakst, und endet von selbst, wenn alles erledigt ist oder 30 Minuten nichts passiert." : {
+
+    },
+    "Zeigt den Barcode deiner Kundenkarte im Vollbild mit voller Helligkeit." : {
+
+    },
+    "Zeigt den Einkauf als Live-Aktivität: nächste Einträge, Fortschritt und Kundenkarte auf dem Sperrbildschirm." : {
+
     },
     "Ziehe die Abschnitte in die Reihenfolge deines Wegs durch %@." : {
       "localizations" : {
@@ -3904,6 +4349,9 @@
           }
         }
       }
+    },
+    "Zu %@ zuordnen" : {
+
     },
     "Zu deinen Listen hinzufügen?" : {
       "localizations" : {
@@ -3954,6 +4402,9 @@
           }
         }
       }
+    },
+    "Zuletzt erledigt" : {
+
     },
     "Zuordnen" : {
       "localizations" : {

@@ -69,27 +69,27 @@ private struct StoreListView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            if page.openCount == 0 {
-                WidgetEmptyState(page: page, tint: tint, compact: family == .systemSmall)
-                    .padding(.horizontal, 12)
-            } else {
-                switch family {
-                case .systemSmall: small
-                case .systemMedium: medium
-                case .systemExtraLarge: grid(columns: 3, perColumn: 10)
-                default:
-                    if family.isExtraLargePortrait {
-                        tall(lines: 18, footerCard: true)
-                    } else {
-                        tall(lines: 12, footerCard: false)
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                header
+                if page.openCount == 0 {
+                    WidgetEmptyState(page: page, tint: tint, compact: family == .systemSmall)
+                        .padding(.horizontal, 12)
+                } else {
+                    switch family {
+                    case .systemSmall: small
+                    case .systemMedium: medium
+                    case .systemExtraLarge:
+                        grid(height: geometry.size.height, columns: 3)
+                    default:
+                        tall(height: geometry.size.height, footerCard: family.isExtraLargePortrait)
                     }
                 }
+                if family != .systemSmall, family != .systemMedium {
+                    footer
+                }
             }
-            if family != .systemSmall, family != .systemMedium {
-                footer
-            }
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
     }
 
@@ -156,9 +156,9 @@ private struct StoreListView: View {
 
     private var mediumSingleColumn: some View {
         let items = page.items
-        let shown = min(items.count, 3)
+        let shown = min(items.count, items.count > 3 ? 2 : 3)
         return VStack(alignment: .leading, spacing: 0) {
-            ForEach(items.prefix(shown)) { item in row(item, fontSize: 14).frame(height: items.count > 3 ? 32 : 36) }
+            ForEach(items.prefix(shown)) { item in row(item, fontSize: 14).frame(height: 28) }
             if items.count > shown {
                 MoreItemsLabel(count: items.count - shown)
                     .frame(height: 20)
@@ -166,7 +166,8 @@ private struct StoreListView: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.top, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 14)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
@@ -179,28 +180,33 @@ private struct StoreListView: View {
         return HStack(alignment: .top, spacing: 10) {
             column(left)
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(right) { item in row(item, fontSize: 14).frame(height: 36) }
+                ForEach(right) { item in row(item, fontSize: 14).frame(height: 28) }
                 if items.count > shown {
                     MoreItemsLabel(count: items.count - shown)
-                        .frame(height: 36)
+                        .frame(height: 28)
                         .padding(.leading, 32)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 14)
-        .padding(.top, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 14)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private func column(_ items: [WidgetSnapshot.Item]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(items) { item in row(item, fontSize: 14).frame(height: 36) }
+            ForEach(items) { item in row(item, fontSize: 14).frame(height: 28) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func tall(lines limit: Int, footerCard: Bool) -> some View {
+    private func tall(height: CGFloat, footerCard: Bool) -> some View {
+        // Keep room for the header, actions, the hidden-items label and (on portrait) the card.
+        let card = footerCard ? page.store.flatMap { snapshot.loyaltyCards(for: $0.id).first } : nil
+        let reserved: CGFloat = 54 + 46 + 16 + 20 + (card == nil ? 0 : 78)
+        let limit = max(1, Int((height - reserved) / 25))
         let (lines, hidden) = WidgetLine.lines(of: page, showsSections: showsSections, limit: limit)
         return VStack(alignment: .leading, spacing: 0) {
             ForEach(lines) { line($0, fontSize: 15, height: 25) }
@@ -208,19 +214,23 @@ private struct StoreListView: View {
                 .padding(.leading, 33)
                 .padding(.top, 2)
             Spacer(minLength: 0)
-            if footerCard, let card = page.store.flatMap({ snapshot.loyaltyCards(for: $0.id).first }) {
+            if let card {
                 LoyaltyStrip(card: card)
                     .padding(.bottom, 4)
             }
         }
         .padding(.horizontal, 12)
         .padding(.top, 8)
+        .padding(.bottom, 8)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    private func grid(columns count: Int, perColumn: Int) -> some View {
-        let (lines, hidden) = WidgetLine.lines(of: page, showsSections: showsSections, limit: count * perColumn)
+    private func grid(height: CGFloat, columns count: Int) -> some View {
+        let perColumn = max(1, Int((height - 54 - 46 - 16 - 22) / 25))
+        let (lines, _) = WidgetLine.lines(of: page, showsSections: showsSections, limit: count * perColumn)
         let columns = WidgetLine.columns(lines, count: count, perColumn: perColumn)
+        let shownItems = columns.flatMap { $0 }.count { !$0.isHeader }
+        let hidden = page.openCount - shownItems
         return VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .top, spacing: 18) {
                 ForEach(columns.indices, id: \.self) { index in
@@ -236,6 +246,7 @@ private struct StoreListView: View {
         }
         .padding(.horizontal, 14)
         .padding(.top, 8)
+        .padding(.bottom, 8)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
@@ -355,12 +366,12 @@ private struct CompletedListView: View {
 
     private var tint: Color { renderingMode == .fullColor ? snapshot.accentColor : .primary }
 
-    private var limit: Int {
+    private func limit(for height: CGFloat) -> Int {
         switch family {
         case .systemSmall: 3
         case .systemMedium: 3
-        case .systemExtraLarge: 10
-        default: family.isExtraLargePortrait ? 18 : 11
+        default:
+            max(1, Int((height - 46 - 6 - 16 - 10) / 27))
         }
     }
 
@@ -368,40 +379,48 @@ private struct CompletedListView: View {
         if family.isAccessory {
             AccessoryCompletedView(snapshot: snapshot, family: family)
         } else {
-            VStack(spacing: 0) {
-                WidgetCardHeader(
-                    page: WidgetSnapshot.Page(id: "completed", store: nil, state: nil, sections: []),
-                    title: String(localized: "Zuletzt erledigt"),
-                    subtitle: family == .systemSmall ? nil : String(localized: "Nochmal kaufen mit ↺"),
-                    systemImage: "checkmark",
-                    tint: snapshot.accentColor,
-                    badgeSize: family == .systemSmall ? 22 : 26,
-                    height: family == .systemSmall ? 40 : 46,
-                    trailing: .none
-                )
-                if snapshot.recentlyCompleted.isEmpty {
-                    VStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle")
-                            .font(.system(size: 26))
-                            .foregroundStyle(tint)
-                        Text("In den letzten 7 Tagen nichts erledigt.")
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(snapshot.recentlyCompleted.prefix(limit)) { item in
-                            WidgetCompletedRow(item: item, tint: tint, fontSize: family == .systemSmall ? 13 : 14)
-                                .frame(height: family == .systemSmall ? 25 : 27)
+            GeometryReader { geometry in
+                let shown = min(snapshot.recentlyCompleted.count, limit(for: geometry.size.height))
+                VStack(spacing: 0) {
+                    WidgetCardHeader(
+                        page: WidgetSnapshot.Page(id: "completed", store: nil, state: nil, sections: []),
+                        title: String(localized: "Zuletzt erledigt"),
+                        subtitle: family == .systemSmall ? nil : String(localized: "Nochmal kaufen mit ↺"),
+                        systemImage: "checkmark",
+                        tint: snapshot.accentColor,
+                        badgeSize: family == .systemSmall ? 22 : 26,
+                        height: family == .systemSmall ? 40 : 46,
+                        trailing: .none
+                    )
+                    if snapshot.recentlyCompleted.isEmpty {
+                        VStack(spacing: 6) {
+                            Image(systemName: "checkmark.circle")
+                                .font(.system(size: 26))
+                                .foregroundStyle(tint)
+                            Text("In den letzten 7 Tagen nichts erledigt.")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
                         }
-                        Spacer(minLength: 0)
+                        .padding(.horizontal, 12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(snapshot.recentlyCompleted.prefix(shown)) { item in
+                                WidgetCompletedRow(item: item, tint: tint, fontSize: family == .systemSmall ? 13 : 14)
+                                    .frame(height: family == .systemSmall ? 25 : 27)
+                            }
+                            MoreItemsLabel(count: snapshot.recentlyCompleted.count - shown)
+                                .padding(.leading, 32)
+                                .frame(height: snapshot.recentlyCompleted.count > shown ? 16 : 0)
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 10)
+                        .padding(.top, 6)
+                        .padding(.bottom, 10)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.top, 6)
                 }
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
             }
         }
     }

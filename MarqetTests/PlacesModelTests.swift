@@ -33,6 +33,7 @@ final class FakePlaceSearch: PlaceSearching {
     var places: [PlaceResult] = []
     func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint, radius: Double) async throws -> [PlaceResult] { places }
     func shops(near origin: GeoPoint) async throws -> [PlaceResult] { places }
+    func shops(near origin: GeoPoint, category: NearbyShopCategory) async throws -> [PlaceResult] { places }
     func search(_ query: String, near origin: GeoPoint?) async throws -> [PlaceResult] { places }
 }
 
@@ -122,7 +123,7 @@ struct PlacesModelTests {
         await model.setStoreSortMode(.distance)
         #expect(model.storeSortMode == .distance)
         let stores = model.deck.pages.compactMap { if case .store(let id) = $0 { id } else { nil } }
-        #expect(Array(model.deck.pages.prefix(2)) == [.brochures, .unsorted])
+        #expect(Array(model.deck.pages.prefix(3)) == [.map, .brochures, .unsorted])
         #expect(Array(stores.prefix(2)) == [edeka.id, rewe.id])
         #expect(model.distanceText(to: edeka.id) != nil)
 
@@ -214,6 +215,26 @@ struct PlacesModelTests {
         let store = try #require(model.addStore(from: place("BUDNI", metersNorth: 300, type: .other)))
         #expect(store.catalogKey == "budni")
         #expect(model.catalog?.entry(forKey: "budni")?.leafletURL != nil)
+    }
+
+    @Test func departmentStoreFromMapUsesCatalogAndUnknownShopRemainsAddable() async throws {
+        let model = try await makeModel()
+        let galeria = place("Galeria Kaufhof", metersNorth: 300, type: .other)
+        let unknown = place("Marias Keramikladen", metersNorth: 450, type: .other)
+        let pins = model.mapPins(found: [galeria, unknown], includeUnmatched: true)
+        #expect(pins.contains { if case .suggestion(_, "galeria") = $0.kind { true } else { false } })
+        #expect(pins.contains { if case .place(let result) = $0.kind { result.name == unknown.name } else { false } })
+        let store = try #require(model.addStore(from: unknown))
+        #expect(store.origin == .custom)
+        #expect(model.relevantLocation(of: store.id)?.name == unknown.name)
+    }
+
+    @Test func discoveryCategoriesKeepShoppingListStoresAvailable() {
+        #expect(NearbyShopCategory.beauty.includes(.beauty))
+        #expect(NearbyShopCategory.department.includes(.department))
+        #expect(NearbyShopCategory.groceries.includes(.supermarket))
+        #expect(!NearbyShopCategory.groceries.includes(.fashion))
+        #expect(NearbyShopCategory.all.includes(.electronics))
     }
 
     @Test func focusOpensStoreCardsButNotWhileTyping() async throws {

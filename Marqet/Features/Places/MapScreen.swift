@@ -2,7 +2,7 @@ import MapKit
 import MarqetCore
 import SwiftUI
 
-/// "Karte" (KONZEPT §14.1): branches for stores with open list items, plus a search.
+/// Shopping-list branches first, with optional discovery of other shops in Apple Maps.
 struct MapScreen: View {
     let focusedStoreID: Store.ID?
 
@@ -12,13 +12,16 @@ struct MapScreen: View {
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     /// Places found around the visible area: branches of stores with open list items.
     @State private var found: [PlaceResult] = []
+    @State private var discovered: [PlaceResult] = []
     @State private var lastLoad: (center: GeoPoint, radius: Double)?
     @State private var loadTask: Task<Void, Never>?
     @State private var query = ""
     @State private var searchResults: [PlaceResult] = []
     @State private var selectedPin: MapPin?
     @State private var isLoading = false
+    @State private var shouldFrameDiscovery = true
     @AppStorage("mapShowsOnlyStoresWithItems") private var showsOnlyStoresWithItems = true
+    @AppStorage("mapShopCategory") private var shopCategory: NearbyShopCategory = .groceries
 
     private static let initialRadius: Double = 2_500
 
@@ -27,10 +30,15 @@ struct MapScreen: View {
     }
 
     var body: some View {
-        let pins = model.mapPins(found: found).filter { pin in
-            guard showsOnlyStoresWithItems else { return true }
-            guard let store = pin.store else { return false }
-            return model.openItemCount(of: store.id) > 0
+        let pins = model.mapPins(found: found + discovered, includeUnmatched: !showsOnlyStoresWithItems).filter { pin in
+            if showsOnlyStoresWithItems {
+                guard let store = pin.store else { return false }
+                return model.openItemCount(of: store.id) > 0
+            }
+            if let store = pin.store { return shopCategory.includes(store.type) }
+            if case .suggestion(_, let key) = pin.kind,
+               let chain = model.catalog?.entry(forKey: key) { return shopCategory.includes(chain.type) }
+            return true
         }
         NavigationStack {
             Map(position: $position) {
@@ -43,7 +51,7 @@ struct MapScreen: View {
                         }
                             .buttonStyle(.plain)
                     }
-                    .annotationTitles(isOwn(pin) ? .automatic : .hidden)
+                    .annotationTitles(!showsOnlyStoresWithItems || isOwn(pin) ? .automatic : .hidden)
                 }
             }
             .mapControls {
@@ -58,6 +66,17 @@ struct MapScreen: View {
             .overlay(alignment: .top) {
                 if !searchResults.isEmpty { searchResultList }
             }
+            #if DEBUG
+            .overlay(alignment: .topLeading) {
+                if ProcessInfo.processInfo.arguments.contains("-demo-map") {
+                    Text("items=\(showsOnlyStoresWithItems) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) names=\(discovered.map(\.name).joined(separator: ", "))")
+                        .font(.caption2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(5)
+                        .background(.yellow)
+                }
+            }
+            #endif
             .safeAreaInset(edge: .bottom) {
                 storeStrip(pins: pins)
             }
@@ -68,7 +87,11 @@ struct MapScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .close) { dismiss() }
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.body.weight(.semibold))
+                    }
+                    .accessibilityLabel("Schließen")
                 }
                 ToolbarItem(placement: .primaryAction) { filterMenu }
                 if isLoading {
@@ -85,8 +108,17 @@ struct MapScreen: View {
                 }
             }
             .onChange(of: showsOnlyStoresWithItems) {
-                // Other stores need their own branch search; start again where the map is.
+                found = []
+                discovered = []
+                shouldFrameDiscovery = true
                 guard let lastLoad else { return }
+                scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
+            }
+            .onChange(of: shopCategory) {
+                found = []
+                discovered = []
+                shouldFrameDiscovery = true
+                guard !showsOnlyStoresWithItems, let lastLoad else { return }
                 scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
             }
             .sheet(item: $selectedPin) { pin in
@@ -100,7 +132,7 @@ struct MapScreen: View {
                 }
             }
         }
-        .tint(.primary)
+        .tint(Color(uiColor: .label))
     }
 
     private var filterMenu: some View {
@@ -109,10 +141,16 @@ struct MapScreen: View {
                 Label("Läden mit Einträgen", systemImage: "checklist").tag(true)
                 Label("Alle Läden", systemImage: "storefront").tag(false)
             }
+            Picker("Geschäfte", selection: $shopCategory) {
+                ForEach(NearbyShopCategory.allCases, id: \.self) { category in
+                    Text(category.title).tag(category)
+                }
+            }
+            .disabled(showsOnlyStoresWithItems)
         } label: {
             Label("Filter", systemImage: "line.3.horizontal.decrease")
         }
-        .accessibilityValue(showsOnlyStoresWithItems ? "Läden mit Einträgen" : "Alle Läden")
+        .accessibilityValue(showsOnlyStoresWithItems ? String(localized: "Läden mit Einträgen") : shopCategory.title)
     }
 
     private func title(of pin: MapPin) -> String {
@@ -150,12 +188,26 @@ struct MapScreen: View {
         lastLoad = (center, radius)
         isLoading = true
         defer { isLoading = false }
+        if !showsOnlyStoresWithItems {
+            let shops = (try? await model.placeSearch.shops(near: center, category: shopCategory)) ?? []
+            guard !Task.isCancelled else { return }
+            discovered = shops
+            if shouldFrameDiscovery, !shops.isEmpty {
+                shouldFrameDiscovery = false
+                let furthest = shops.map { center.distance(to: $0.coordinate) }.max() ?? 0
+                let span = min(max(furthest * 2.4, 1_500), 6_500)
+                withAnimation(.smooth) {
+                    position = .region(MKCoordinateRegion(center: center.clCoordinate, latitudinalMeters: span, longitudinalMeters: span))
+                }
+            }
+        }
         var results: [PlaceResult] = []
-        for store in model.storesForBranchSearch(onlyWithItems: showsOnlyStoresWithItems) {
+        for store in model.storesForBranchSearch(onlyWithItems: showsOnlyStoresWithItems).filter({ showsOnlyStoresWithItems || shopCategory.includes($0.type) }) {
             guard !Task.isCancelled else { return }
             let chain = store.catalogKey.flatMap { model.catalog?.entry(forKey: $0) }
             results += (try? await model.placeSearch.branches(of: store, chain: chain, near: center, radius: radius)) ?? []
         }
+        guard !Task.isCancelled else { return }
         // Keep what was found elsewhere, so panning back does not empty the map.
         var seen = Set(results.map(\.id))
         found = results + found.filter { seen.insert($0.id).inserted }
@@ -337,7 +389,7 @@ private struct PinSheet: View {
         VStack(alignment: .leading, spacing: 20) {
             header
             facts
-            if let store = pin.store { itemPreview(of: store) }
+            if let store = pin.store, !isOwnBranch { itemPreview(of: store) }
             VStack(spacing: 10) { actions }
                 .controlSize(.large)
         }
@@ -368,10 +420,15 @@ private struct PinSheet: View {
                     .minimumScaleFactor(0.8)
             }
             Spacer(minLength: 0)
-            Button(role: .close) { onDone(nil) }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .tint(.primary)
+            Button { onDone(nil) } label: {
+                Image(systemName: "xmark")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Color(uiColor: .label))
+                    .frame(width: 44, height: 44)
+                    .glassEffect(.regular.interactive(), in: .circle)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Schließen")
         }
     }
 
@@ -514,6 +571,10 @@ private struct PinSheet: View {
         case .suggestion: "Noch nicht in deinen Läden"
         case .place: "Ort"
         }
+    }
+
+    private var isOwnBranch: Bool {
+        if case .saved = pin.kind { true } else { false }
     }
 
     /// The own store, or the chain as a store for suggestions.

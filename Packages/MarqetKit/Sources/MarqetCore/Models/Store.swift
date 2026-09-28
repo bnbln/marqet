@@ -68,6 +68,7 @@ public enum StoreSymbol: Hashable, Sendable, Codable {
 public enum StoreType: String, Codable, Sendable, CaseIterable {
     case discounter, supermarket, drugstore, organic, hardware, furniture
     case beverage, bakery, butcher, pharmacy, market, online, other
+    case beauty, department, fashion, electronics, sports, books, pet
 
     /// Grocery-like stores show category sections inside their card (KONZEPT §6.3).
     public var showsCategorySections: Bool {

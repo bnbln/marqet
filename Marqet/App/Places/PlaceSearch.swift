@@ -13,12 +13,54 @@ struct PlaceResult: Identifiable, Hashable, Sendable {
     let suggestedType: StoreType
 }
 
+/// Discovery choices on the map. The shopping list remains the default view.
+enum NearbyShopCategory: String, CaseIterable, Sendable {
+    case groceries, beauty, department, fashion, home, other, all
+
+    var title: String {
+        switch self {
+        case .groceries: String(localized: "Supermärkte & Lebensmittel")
+        case .beauty: String(localized: "Beauty & Drogerie")
+        case .department: String(localized: "Kaufhäuser")
+        case .fashion: String(localized: "Mode & Schuhe")
+        case .home: String(localized: "Wohnen & Baumarkt")
+        case .other: String(localized: "Weitere Geschäfte")
+        case .all: String(localized: "Alle Geschäfte")
+        }
+    }
+
+    var queries: [String] {
+        switch self {
+        case .groceries: ["Supermarkt", "Discounter", "Lebensmittelgeschäft"]
+        case .beauty: ["Parfümerie", "Drogerie", "Kosmetikgeschäft"]
+        case .department: ["Kaufhaus", "Warenhaus"]
+        case .fashion: ["Bekleidungsgeschäft", "Schuhgeschäft"]
+        case .home: ["Möbelhaus", "Baumarkt"]
+        case .other: ["Elektronikgeschäft", "Buchhandlung", "Sportgeschäft", "Tierbedarf"]
+        case .all: ["Supermarkt", "Parfümerie", "Kaufhaus", "Bekleidungsgeschäft", "Baumarkt", "Elektronikgeschäft"]
+        }
+    }
+
+    func includes(_ type: StoreType) -> Bool {
+        switch self {
+        case .groceries: [.discounter, .supermarket, .organic, .beverage, .bakery, .butcher, .market].contains(type)
+        case .beauty: [.beauty, .drugstore, .pharmacy].contains(type)
+        case .department: type == .department
+        case .fashion: type == .fashion
+        case .home: [.furniture, .hardware].contains(type)
+        case .other: [.electronics, .sports, .books, .pet, .other].contains(type)
+        case .all: type != .online
+        }
+    }
+}
+
 @MainActor
 protocol PlaceSearching: AnyObject {
     /// Branches of one store within `radius` meters of `origin` (chain stores: only that chain).
     func branches(of store: Store, chain: StoreCatalog.Entry?, near origin: GeoPoint, radius: Double) async throws -> [PlaceResult]
     /// Shops around `origin` – for "Läden in der Nähe" on the map.
     func shops(near origin: GeoPoint) async throws -> [PlaceResult]
+    func shops(near origin: GeoPoint, category: NearbyShopCategory) async throws -> [PlaceResult]
     /// Free-text search ("Hofladen Maier").
     func search(_ query: String, near origin: GeoPoint?) async throws -> [PlaceResult]
 }
@@ -29,10 +71,7 @@ protocol PlaceSearching: AnyObject {
 final class MapKitPlaceSearch: PlaceSearching {
     static let branchRadius: CLLocationDistance = 5_000
     static let shopsRadius: CLLocationDistance = 2_500
-    /// `.store` is left out on purpose: in city centres it returns dozens of boutiques and pushes
-    /// the supermarkets out of MapKit's result limit. Chains come from the text queries instead.
-    private static let shopCategories: [MKPointOfInterestCategory] = [.foodMarket, .pharmacy, .bakery]
-    private static let shopQueries = ["Supermarkt", "Discounter", "Drogerie"]
+    private static let groceryCategories: [MKPointOfInterestCategory] = [.foodMarket, .bakery]
 
     private var cache: [String: (results: [PlaceResult], date: Date)] = [:]
 
@@ -62,16 +101,21 @@ final class MapKitPlaceSearch: PlaceSearching {
     }
 
     func shops(near origin: GeoPoint) async throws -> [PlaceResult] {
-        try await cached("shops", near: origin) {
+        try await shops(near: origin, category: .groceries)
+    }
+
+    func shops(near origin: GeoPoint, category: NearbyShopCategory) async throws -> [PlaceResult] {
+        try await cached("shops:\(category.rawValue)", near: origin) {
             let request = MKLocalPointsOfInterestRequest(center: origin.clCoordinate, radius: Self.shopsRadius)
-            request.pointOfInterestFilter = MKPointOfInterestFilter(including: Self.shopCategories)
-            var results = try await MKLocalSearch(request: request).start().mapItems.map(PlaceResult.init)
-            for query in Self.shopQueries {
+            request.pointOfInterestFilter = MKPointOfInterestFilter(including: category == .groceries ? Self.groceryCategories : [.store, .foodMarket, .pharmacy])
+            var results = (try? await MKLocalSearch(request: request).start().mapItems.map(PlaceResult.init)) ?? []
+            if category != .all && category != .groceries { results = [] }
+            for query in category.queries {
                 let search = MKLocalSearch.Request()
                 search.naturalLanguageQuery = query
                 search.resultTypes = .pointOfInterest
                 search.region = MKCoordinateRegion(center: origin.clCoordinate, latitudinalMeters: Self.shopsRadius * 2, longitudinalMeters: Self.shopsRadius * 2)
-                // One failing query (throttling) should not hide the others.
+                // Each query has its own result limit. Keep partial results if Maps throttles one.
                 if let items = try? await Self.run(search) { results += items }
             }
             var seen = Set<String>()

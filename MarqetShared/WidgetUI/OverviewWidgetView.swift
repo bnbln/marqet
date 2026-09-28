@@ -204,6 +204,7 @@ private struct MiniCard: View {
     let page: WidgetSnapshot.Page
     var itemCount = 0
     var fillsHeight = true
+    var compact = false
 
     @Environment(\.widgetRenderingMode) private var renderingMode
 
@@ -218,7 +219,7 @@ private struct MiniCard: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(page.openCount, format: .number)
-                        .font(.system(size: itemCount > 0 ? 22 : 26, weight: .bold, design: .rounded))
+                        .font(.system(size: compact ? 20 : (itemCount > 0 ? 22 : 26), weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .widgetAccentable()
                     if itemCount > 0 {
@@ -231,7 +232,7 @@ private struct MiniCard: View {
                     Text(page.store?.name ?? String(localized: "Inbox"))
                         .font(.system(size: 12, weight: .semibold))
                         .lineLimit(1)
-                    if let first = page.items.first {
+                    if !compact, let first = page.items.first {
                         Text(first.title)
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
@@ -368,37 +369,44 @@ private struct AllDoneView: View {
 
 private struct LargeOverview: View {
     let model: OverviewModel
-    private let maximumRows = 5
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            OverviewTitle(model: model)
-                .padding(.bottom, 10)
-            VStack(spacing: 0) {
-                let rows = Array(model.stores.prefix(model.inbox == nil ? maximumRows : maximumRows - 1))
-                ForEach(rows) { page in
-                    StoreRow(page: page)
-                    Divider().padding(.leading, 44)
+        GeometryReader { geometry in
+            // Summary can take two lines. Reserve its full height, the trip button and the
+            // overflow label before choosing how many store rows fit on this device.
+            let rowBudget = max(1, Int((geometry.size.height - 176) / 41))
+            let storeLimit = max(0, min(5, rowBudget - (model.inbox == nil ? 0 : 1)))
+            let rows = Array(model.stores.prefix(storeLimit))
+            VStack(alignment: .leading, spacing: 0) {
+                OverviewTitle(model: model)
+                    .frame(height: 66, alignment: .top)
+                    .padding(.bottom, 8)
+                VStack(spacing: 0) {
+                    ForEach(rows) { page in
+                        StoreRow(page: page)
+                        Divider().padding(.leading, 44)
+                    }
+                    if let inbox = model.inbox {
+                        InboxRow(page: inbox)
+                    }
+                    if model.stores.count > rows.count {
+                        Text("+ \(model.stores.count - rows.count) weitere Läden")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 44)
+                            .frame(height: 18)
+                    }
                 }
-                if let inbox = model.inbox {
-                    InboxRow(page: inbox)
-                }
-                if model.stores.count > rows.count {
-                    Text("+ \(model.stores.count - rows.count) weitere Läden")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 44)
-                        .padding(.top, 4)
-                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
+                Spacer(minLength: 8)
+                TripButton(model: model)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
-            Spacer(minLength: 8)
-            TripButton(model: model)
+            .padding(14)
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
-        .padding(14)
     }
 }
 
@@ -468,7 +476,7 @@ private struct StoreRow: View {
                         }
                     }
                 }
-                .frame(height: 46)
+                .frame(height: 40)
             }
             .foregroundStyle(.primary)
         }
@@ -499,7 +507,7 @@ private struct InboxRow: View {
                     .background(Color.primary.opacity(0.08), in: .capsule)
             }
         }
-        .frame(height: 46)
+        .frame(height: 40)
         .foregroundStyle(.primary)
     }
 }
@@ -562,30 +570,38 @@ private struct CardGrid: View {
     let itemsPerCard: Int
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            OverviewTitle(model: model)
-            let cards = Array(model.cards.prefix(columns * rows))
-            if cards.isEmpty {
-                AllDoneView(model: model)
-            } else {
-                Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                    ForEach(0..<rows, id: \.self) { row in
-                        GridRow {
-                            ForEach(0..<columns, id: \.self) { column in
-                                let index = row * columns + column
-                                if index < cards.count {
-                                    MiniCard(page: cards[index], itemCount: itemsPerCard)
-                                } else {
-                                    Color.clear
+        GeometryReader { geometry in
+            let cardHeight = max(1, (geometry.size.height - 28 - 66 - 40 - 20 - CGFloat(rows - 1) * 10) / CGFloat(rows))
+            let visibleItems = min(itemsPerCard, max(0, Int((cardHeight - 30 - 27 - 12 - 16) / 23)))
+            VStack(alignment: .leading, spacing: 10) {
+                OverviewTitle(model: model)
+                    .frame(height: 66, alignment: .top)
+                let cards = Array(model.cards.prefix(columns * rows))
+                if cards.isEmpty {
+                    AllDoneView(model: model)
+                } else {
+                    Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+                        ForEach(0..<rows, id: \.self) { row in
+                            GridRow {
+                                ForEach(0..<columns, id: \.self) { column in
+                                    let index = row * columns + column
+                                    if index < cards.count {
+                                        MiniCard(page: cards[index], itemCount: visibleItems, compact: cardHeight < 105)
+                                            .frame(height: cardHeight)
+                                    } else {
+                                        Color.clear.frame(height: cardHeight)
+                                    }
                                 }
                             }
                         }
                     }
                 }
+                Spacer(minLength: 0)
+                TripButton(model: model)
             }
-            TripButton(model: model)
+            .padding(14)
+            .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
-        .padding(14)
     }
 }
 

@@ -53,8 +53,7 @@ struct AppModelTests {
         let store = try #require(model.stores.first)
         #expect(store.catalogKey == "aldi-sued")
         #expect(model.items.first?.storeID == store.id)
-        // The unsorted inbox is always the first page (K3).
-        #expect(model.deck.pages == [.brochures, .unsorted, .store(store.id), .more])
+        #expect(model.deck.pages == [.map, .brochures, .unsorted, .store(store.id), .more])
     }
 
     @Test func composerAddsToStoreWritesMarkerAndLearns() async throws {
@@ -86,11 +85,11 @@ struct AppModelTests {
     @Test func plannedStoreStaysAndHideRemovesIt() async throws {
         let model = try await makeModel()
         let dm = try catalogStore(model, "dm")
-        #expect(model.deck.pages == [.brochures, .unsorted, .more])
+        #expect(model.deck.pages == [.map, .brochures, .unsorted, .more])
         model.plan(dm.id)
-        #expect(model.deck.pages == [.brochures, .unsorted, .store(dm.id), .more])
+        #expect(model.deck.pages == [.map, .brochures, .unsorted, .store(dm.id), .more])
         model.hide(dm.id)
-        #expect(model.deck.pages == [.brochures, .unsorted, .more])
+        #expect(model.deck.pages == [.map, .brochures, .unsorted, .more])
     }
 
     // MARK: M5 – store management

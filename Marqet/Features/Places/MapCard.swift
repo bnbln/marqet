@@ -36,6 +36,8 @@ struct MapCard: View {
             .contentShape(.rect(cornerRadius: 30, style: .continuous))
         }
         .buttonStyle(.plain)
+        // Leave room below the card for Home's floating microphone and add button.
+        .padding(.bottom, 48)
         .modifier(CardZoomSource(page: .map, namespace: zoomNamespace))
         .accessibilityLabel("Karte öffnen")
     }

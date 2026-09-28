@@ -296,7 +296,7 @@ extension AppModel {
         return MapPin(kind: .place(place), store: nil)
     }
 
-    func mapPins(found: [PlaceResult]) -> [MapPin] {
+    func mapPins(found: [PlaceResult], includeUnmatched: Bool = false) -> [MapPin] {
         var pins = locations.compactMap { location in
             store(location.storeID).map { MapPin(kind: .saved(location), store: $0) }
         }
@@ -310,6 +310,8 @@ extension AppModel {
                 if !isSaved { pins.append(MapPin(kind: .branch(place), store: store)) }
             } else if let chain = chain(of: place) {
                 pins.append(MapPin(kind: .suggestion(place, chainKey: chain.key), store: nil))
+            } else if includeUnmatched {
+                pins.append(MapPin(kind: .place(place), store: nil))
             }
         }
         return pins

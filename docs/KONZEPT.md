@@ -169,3 +169,11 @@ Stopp ─▶ finalizeAndFinish ─▶ letzter Modell-Durchlauf ─▶ Nachfrage 
 - Namen der allgemeinen Katalog-Läden lokalisieren („Market“ statt „Markt“ in der englischen App). Der Name ist zugleich Marker in den Erinnerungen, das braucht deshalb ein eigenes Konzept.
 - Beim Einsprechen genannte Kategorien („beim Metzger um die Ecke“) als eigener Laden anlegen.
 - Test auf echtem Gerät: Latenz des Modell-Durchlaufs pro Satz, Erkennungsqualität von Ladennamen mit `contextualStrings`.
+
+## 4. Shopping jenseits von Lebensmitteln
+
+Die Einkaufsliste bleibt der Ausgangspunkt: Auf Home und beim Öffnen der Karte stehen zunächst die Läden mit offenen Einträgen. Der Laden ist ein frei wählbares Ziel für eine Liste, unabhängig davon, ob er Lebensmittel, Kosmetik, Kleidung oder Möbel verkauft. Für bekannte Ketten gibt es einen kuratierten DACH-Katalog mit Suchnamen und Ladentyp. Für jedes andere Geschäft kann der Nutzer einen eigenen Laden mit Namen, Art, Farbe und Symbol anlegen.
+
+Im Kartenfilter wechselt „Alle Läden“ zur Entdeckung. Wählbar sind Lebensmittel, Beauty und Drogerie, Kaufhäuser, Mode und Schuhe, Wohnen und Baumarkt, weitere Geschäfte sowie alle Geschäfte. Die Umgebungssuche nutzt Apple Maps; die Freitextsuche findet auch gezielt benannte Läden und Adressen. Ein Treffer kann als Laden mit bevorzugter Filiale übernommen werden. Die Karte zeigt Vorschläge aus dem Katalog und Orte ohne Katalogeintrag, damit der Katalog keine Grenze für die Nutzerliste bildet.
+
+Apple Maps ist eine Suche nach Points of Interest mit begrenzten Treffermengen, keine vollständige oder garantiert aktuelle Datenbank aller Geschäfte. Deshalb bleibt die manuelle Anlage immer verfügbar. Auf Home dient die Karte der Orientierung und erhält Abstand zu den schwebenden Aktionen. Die Filialkarte zeigt Adresse, Distanz, Listenanzahl, Card und Route; bei „Deine Filiale“ entfällt die Artikelvorschau.

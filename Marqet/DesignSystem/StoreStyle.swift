@@ -49,6 +49,13 @@ extension StoreType {
         case .market: String(localized: "Markt")
         case .online: String(localized: "Online")
         case .other: String(localized: "Sonstiges")
+        case .beauty: String(localized: "Beauty & Parfümerie")
+        case .department: String(localized: "Kaufhaus")
+        case .fashion: String(localized: "Mode")
+        case .electronics: String(localized: "Elektronik")
+        case .sports: String(localized: "Sport")
+        case .books: String(localized: "Bücher")
+        case .pet: String(localized: "Tierbedarf")
         }
     }
 
@@ -66,6 +73,13 @@ extension StoreType {
         case .market: "carrot.fill"
         case .online: "shippingbox.fill"
         case .other: "bag.fill"
+        case .beauty: "sparkles"
+        case .department: "building.2.fill"
+        case .fashion: "tshirt.fill"
+        case .electronics: "headphones"
+        case .sports: "figure.run"
+        case .books: "books.vertical.fill"
+        case .pet: "pawprint.fill"
         }
     }
 }

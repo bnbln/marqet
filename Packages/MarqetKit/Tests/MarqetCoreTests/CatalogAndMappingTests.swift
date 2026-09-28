@@ -32,6 +32,16 @@ struct StoreCatalogTests {
         #expect(catalog.entries(for: .switzerland).map(\.key).contains("migros"))
     }
 
+    @Test func shoppingBrandsCoverMoreThanGroceries() throws {
+        let german = catalog.entries(for: .germany).map(\.key)
+        for key in ["sephora", "douglas", "kadewe", "breuninger", "galeria"] {
+            #expect(german.contains(key))
+        }
+        let galeria = try #require(catalog.entry(forKey: "galeria"))
+        #expect(galeria.aliases.contains("Galeria Kaufhof"))
+        #expect(galeria.type == .department)
+    }
+
     @Test func catalogStoresResolveThroughMatcher() {
         let stores = catalog.entries(for: .germany).enumerated().map { $1.makeStore(sortIndex: $0) }
         let matcher = StoreMatcher(stores: stores)

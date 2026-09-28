@@ -19,6 +19,7 @@ struct TriageScreen: View {
             Group {
                 if model.triageQueue.isEmpty {
                     TriageSummary()
+                        .transition(.opacity.combined(with: .scale(scale: 0.97)))
                 } else if mode == .board {
                     TriageOverview(showsAddStore: $showsAddStore)
                         .safeAreaInset(edge: .bottom) { LastStepLine() }
@@ -26,6 +27,7 @@ struct TriageScreen: View {
                     TriageCards(showsAddStore: $showsAddStore)
                 }
             }
+            .animation(.smooth(duration: 0.35), value: model.triageQueue.isEmpty)
             .background(Color(.systemGroupedBackground))
             .navigationTitle(model.triageQueue.isEmpty ? String(localized: "Zuordnen") : String(localized: "Wo kaufst du das?"))
             .navigationSubtitle(subtitle)
@@ -397,48 +399,86 @@ private struct CenteredFlow: Layout {
 
 // MARK: - Summary
 
+/// The end of a round as a small reward: the check pops, then every step of the round comes up
+/// as a pill, one after the other with a light tick each, closed by a success haptic and a ring
+/// around the check. "Fertig" sits full width at the thumb.
 private struct TriageSummary: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showsPaywall = false
+    @State private var viewportHeight: CGFloat = 0
+    @State private var hasAppeared = false
+    /// Pills shown so far.
+    @State private var revealed = 0
+    @State private var isComplete = false
 
     var body: some View {
-        // Centered while it fits; a long session scrolls.
-        ViewThatFits(in: .vertical) {
-            content.frame(maxHeight: .infinity)
-            ScrollView { content }
+        let history = model.triage?.history ?? []
+        ScrollView {
+            content(history)
+                .frame(maxWidth: .infinity, minHeight: viewportHeight)
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { viewportHeight = $0 }
+        .safeAreaInset(edge: .bottom, spacing: 0) { actions }
+        .sensoryFeedback(trigger: revealed) { _, count in
+            // Ticks grow a little firmer towards the end.
+            count > 0 ? .impact(weight: .light, intensity: min(1, 0.45 + Double(count) * 0.05)) : nil
+        }
+        .sensoryFeedback(.success, trigger: isComplete)
+        .task { await reveal(count: history.count) }
         .sheet(isPresented: $showsPaywall) { PaywallView() }
     }
 
-    @ViewBuilder
-    private var content: some View {
+    private func reveal(count: Int) async {
+        guard !reduceMotion else {
+            hasAppeared = true
+            revealed = count
+            isComplete = true
+            return
+        }
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.55)) { hasAppeared = true }
+        try? await Task.sleep(for: .milliseconds(380))
+        // About a second and a half for the whole round, however long it was.
+        let step = min(0.13, 1.5 / Double(max(count, 1)))
+        for index in stride(from: 1, through: count, by: 1) {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.58)) { revealed = index }
+            try? await Task.sleep(for: .seconds(step))
+        }
+        try? await Task.sleep(for: .milliseconds(120))
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.5)) { isComplete = true }
+    }
+
+    private func content(_ history: [TriageSession.Step]) -> some View {
         let assigned = model.triage?.assignedCount ?? 0
         let autoAssignable = model.triage?.autoAssignable ?? 0
         let skipped = model.triageSkippedItems.count
-        VStack(spacing: 16) {
-            if assigned == 0, skipped > 0 {
-                // Everything skipped: no success check, just what is still open.
-                Image(systemName: "tray.full.fill")
-                    .font(.system(size: 56))
-                    .foregroundStyle(.secondary)
-                Text(skipped == 1 ? "1 Eintrag übersprungen" : "\(skipped) Einträge übersprungen")
-                    .font(.title2.bold())
-            } else {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundStyle(.tint)
-                Text(assigned == 1 ? "1 Eintrag zugeordnet" : "\(assigned) Einträge zugeordnet")
-                    .font(.title2.bold())
+        let allSkipped = assigned == 0 && skipped > 0
+        return VStack(spacing: 16) {
+            badge(allSkipped: allSkipped)
+            Group {
+                if allSkipped {
+                    Text(skipped == 1 ? "1 Eintrag übersprungen" : "\(skipped) Einträge übersprungen")
+                } else {
+                    Text(assigned == 1 ? "1 Eintrag zugeordnet" : "\(assigned) Einträge zugeordnet")
+                }
             }
+            .font(.title2.bold())
+            .opacity(hasAppeared ? 1 : 0)
+            .offset(y: hasAppeared ? 0 : 10)
             if assigned > 0, skipped > 0 {
                 Text(skipped == 1 ? "1 Eintrag hast du übersprungen." : "\(skipped) Einträge hast du übersprungen.")
                     .foregroundStyle(.secondary)
             }
-            // Every step of the session, as the pills that came up while assigning.
-            if let history = model.triage?.history, !history.isEmpty {
+            // Every step of the round; hidden pills keep their place so nothing jumps.
+            if !history.isEmpty {
                 CenteredFlow {
-                    ForEach(Array(history.enumerated()), id: \.offset) { _, step in
+                    ForEach(Array(history.enumerated()), id: \.offset) { index, step in
+                        let isShown = index < revealed
                         StepPill(step: step)
+                            .scaleEffect(isShown ? 1 : 0.5)
+                            .opacity(isShown ? 1 : 0)
+                            .offset(y: isShown ? 0 : 12)
                     }
                 }
                 .padding(.vertical, 8)
@@ -454,21 +494,45 @@ private struct TriageSummary: View {
                 Button("Mehr über Marqet Pro") { showsPaywall = true }
                     .font(.subheadline.weight(.semibold))
             }
-            if skipped > 0 {
-                Button("Jetzt zuordnen") {
-                    withAnimation(.snappy) { model.triageRevisitSkipped() }
-                }
-                .buttonStyle(.glassProminent)
-                .controlSize(.large)
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 32)
+    }
+
+    /// The check pops in, bounces once all pills are there and sends a ring out.
+    private func badge(allSkipped: Bool) -> some View {
+        ZStack {
+            if !allSkipped {
+                Circle()
+                    .stroke(.tint, lineWidth: 3)
+                    .frame(width: 64, height: 64)
+                    .scaleEffect(isComplete ? 2.1 : 1)
+                    .opacity(isComplete ? 0 : (hasAppeared ? 0.5 : 0))
+                    .animation(.easeOut(duration: 0.9), value: isComplete)
+            }
+            Image(systemName: allSkipped ? "tray.full.fill" : "checkmark.circle.fill")
+                .font(.system(size: allSkipped ? 56 : 64))
+                .foregroundStyle(allSkipped ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tint))
+                .symbolEffect(.bounce, value: isComplete)
+        }
+        .scaleEffect(hasAppeared ? 1 : 0.3)
+        .opacity(hasAppeared ? 1 : 0)
+    }
+
+    private var actions: some View {
+        VStack(spacing: 4) {
+            if model.triageSkippedItems.isEmpty {
+                TriageWideButton(title: String(localized: "Fertig")) { model.endTriage() }
+            } else {
                 Button("Später") { model.endTriage() }
                     .font(.body.weight(.semibold))
-            } else {
-                Button("Fertig") { model.endTriage() }
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
+                    .frame(height: 44)
+                    .tint(.primary)
+                TriageWideButton(title: String(localized: "Jetzt zuordnen")) {
+                    withAnimation(.snappy) { model.triageRevisitSkipped() }
+                }
             }
         }
-        .padding(32)
-        .frame(maxWidth: .infinity)
+        .padding(.bottom, 8)
     }
 }

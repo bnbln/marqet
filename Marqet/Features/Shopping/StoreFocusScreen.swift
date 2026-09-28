@@ -318,7 +318,8 @@ struct StoreFocusScreen: View {
         let subtitle = StoreCardHeader.subtitle(
             store: store, items: items,
             state: store.map { model.deck.state(of: $0.id) } ?? nil,
-            distance: store.flatMap { model.distanceText(to: $0.id) }
+            distance: store.flatMap { model.distanceText(to: $0.id) },
+            presenceStoreID: model.presence?.storeID
         )
         return HStack(spacing: 9) {
             if let store {

@@ -32,6 +32,8 @@ targets:
     platform: iOS
     sources:
       - path: Marqet
+      # Intents, entities and widget views – shared with the widget extension (KONZEPT-WIDGETS §9.1).
+      - path: MarqetShared
       - path: Marqet.icon
         type: file
         buildPhase: resources
@@ -42,6 +44,11 @@ targets:
         product: MarqetReminders
       - package: MarqetKit
         product: MarqetPersistence
+      - target: MarqetWidgets
+    entitlements:
+      path: Marqet/Marqet.entitlements
+      properties:
+        com.apple.security.application-groups: [group.app.marqet.Marqet]
     info:
       path: Marqet/Info.plist
       properties:
@@ -55,6 +62,8 @@ targets:
         NSMicrophoneUsageDescription: Marqet hört zu, wenn du deine Einkäufe einsprichst. Die Aufnahme wird auf deinem Gerät in Text umgewandelt und nicht gespeichert.
         NSSpeechRecognitionUsageDescription: Marqet wandelt deine eingesprochenen Einkäufe auf deinem Gerät in Einträge für deine Listen um.
         NSLocationWhenInUseUsageDescription: Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.
+        # Arrival alerts (KONZEPT-WIDGETS §13): geofences around branches, only after opting in.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Marqet meldet sich, wenn du an einem deiner Läden ankommst, und zeigt dann dessen Einkaufsliste. Dein Standort bleibt auf deinem Gerät.
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -63,14 +72,64 @@ targets:
         UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         ITSAppUsesNonExemptEncryption: false
         MarqetUsesBrandLogos: $(MARQET_BRAND_LOGOS)
+        # Widgets, Live Activity and controls open the app with marqet://… (KONZEPT-WIDGETS §8).
+        CFBundleURLTypes:
+          - CFBundleURLName: app.marqet.Marqet
+            CFBundleURLSchemes: [marqet]
+        NSSupportsLiveActivities: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.marqet.Marqet
+        # Shared intents run their actions only in the app process (LiveActivityIntent).
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) MARQET_APP
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: Marqet
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_PREVIEWS: YES
         CODE_SIGN_STYLE: Automatic
+
+  # Widgets, Live Activity and controls (KONZEPT-WIDGETS).
+  MarqetWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: MarqetWidgets
+      - path: MarqetShared
+      # The app's design system, so widgets look exactly like the cards.
+      - path: Marqet/DesignSystem/Color+Hex.swift
+      - path: Marqet/DesignSystem/StoreBadge.swift
+      - path: Marqet/DesignSystem/StoreStyle.swift
+      - path: Marqet/DesignSystem/CategoryStyle.swift
+      - path: Marqet/Features/LoyaltyCards/BarcodeView.swift
+      - path: Marqet/Resources/StoreLogos.xcassets
+    dependencies:
+      - package: MarqetKit
+        product: MarqetCore
+      - package: MarqetKit
+        product: MarqetReminders
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    entitlements:
+      path: MarqetWidgets/MarqetWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.app.marqet.Marqet]
+    info:
+      path: MarqetWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Marqet
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleDevelopmentRegion: de
+        CFBundleLocalizations: [de, en]
+        NSRemindersFullAccessUsageDescription: Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.marqet.Marqet.Widgets
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
 
   MarqetTests:
     type: bundle.unit-test

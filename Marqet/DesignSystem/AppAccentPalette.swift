@@ -21,13 +21,16 @@ enum AppAccentPalette: String, CaseIterable, Identifiable {
         }
     }
 
-    var color: Color {
+    var color: Color { Color(hex: hex) }
+
+    /// Also written for the widgets, which cannot read the app's settings.
+    var hex: String {
         switch self {
-        case .leaf: Color(hex: "#238A5D")
-        case .ocean: Color(hex: "#286BC7")
-        case .amber: Color(hex: "#B96620")
-        case .violet: Color(hex: "#7651B8")
-        case .coral: Color(hex: "#C94E55")
+        case .leaf: "#238A5D"
+        case .ocean: "#286BC7"
+        case .amber: "#B96620"
+        case .violet: "#7651B8"
+        case .coral: "#C94E55"
         }
     }
 }

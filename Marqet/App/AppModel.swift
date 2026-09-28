@@ -155,6 +155,50 @@ final class AppModel {
     /// Card order for distance/smart, computed on open – never while the user looks at the cards.
     var storeOrderSnapshot: [Store.ID]?
 
+    // MARK: Widgets & Live Activity (KONZEPT-WIDGETS)
+
+    /// The model of the running app. Intents from widgets, the Live Activity and controls run in
+    /// the app process and act through it – there is only one path for changes.
+    static weak var active: AppModel?
+    /// The running shopping trip, shown as the Live Activity "Einkauf".
+    var trip: ShoppingTrip? {
+        didSet { if sharesWithWidgets, trip != oldValue { SharedStore.write(trip) } }
+    }
+    /// Only the app's own model writes to the App Group – not tests or previews.
+    @ObservationIgnored var sharesWithWidgets = false
+
+    // MARK: At the store (KONZEPT-WIDGETS §13)
+
+    /// The store the user is at – its list wins wherever Marqet picks one.
+    var presence: StorePresence?
+    /// Opening the app at a store shows that store's list.
+    var followsPresence: Bool {
+        didSet { defaults.set(followsPresence, forKey: Keys.followsPresence) }
+    }
+    /// Watches branches and reports arrivals (location "Immer" and notifications).
+    var arrivalAlertsEnabled: Bool {
+        didSet { defaults.set(arrivalAlertsEnabled, forKey: Keys.arrivalAlerts) }
+    }
+    /// Branches watched right now, for the settings.
+    var geofences: [Geofence] = []
+    /// Set by the scene phase: jumps and notifications depend on whether the user sees the app.
+    @ObservationIgnored var isInForeground = false
+    @ObservationIgnored var nearbyBranches: (origin: GeoPoint, branches: [BranchCandidate])?
+    @ObservationIgnored var jumpedToPresence: StorePresence?
+    @ObservationIgnored var watchedStores: Set<Store.ID> = []
+    /// Starts the Live Activity with the first check-off in a store.
+    var autoStartsTrip: Bool {
+        didSet { defaults.set(autoStartsTrip, forKey: Keys.autoStartsTrip) }
+    }
+    /// Customer cards opened from a widget, the Live Activity or a control.
+    var presentedLoyaltyCards: LoyaltyCardPresentation?
+    /// A retailer's leaflet opened from the offers widget.
+    var presentedLeaflet: LeafletPresentation?
+    /// A deep link that arrived before the list was loaded.
+    @ObservationIgnored var pendingLink: MarqetLink?
+    @ObservationIgnored var widgetSyncTask: Task<Void, Never>?
+    @ObservationIgnored var isSyncingWidgets = false
+
     var preferredTriageMode: TriageSession.Mode {
         didSet { defaults.set(preferredTriageMode.rawValue, forKey: Keys.triageMode) }
     }
@@ -222,6 +266,9 @@ final class AppModel {
         self.intelligenceEnabled = defaults.object(forKey: Keys.intelligence) as? Bool ?? true
         self.routeLearningEnabled = defaults.object(forKey: Keys.routeLearning) as? Bool ?? true
         self.preferredTriageMode = TriageSession.Mode(rawValue: defaults.string(forKey: Keys.triageMode) ?? "") ?? .single
+        self.autoStartsTrip = defaults.object(forKey: Keys.autoStartsTrip) as? Bool ?? true
+        self.followsPresence = defaults.object(forKey: Keys.followsPresence) as? Bool ?? true
+        self.arrivalAlertsEnabled = defaults.bool(forKey: Keys.arrivalAlerts)
         if let data = defaults.data(forKey: Keys.sessionTracker),
            let tracker = try? JSONDecoder().decode(ShoppingSessionTracker.self, from: data) {
             self.sessionTracker = tracker
@@ -270,6 +317,9 @@ final class AppModel {
     // MARK: Lifecycle
 
     func start() async {
+        // A trip from an earlier launch continues – unless its store is gone.
+        if sharesWithWidgets { trip = SharedStore.trip.flatMap { store($0.storeID) == nil ? nil : $0 } }
+        startWidgetSync()
         await refreshPhase()
         observeChanges()
     }
@@ -277,6 +327,7 @@ final class AppModel {
     /// Re-evaluates permission and list selection, ends expired shopping sessions, reloads.
     func refreshPhase() async {
         endShoppingSessionIfExpired()
+        endTripIfExpired()
         finishExpiredRouteSessions()
         let status = await gateway.authorizationStatus()
         guard status == .fullAccess else {
@@ -354,6 +405,7 @@ final class AppModel {
             // Briefing (KONZEPT #40) vorerst deaktiviert – zurück zur alten Startansicht.
             // if !hasLoadedItems { prepareBriefing() }
             hasLoadedItems = true
+            openPendingLink()
         } catch {
             present(error)
         }
@@ -448,6 +500,7 @@ final class AppModel {
                 sessionTracker.remove(itemKey: ItemKeyNormalizer.matchingKey(for: item.title), storeID: storeID)
                 saveSessionTracker()
             }
+            trip?.recordReopening(of: item.id)
             await perform { try await $0.setCompleted(false, reminder: item.id) }
             return
         }
@@ -458,6 +511,7 @@ final class AppModel {
             $0.completionDate = .now
         }
         defaults.set(Date.now, forKey: Keys.lastShoppingActivity)
+        recordTripCompletion(of: item)
         completionTasks[item.id] = Task { [weak self] in
             try? await Task.sleep(for: Self.completionUndoWindow)
             guard !Task.isCancelled else { return }
@@ -476,6 +530,7 @@ final class AppModel {
     /// "Nochmal kaufen" from the completed section.
     func restore(_ item: ShoppingItem) async {
         recentlyCompleted.removeAll { $0.id == item.id }
+        trip?.recordReopening(of: item.id)
         var reopened = item
         reopened.isCompleted = false
         reopened.completionDate = nil
@@ -730,6 +785,9 @@ final class AppModel {
         static let storeSortMode = "storeSortMode"
         static let travelMode = "travelMode"
         static let sessionTracker = "routeSessionTracker"
+        static let autoStartsTrip = "autoStartsTrip"
+        static let followsPresence = "followsPresence"
+        static let arrivalAlerts = "arrivalAlertsEnabled"
     }
 }
 
@@ -755,6 +813,19 @@ extension AppModel {
         // Earlier shops taught Marqet where oat milk goes.
         if let rewe = model.stores.first(where: { $0.catalogKey == "rewe" }) {
             for _ in 0..<2 { model.assignmentMemory.record(itemKey: "hafermilch", storeID: rewe.id) }
+        }
+        // Branches in Munich's old town, about 900 m apart: for the map and for arrival checks
+        // with `xcrun simctl location booted set 48.1321,11.5648` (Aldi Süd).
+        let branches: [(key: String, name: String, latitude: Double, longitude: Double)] = [
+            ("aldi-sued", "Aldi Süd Sendlinger Tor", 48.13210, 11.56480),
+            ("rewe", "REWE Viktualienmarkt", 48.13510, 11.57640),
+            ("dm", "dm Karlsplatz", 48.13870, 11.56760),
+        ]
+        for branch in branches {
+            guard let store = model.stores.first(where: { $0.catalogKey == branch.key }) else { continue }
+            model.locations.append(StoreLocation(storeID: store.id, name: branch.name,
+                                                 coordinate: GeoPoint(latitude: branch.latitude, longitude: branch.longitude),
+                                                 isPreferred: true))
         }
         return model
     }

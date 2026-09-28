@@ -1,6 +1,7 @@
 # Marqet – MVP-Konzept
 
-Stand: 28.09.2026 (Rev. 7: Angebote-Card, Kundenkarten) · Status: M1 umgesetzt, als Nächstes M0-Duo-Spike + M2
+Stand: 28.09.2026 (Rev. 9: Widgets, Live-Aktivität, Steuerelemente) · Status: M1–M6 umgesetzt, Widgets vorgezogen
+Widgets & Live-Aktivität: [KONZEPT-WIDGETS.md](KONZEPT-WIDGETS.md)
 Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYSE.md) · iPhone Duo & iPad: [KONZEPT-DUO-IPAD.md](KONZEPT-DUO-IPAD.md)
 
 > Marqet ist eine iOS-App, die die Einkaufsliste aus Apple Erinnerungen nach Läden sortiert.
@@ -51,7 +52,7 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 36 | Prospekte-Card | *Rev. 5 (26.09.), Name siehe #41:* **Erste Card vor Inbox**, zentrale Sammlung offizieller Händler-Prospekte über `leafletURL`; „Weitere Läden“ bleibt letzte Card |
 | 36 | Projektdatei | *Rev. 4:* **`project.yml` ist die einzige Quelle**, `scripts/generate.sh` erzeugt das Projekt, `scripts/ci.sh` prüft alles |
 | 37 | Name der ersten Card | *Rev. 5 (26.09.):* **„Inbox“** statt „Unsortiert“; „Läden zuordnen“ mittig am Card-Ende |
-| 38 | Laden-Vollbild | *Rev. 5:* Tipp auf den Header oder Hochziehen der Liste zoomt die Card auf Vollbild (Zoom-Transition). Plus bleibt, Seitenpunkte fallen weg. Der aktuelle Prospekt steht direkt unter dem Header, ohne zusätzliche Abschnittsüberschrift |
+| 38 | Laden-Vollbild | *Rev. 5, Rev. 10:* Tipp auf den Header oder freie Listenfläche oder Hochziehen der Liste zoomt die Card auf Vollbild (Zoom-Transition). Plus bleibt, Seitenpunkte fallen weg. Im kompakten Layout liegen Ladenname und Untertitel in der nativen Systemleiste; der aktuelle Prospekt ist über „…“ erreichbar. Im breiten Layout liegt er in der Kontextspalte |
 | 39 | Prospekt-Link | *Rev. 5:* **v1.0** (vorgezogen aus #27) im Laden-Vollbild: offizielle Angebotsseite der Kette im `SFSafariViewController`. Einzelangebote bleiben v2.0 (#27) |
 | 40 | Zusammenfassung über der Inbox | *Rev. 5 (26.09.):* Beim ersten Laden pro App-Start, wenn Läden offene Einträge haben oder geplant sind: großer Titel und Karte „Was jetzt wichtig ist“ (Läden mit Anzahl, nächster Laden, Inbox) mit „Einkauf starten“ und „Zuordnen“. Die Inbox rutscht darunter, die Seitenpunkte sind ausgeblendet. Wischen zur nächsten Card blendet alles fingergenau aus. Nur iPhone (eine Card). Text aus festen Regeln, nicht vom Sprachmodell – die Zahlen müssen stimmen |
 | 41 | Name der Prospekte-Card | *Rev. 7 (28.09.):* **„Angebote“** statt „Prospekte“ (ersetzt den Namen aus #36). Die Card wächst ab v2.0 ohne Umbenennung von Prospekten zu Einzelangeboten (#27). Das einzelne Heft heißt weiter „Prospekt“ („Aktueller Prospekt“ im Laden-Vollbild). Code-Namen (`BrochuresCard`, `PageID.brochures`) bleiben |
@@ -60,6 +61,14 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 44 | Onboarding-Raster | *Rev. 8:* Jeder Schritt nutzt dasselbe Raster: Bildbühne 300 × 184, Überschrift mit immer zwei reservierten Zeilen, darunter Text. Der Abstand nach oben hängt nur von der Bildschirmhöhe ab, deshalb stehen Bild, Überschrift und Textanfang auf allen Seiten gleich hoch. Duo aufgeklappt: Bild links, Text und Button rechts vom Falz. Die Willkommensseite zeigt in einer Schleife, wie drei Einträge aus einer Liste in ihre Laden-Cards fliegen; die anderen Schritte haben kleine erklärende Illustrationen. Reduce Motion zeigt den Endzustand |
 | 45 | Läden aus dem Onboarding | *Rev. 8:* Gewählte Läden werden **geplant** angelegt und erscheinen sofort als Cards (vorher unsichtbar bis zum ersten Eintrag). Eine offensichtliche Einkaufsliste wird vorausgewählt, „Neue Liste anlegen“ legt keine Dublette an |
 | 46 | Einsprechen | *Rev. 9 (28.09.), Rev. 10: iPhone links gegenüber vom Plus, Englisch:* **Mikrofon neben Plus**: Einkäufe samt Laden einsprechen („10 Eier vom Markt, bei Rewe Hackfleisch“). Die Listen bauen sich beim Sprechen animiert auf, danach „Zu deinen Listen hinzufügen?“. Transkription on-device für alle, Lesen mit Apple Intelligence ist Pro (#15). Details in §3 |
+| 47 | Widgets | *Rev. 9 (28.09.):* **Vorgezogen aus v1.1, Free.** Vier Widgets: **Liste** (für jede Liste der App konfigurierbar: Nächster Laden, Inbox, jeder Laden, Zuletzt erledigt), **Überblick**, **Kundenkarte**, **Angebote**. Jedes Widget ist eine Miniatur der Card (Kopf in Markenfarbe, Laufweg). Alle Größen inkl. XL hoch (iOS 27) und Sperrbildschirm. Details: KONZEPT-WIDGETS |
+| 48 | Abhaken im Widget | *Rev. 9:* Jede Zeile hat einen Kreis zum Abhaken; Inbox-Zeilen zeigen den gelernten Laden als Chip („→ Rewe“), ein Tipp ordnet zu und lernt mit. Kein Rückgängig im Widget – das bleibt in der App, „↺“ in „Zuletzt erledigt“ |
+| 49 | Live-Aktivität „Einkauf“ | *Rev. 9:* **Vorgezogen aus v1.3.** Startet automatisch beim ersten Abhaken in einem Laden (abschaltbar) oder bewusst. Der Laden steckt im Zustand, nicht in den Attributen: Die Aktivität wandert mit („Weiter zu dm“), endet, wenn alles erledigt ist oder nach 30 Minuten ohne Abhaken. Kundenkarte als Knopf auf dem Sperrbildschirm |
+| 50 | Ein Weg für Änderungen | *Rev. 9:* Alle Knöpfe in Widgets, Live-Aktivität und Steuerelementen sind `LiveActivityIntent`s und laufen im App-Prozess über das `AppModel` – mit Lernen, Einkaufssitzung und Rückgängig. Die Erweiterung liest nur |
+| 51 | Daten für Widgets | *Rev. 9:* Die App schreibt Registry und Snapshot in die App Group; die Erweiterung liest Erinnerungen selbst und baut mit **derselben Funktion** (`WidgetSnapshotBuilder`) neu – Siri-Einträge erscheinen ohne App-Start |
+| 52 | Steuerelemente | *Rev. 9:* Kontrollzentrum, Sperrbildschirm, Aktionstaste: „Eintrag hinzufügen“ (öffnet die Eingabe), „Kundenkarte“, Schalter „Einkauf“ |
+| 53 | Deep Links | *Rev. 9:* `marqet://` mit `page`, `compose`, `triage`, `completed`, `card`, `offers`, `trip`. Kommen sie vor dem Laden der Liste, warten sie |
+| 54 | Widget-Galerie in der App | *Rev. 9:* Einstellungen › „Widgets & Live-Aktivität“ zeigt alle Widgets mit den eigenen Listen (dieselben Ansichten wie auf dem Home-Bildschirm) und den Schalter für den automatischen Start |
 
 ---
 
@@ -71,9 +80,9 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 
 | Schritt | Verhalten |
 |---|---|
-| Anlegen | Im Laden-Vollbild (Toolbar-Button bzw. Zeile), im Laden-Menü „…“ oder in den Einstellungen unter „Kundenkarten“. Kamera-Scan (VisionKit `DataScannerViewController`), Rückfall: Nummer und Barcode-Typ von Hand |
+| Anlegen | Im kompakten Laden-Vollbild über „…“, im breiten Layout über die Kontextspalte oder in den Einstellungen unter „Kundenkarten“. Kamera-Scan (VisionKit `DataScannerViewController`), Rückfall: Nummer und Barcode-Typ von Hand |
 | Zuordnen | Beim Anlegen aus dem Laden-Vollbild ist der Laden vorgewählt. Mehrfachauswahl für Programme über mehrere Ketten (Payback). *Offen:* Der Katalog schlägt bekannte Programme vor (`loyaltyPrograms` pro Kette, per Katalog-Update pflegbar, weil Partner wechseln) |
-| Zeigen (kompakt) | *Rev. 7b:* iPhone, Duo außen und schmale iPad-Fenster: **native Toolbar-Buttons** in der Systemleiste des Laden-Vollbilds, gruppiert als [Prospekt · Kundenkarte] neben [Menü · Schließen]. Keine Listenzeilen für Prospekt und Karte, die Liste beginnt direkt unter dem Header. Kundenkarte: `wallet.pass.fill` öffnet den Barcode, ohne Karte `wallet.pass` zum Anlegen. Barcode im Vollbild, **Bildschirmhelligkeit auf Maximum**, beim Schließen zurück. Mehrere Karten: seitlich wischen |
+| Zeigen (kompakt) | *Rev. 7b, Rev. 10:* iPhone, Duo außen und schmale iPad-Fenster: **Laden-Icon, Name und Untertitel** stehen links in der nativen Systemleiste, rechts nur [Menü · Schließen]. Das Menü enthält Prospekt, vorhandene Kundenkarten und „Kundenkarte hinzufügen“. Die Liste beginnt direkt unter der Systemleiste. Barcode im Vollbild, **Bildschirmhelligkeit auf Maximum**, beim Schließen zurück. Mehrere Karten: seitlich wischen |
 | Zeigen (breit) | iPad und Duo innen: Prospekt und Kundenkarten als Zeilen in der linken Kontextspalte, die Liste rechts bleibt stehen |
 | Home-Pager | Keine Karten auf den Laden-Cards, der Pager bleibt ruhig. Die Karte gehört zum Einkauf im Laden, also zum Vollbild |
 

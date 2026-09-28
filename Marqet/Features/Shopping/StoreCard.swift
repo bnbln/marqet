@@ -416,7 +416,7 @@ struct StoreCardHeader: View {
                         .frame(width: 94, height: 8)
                         .accessibilityLabel("Einträge werden geladen")
                 } else {
-                    Text(Self.subtitle(store: store, items: items, state: state, distance: store.flatMap { model.distanceText(to: $0.id) }))
+                    Text(Self.subtitle(store: store, items: items, state: state, distance: store.flatMap { model.distanceText(to: $0.id) }, presenceStoreID: model.presence?.storeID))
                         .font(.subheadline.weight(.medium))
                         .lineLimit(1)
                 }
@@ -474,11 +474,13 @@ struct StoreCardHeader: View {
         }
     }
 
-    static func subtitle(store: Store?, items: [ShoppingItem], state: StoreCardState?, distance: String?) -> String {
+    static func subtitle(store: Store?, items: [ShoppingItem], state: StoreCardState?, distance: String?, presenceStoreID: Store.ID?) -> String {
         let open = items.filter { !$0.isCompleted }.count
         guard let store else {
             return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
         }
+        // At this store right now (KONZEPT-WIDGETS §13).
+        if presenceStoreID == store.id, open > 0 { return String(localized: "Du bist hier · \(open) offen") }
         if let address = store.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
         if let detail = store.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
         if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }
@@ -526,6 +528,12 @@ struct StoreActionsMenu<MenuLabel: View>: View {
             }
             Section {
                 Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
+                // The Live Activity "Einkauf" (KONZEPT-WIDGETS §5).
+                if model.trip?.storeID == store.id {
+                    Button("Einkauf beenden", systemImage: "cart.badge.minus") { Task { await model.endTrip() } }
+                } else if !items.isEmpty {
+                    Button("Einkauf starten", systemImage: "cart") { Task { await model.startTrip(at: store.id) } }
+                }
                 Button("Karte", systemImage: "map") { showsMap = true }
                 Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
                 if store.type.showsCategorySections {

@@ -11,7 +11,9 @@
 		0321B39B103F92366C02DDBD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A201C9C48A4C086168C0474 /* SettingsView.swift */; };
 		038DB2893059C807DB6E7A91 /* StoreTile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9717E76FB70665C520368F /* StoreTile.swift */; };
 		044B6898EDC716B338496462 /* BarcodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7466E8A03099F02EC77826CF /* BarcodeView.swift */; };
+		04E61211293E0B962A51C04F /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29E85784FD14BC5F264AC43A /* SwiftUI.framework */; };
 		07C2E085A543D3710EC87FE6 /* AdaptiveSplit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FD6E5F8B4968F49192DF3E3 /* AdaptiveSplit.swift */; };
+		080687A18F6C3E19483B2E29 /* WidgetComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F68A05A39E8357D0141B5FA /* WidgetComponents.swift */; };
 		0839964C3278686B5FD118A3 /* MarqetCore in Frameworks */ = {isa = PBXBuildFile; productRef = 190B3E4E6E007D68641F33C1 /* MarqetCore */; };
 		0A6627C042705B2267ABD612 /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */; };
 		0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB54FD43517F8A2CB74AF85 /* ShoppingScreen.swift */; };
@@ -21,22 +23,36 @@
 		0FFDCC78B7EBBA1E52D5E44E /* ListPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */; };
 		11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8662B64170332932ED37FE06 /* StorePager.swift */; };
 		1894910664A05EB40EFBD368 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E7161CE333347F853CDAB6 /* OnboardingFlow.swift */; };
+		19B647351CF7F900C9AD680D /* StoreBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B92F2AB1F42A1299049632 /* StoreBadge.swift */; };
+		1ABE939F5E81C693B43DD2C8 /* MarqetWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 824A2E347FFBA92040BF6D7B /* MarqetWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1C843DDC705AF743176C062A /* CategoryStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */; };
+		1ED3E27CE55AB2D3FD165DE1 /* OverviewWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0560FF82554628E0CFE6E2FA /* OverviewWidgetView.swift */; };
+		254C901EB9B01F0EA2FD114C /* WidgetDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392BB0023275F7CDC400B11 /* WidgetDataSource.swift */; };
 		2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B307E22CA868870A6E3000A8 /* MarqetApp.swift */; };
 		28FE77112CC87D75735F6CA7 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F6FB75E4BD75DA52E41AB95A /* InfoPlist.xcstrings */; };
+		2AFFAF244870CECDE218D409 /* ShoppingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7986047A7DC02CCED2FF44D8 /* ShoppingActivityAttributes.swift */; };
 		2CEF1380FE67C101C8BC46C1 /* LoyaltyCardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E8FE7EDAB15B74F7A7EB6D6 /* LoyaltyCardScreen.swift */; };
 		2D56704CCCBB3B2AC6F58B75 /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = D12C6C9AEC2562DE4F0D5503 /* MarqetReminders */; };
 		3017321CE44BFEDF1A0D04DE /* BrochureShelf.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926CFED7B1EE0E0F3637C5C4 /* BrochureShelf.swift */; };
 		33ADF71CC9B5997104B51278 /* FoundationModelsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED3F55DF79B9C905CB17271 /* FoundationModelsService.swift */; };
+		34A0C0B95B043EE163B806C7 /* AppModel+Presence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6319561D8C1C77D7FE163B85 /* AppModel+Presence.swift */; };
 		34BC3E34CA657B3B9360D0A4 /* LoyaltyCardsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D319615B6B47ECB5A1C3135 /* LoyaltyCardsSection.swift */; };
 		35A81383490972E451FF5ADD /* Marqet.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F618F2863408E4DA34E045C7 /* Marqet.storekit */; };
 		38B193C69F2E7033A3EA453F /* TriageScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C36556FC45F2FFF3189F223 /* TriageScreen.swift */; };
 		403ECFB3302A546326B500BF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B1750AD8E04F3D150D2585 /* BarcodeScanner.swift */; };
 		422DEA2467FDF2B9463BD0D5 /* OnboardingIllustrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */; };
+		43852650623644900D5CAD58 /* StoreLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */; };
 		43DE49B84637E2AEB86484AB /* PlacesStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A555236677087D1E17AECE59 /* PlacesStrings.swift */; };
 		450193FBDCD76730DB3FE4F7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */; };
+		480C44CEC0F7B2F40DB99D52 /* ShoppingTripLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91F82A82FCE2B27EA7F8AB97 /* ShoppingTripLiveActivity.swift */; };
 		49E2984906CF77951151D50A /* OnboardingLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 484825E382AFE84E38EA5CBF /* OnboardingLayout.swift */; };
+		4B3B977BC42D12BD591B9A8C /* WidgetRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91E00936ACABDB675C75DD98 /* WidgetRenderTests.swift */; };
 		4D8172B6B4DA85E2884F828B /* SectionOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */; };
+		4FD6DD8025873C80B142FD98 /* WidgetSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB128AADBB664E68839AA8CD /* WidgetSettingsView.swift */; };
+		5137785CADB99AB1EEA5EF48 /* LoyaltyAndOffersWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6AA10EEC4221451EDD943 /* LoyaltyAndOffersWidgetViews.swift */; };
+		516911A7F177FD61FCBBD643 /* ListWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B44693376CD412EC19A7F6 /* ListWidgetView.swift */; };
 		51DD3BFE4DF5111422602A2E /* AppModel+Triage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 991A83F47BCCEE4CB948BC3C /* AppModel+Triage.swift */; };
+		526E4407608723862D329B31 /* Controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47DE3B3A08709F661A254E0 /* Controls.swift */; };
 		54BE956B28391C73DD7626BB /* ItemContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4E9CAF12D18A5E6329754FD /* ItemContextMenu.swift */; };
 		5858F5D9786D1BD19D94DB02 /* LiveTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1762318DF69647F80752B374 /* LiveTranscriber.swift */; };
 		5C5087B9348C11AEDDCEC9CC /* StoresSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9BFF55B4149AA06EB81000A /* StoresSettingsView.swift */; };
@@ -46,47 +62,89 @@
 		61EAEFF8182EDF2AFC6EF4F0 /* MarqetPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 322638D8297418C684AE6F29 /* MarqetPersistence */; };
 		63B6677F47535B463636BFD4 /* Marqet.icon in Resources */ = {isa = PBXBuildFile; fileRef = 6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */; };
 		64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */; };
+		66DC7BDDAAEC57BDEC845D2A /* StoreStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FD1AA7953B020E2F971793 /* StoreStyle.swift */; };
 		67B40B5BD20A6C9B73086212 /* StoreOrderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36EB610271AC41550A76CFD4 /* StoreOrderSheet.swift */; };
+		6861A336C56C34BD11872AF2 /* ActionIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB9D40EA36AFF1B2B87C1CA /* ActionIntents.swift */; };
 		69FBBFE5522A433B53A97EA0 /* StoreFocusScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */; };
 		6CE122BF46C50E69135ED788 /* PlacesModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */; };
 		71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */; };
+		75CC248BA2CA553D6BC0B4FF /* MarqetCore in Frameworks */ = {isa = PBXBuildFile; productRef = B5187F074C512B706CDA8277 /* MarqetCore */; };
 		77F6CC97D3364C5E8DDB8166 /* BriefingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E317B9F6CBC0892FCE76E7E2 /* BriefingCard.swift */; };
 		7DE206B5AAE73DD1CE6D39D9 /* AppModel+LoyaltyCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0202583F748D52C31D3A06BE /* AppModel+LoyaltyCards.swift */; };
 		7F17A4EDE155D84A9BD89293 /* MapCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27499D7335CBDA7C48845546 /* MapCard.swift */; };
+		7F6E445F2A6FB54A244065C1 /* WidgetBarcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3BC97DEAAB181BF352ED72 /* WidgetBarcode.swift */; };
+		81885EFCDB1FFBCA037C4AEB /* ConfigurationIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9F82EBB3EE2B6EAC4096A0 /* ConfigurationIntents.swift */; };
 		8679718102E01AFEFE165FEB /* LoyaltyCardEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C87F96738EA1D930F698375 /* LoyaltyCardEditor.swift */; };
 		88167E848566A767ED3889AC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CD3044CC8DBA6E48095569D /* RootView.swift */; };
+		8B6597D8F36FDEF71DA9F9FA /* OverviewWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0560FF82554628E0CFE6E2FA /* OverviewWidgetView.swift */; };
 		8D0D88BF82B70EAC320D28A3 /* DictationInterpreter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75E6C20C12FBF4B4AF16F828 /* DictationInterpreter.swift */; };
+		8EABB39E1B62E7C44D474594 /* ActionIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB9D40EA36AFF1B2B87C1CA /* ActionIntents.swift */; };
 		913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B92F2AB1F42A1299049632 /* StoreBadge.swift */; };
 		920420903EB2070551DD9CB2 /* VoiceCaptureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25F5416FA57052D3605D0795 /* VoiceCaptureScreen.swift */; };
+		92A5C4F1CD8DA5C06C14B1F5 /* ConfigurationIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E9F82EBB3EE2B6EAC4096A0 /* ConfigurationIntents.swift */; };
 		9367883310405E9FF4AAE02E /* BranchPickerSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68440EB6E1E9D12D43C573CF /* BranchPickerSection.swift */; };
 		96BFCE1F769A71C3791B4226 /* AddStoreSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */; };
+		977D476D6645110E6EAD5C27 /* LoyaltyAndOffersWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79F6AA10EEC4221451EDD943 /* LoyaltyAndOffersWidgetViews.swift */; };
+		989ABED2A0206AAA7A3F356D /* TripActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7A438649CDDFFB6D665E1A /* TripActivityViews.swift */; };
+		98B54AFBC8DD4FB26F22827B /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674C8C721188FD29FC0C3B96 /* Entities.swift */; };
+		9AF198C3AE502F42102C5FBC /* PresenceModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A00BBDDEBAF86FCCBC9B65 /* PresenceModelTests.swift */; };
+		9BD926C4C099DE92C61A9E70 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1335C97D860751574A63AE6 /* Color+Hex.swift */; };
 		9C93206531726357A9CDC613 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1D792C9DC89E371EA48BE6 /* AppModel.swift */; };
 		9F29808C807A006B1D8D602C /* BrochuresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E4D320616F77292D85E5EE0 /* BrochuresCard.swift */; };
 		9F79D0ADA8B58BFCCA3472BB /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = 4838E0B9757FE4E7524F1BE4 /* MarqetReminders */; };
+		9FDD03F60F5E43ED5C2DE250 /* AppModel+Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1112FF21AF3138C1563C0 /* AppModel+Widgets.swift */; };
+		A62BFA2F94E59E13E2537E90 /* StoreLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */; };
 		A971BEE745EF4F4C96EF0E49 /* AppModel+Intelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E8B4F520039DCC556877E1 /* AppModel+Intelligence.swift */; };
 		A9D51BC9D4221685CADD44F0 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0EE0A78B4173CCEDD984D6 /* PlaceSearch.swift */; };
+		AC06688C1A45827C280C1289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D767F53855218BC75FF1D8 /* WidgetKit.framework */; };
 		ADE2EE53C34E3F9D2493582C /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D855A0E770123156BA8F7DEF /* PurchaseManager.swift */; };
+		B1F6F0A7FB40B7C95376F43E /* WidgetModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 725C14DEC2722E4728B0E5E1 /* WidgetModelTests.swift */; };
+		B3CC9E8F9DDE1BE117D11C6B /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84A96E807F96937603DBFE1 /* SharedStore.swift */; };
 		B5C40E5BA2742DB2FBCF99D4 /* StoreStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81FD1AA7953B020E2F971793 /* StoreStyle.swift */; };
 		B7560C024A6A0AF82F652812 /* MapScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F844C60FB84DFBBE4EC1C8 /* MapScreen.swift */; };
+		BD2D0A51E31AEDA35F3F9E9A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6019541D55FAEBE5BE370CEA /* PrivacyInfo.xcprivacy */; };
+		BFFE6288E208CB5360C808E4 /* ShoppingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7986047A7DC02CCED2FF44D8 /* ShoppingActivityAttributes.swift */; };
+		C237F4C12DD365E76E34AC2C /* WidgetSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698AD3C2DE7126D084A9616C /* WidgetSample.swift */; };
+		C3756B4D93AEA4252C18B82B /* ListWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B44693376CD412EC19A7F6 /* ListWidgetView.swift */; };
 		C4B13AD396D7F7FA400F7DF7 /* AppModel+Categories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272464385F86F4053729F36E /* AppModel+Categories.swift */; };
 		C594E2C33B9AE802CC6F55FD /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAEC1C95745BA381C5801D14 /* ProfileView.swift */; };
 		C9A8068F09544701315D20B3 /* AppModel+Voice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F984D70B0AE9C7262E46DF7 /* AppModel+Voice.swift */; };
 		CB9B39B46AB12BB24FE61916 /* ComposerBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D403846165703592E11F /* ComposerBar.swift */; };
+		CC566AFB8731C03262A9FD36 /* HomeScreenWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4BA037EFBE5348BEE69B6F8 /* HomeScreenWidgets.swift */; };
 		CF9679845CC3E2A7EE0000C3 /* AppModel+Places.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC6E5A5E8513D483B2A0259 /* AppModel+Places.swift */; };
 		D230CCE7489CAC2E4CC5C198 /* EventKitRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */; };
 		D38458904B2F33631BF2FFCA /* VoiceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C236B267E346C6F78D87EE5 /* VoiceSession.swift */; };
+		D3FD433724825A63078C13D3 /* MarqetWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83304CA2FC74B1B5938C18CC /* MarqetWidgetsBundle.swift */; };
 		D90626E755FFF8C19D5E0320 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87358243D9ADFF22154E6EF /* LocationService.swift */; };
 		D906C3C671E00C203D2900D5 /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511AB2999B3A3E759DDAB14C /* AppModelTests.swift */; };
+		D922119602DCDC9F93A559A2 /* WidgetComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F68A05A39E8357D0141B5FA /* WidgetComponents.swift */; };
+		D979B455F98CB5D7062D5DF0 /* TripActivityViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7A438649CDDFFB6D665E1A /* TripActivityViews.swift */; };
 		DF44534FF847A4F17DEB54C8 /* AppModel+Stores.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8E8FFBB9F34B86F2F9CF63 /* AppModel+Stores.swift */; };
+		E1520EEB6F7B6FA0F79C1269 /* WidgetBarcode.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC3BC97DEAAB181BF352ED72 /* WidgetBarcode.swift */; };
+		E32358788F49D9624CD78B79 /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674C8C721188FD29FC0C3B96 /* Entities.swift */; };
+		E3E72DF811407773929DEBCE /* BarcodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7466E8A03099F02EC77826CF /* BarcodeView.swift */; };
+		E782D3A54BE68F27010B3BAB /* WidgetSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 698AD3C2DE7126D084A9616C /* WidgetSample.swift */; };
+		EF0DE1012AD37339EB0509DF /* PresenceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1003CA8615DA02EAC3FC84A6 /* PresenceMonitor.swift */; };
 		EF10BED0FD28122A5247DA7A /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1335C97D860751574A63AE6 /* Color+Hex.swift */; };
 		EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */; };
 		F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */; };
 		F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */; };
+		F6D2F45F32EF7B43ED22A7FC /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = FA388AD86D4BE4AB8E4A9A3F /* MarqetReminders */; };
 		F8752FF8E53E75FB08AE2BBE /* AppAccentPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A664A8D158899340160E9D /* AppAccentPalette.swift */; };
+		FB2FBAF4EDF09AF13F8316D1 /* SharedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84A96E807F96937603DBFE1 /* SharedStore.swift */; };
 		FC02F716F84C12673A083C20 /* StoreContextPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AA41AA76F8C2F0F81A461D /* StoreContextPane.swift */; };
+		FDD34DD9D33BCB150F3E116C /* IntentActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3232F1F1E443A03B56471E70 /* IntentActions.swift */; };
+		FE6E9B8DE167B0E02DB6CF64 /* TripActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0CD05BF7500D47F4C8DB0FF /* TripActivityController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		39122E87BD5D8D8727883F2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 16262FFA6416983C287E3765 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C3080134A7858FF45583C84B;
+			remoteInfo = MarqetWidgets;
+		};
 		6B188C882550895185523D8F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 16262FFA6416983C287E3765 /* Project object */;
@@ -96,20 +154,41 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		944B17F50049ECA8307148D8 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1ABE939F5E81C693B43DD2C8 /* MarqetWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		0202583F748D52C31D3A06BE /* AppModel+LoyaltyCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+LoyaltyCards.swift"; sourceTree = "<group>"; };
+		0560FF82554628E0CFE6E2FA /* OverviewWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewWidgetView.swift; sourceTree = "<group>"; };
 		06F844C60FB84DFBBE4EC1C8 /* MapScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreen.swift; sourceTree = "<group>"; };
 		0D1D792C9DC89E371EA48BE6 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		1003CA8615DA02EAC3FC84A6 /* PresenceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceMonitor.swift; sourceTree = "<group>"; };
 		1762318DF69647F80752B374 /* LiveTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscriber.swift; sourceTree = "<group>"; };
 		1B372A2D0943D18B723FDD2F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		1C236B267E346C6F78D87EE5 /* VoiceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSession.swift; sourceTree = "<group>"; };
+		1E7A438649CDDFFB6D665E1A /* TripActivityViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripActivityViews.swift; sourceTree = "<group>"; };
+		1E9F82EBB3EE2B6EAC4096A0 /* ConfigurationIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationIntents.swift; sourceTree = "<group>"; };
 		23B92F2AB1F42A1299049632 /* StoreBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreBadge.swift; sourceTree = "<group>"; };
 		25F5416FA57052D3605D0795 /* VoiceCaptureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCaptureScreen.swift; sourceTree = "<group>"; };
 		272464385F86F4053729F36E /* AppModel+Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Categories.swift"; sourceTree = "<group>"; };
 		27499D7335CBDA7C48845546 /* MapCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCard.swift; sourceTree = "<group>"; };
+		29E85784FD14BC5F264AC43A /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		2CD3044CC8DBA6E48095569D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		2E8FE7EDAB15B74F7A7EB6D6 /* LoyaltyCardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyCardScreen.swift; sourceTree = "<group>"; };
+		3232F1F1E443A03B56471E70 /* IntentActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentActions.swift; sourceTree = "<group>"; };
+		3392BB0023275F7CDC400B11 /* WidgetDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataSource.swift; sourceTree = "<group>"; };
 		36EB610271AC41550A76CFD4 /* StoreOrderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreOrderSheet.swift; sourceTree = "<group>"; };
 		3A201C9C48A4C086168C0474 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3CBD3DC827D3CB723EEF2271 /* AppModel+Briefing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Briefing.swift"; sourceTree = "<group>"; };
@@ -125,21 +204,35 @@
 		4C9717E76FB70665C520368F /* StoreTile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTile.swift; sourceTree = "<group>"; };
 		511AB2999B3A3E759DDAB14C /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
 		56CFC05B28CB70131DEBAFD1 /* StoreCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreCard.swift; sourceTree = "<group>"; };
+		6019541D55FAEBE5BE370CEA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6319561D8C1C77D7FE163B85 /* AppModel+Presence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Presence.swift"; sourceTree = "<group>"; };
+		674C8C721188FD29FC0C3B96 /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
 		68440EB6E1E9D12D43C573CF /* BranchPickerSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerSection.swift; sourceTree = "<group>"; };
+		698AD3C2DE7126D084A9616C /* WidgetSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSample.swift; sourceTree = "<group>"; };
 		6C36556FC45F2FFF3189F223 /* TriageScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriageScreen.swift; sourceTree = "<group>"; };
 		6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */ = {isa = PBXFileReference; path = Marqet.icon; sourceTree = "<group>"; };
 		6E4D320616F77292D85E5EE0 /* BrochuresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrochuresCard.swift; sourceTree = "<group>"; };
+		6F68A05A39E8357D0141B5FA /* WidgetComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetComponents.swift; sourceTree = "<group>"; };
+		725C14DEC2722E4728B0E5E1 /* WidgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetModelTests.swift; sourceTree = "<group>"; };
 		7466E8A03099F02EC77826CF /* BarcodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeView.swift; sourceTree = "<group>"; };
 		75E6C20C12FBF4B4AF16F828 /* DictationInterpreter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationInterpreter.swift; sourceTree = "<group>"; };
+		7986047A7DC02CCED2FF44D8 /* ShoppingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingActivityAttributes.swift; sourceTree = "<group>"; };
 		79A664A8D158899340160E9D /* AppAccentPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAccentPalette.swift; sourceTree = "<group>"; };
+		79F6AA10EEC4221451EDD943 /* LoyaltyAndOffersWidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyAndOffersWidgetViews.swift; sourceTree = "<group>"; };
 		7DC6E5A5E8513D483B2A0259 /* AppModel+Places.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Places.swift"; sourceTree = "<group>"; };
+		7F7E6E148F9332AD3D4BEAED /* MarqetWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MarqetWidgets.entitlements; sourceTree = "<group>"; };
 		7F984D70B0AE9C7262E46DF7 /* AppModel+Voice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Voice.swift"; sourceTree = "<group>"; };
 		80B1750AD8E04F3D150D2585 /* BarcodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScanner.swift; sourceTree = "<group>"; };
 		81FD1AA7953B020E2F971793 /* StoreStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreStyle.swift; sourceTree = "<group>"; };
+		824A2E347FFBA92040BF6D7B /* MarqetWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = MarqetWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		83304CA2FC74B1B5938C18CC /* MarqetWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetWidgetsBundle.swift; sourceTree = "<group>"; };
 		8662B64170332932ED37FE06 /* StorePager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePager.swift; sourceTree = "<group>"; };
 		8C87F96738EA1D930F698375 /* LoyaltyCardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyCardEditor.swift; sourceTree = "<group>"; };
+		91E00936ACABDB675C75DD98 /* WidgetRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRenderTests.swift; sourceTree = "<group>"; };
+		91F82A82FCE2B27EA7F8AB97 /* ShoppingTripLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingTripLiveActivity.swift; sourceTree = "<group>"; };
 		926CFED7B1EE0E0F3637C5C4 /* BrochureShelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrochureShelf.swift; sourceTree = "<group>"; };
 		939362CED74CE9DC640A9D19 /* Marqet.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Marqet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		95D767F53855218BC75FF1D8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		96E7161CE333347F853CDAB6 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		991A83F47BCCEE4CB948BC3C /* AppModel+Triage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Triage.swift"; sourceTree = "<group>"; };
 		997698A631A4635B7AE98F19 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -148,30 +241,43 @@
 		A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStyle.swift; sourceTree = "<group>"; };
 		A0E8B4F520039DCC556877E1 /* AppModel+Intelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Intelligence.swift"; sourceTree = "<group>"; };
 		A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreSheet.swift; sourceTree = "<group>"; };
+		A47DE3B3A08709F661A254E0 /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		A4E9CAF12D18A5E6329754FD /* ItemContextMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemContextMenu.swift; sourceTree = "<group>"; };
 		A555236677087D1E17AECE59 /* PlacesStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacesStrings.swift; sourceTree = "<group>"; };
 		A7F549B56940D1889C58A63B /* SectionOrderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionOrderSheet.swift; sourceTree = "<group>"; };
 		A87358243D9ADFF22154E6EF /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		B307E22CA868870A6E3000A8 /* MarqetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetApp.swift; sourceTree = "<group>"; };
 		B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B9B44693376CD412EC19A7F6 /* ListWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListWidgetView.swift; sourceTree = "<group>"; };
+		BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = StoreLogos.xcassets; sourceTree = "<group>"; };
 		BF874EDF972B9DBECBFE9C28 /* StoreFocusScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFocusScreen.swift; sourceTree = "<group>"; };
+		C4BA037EFBE5348BEE69B6F8 /* HomeScreenWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreenWidgets.swift; sourceTree = "<group>"; };
+		C502BF2218D39E2794A5515F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C843D403846165703592E11F /* ComposerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerBar.swift; sourceTree = "<group>"; };
 		C9BFF55B4149AA06EB81000A /* StoresSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresSettingsView.swift; sourceTree = "<group>"; };
 		CA8E8FFBB9F34B86F2F9CF63 /* AppModel+Stores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Stores.swift"; sourceTree = "<group>"; };
 		CAEC1C95745BA381C5801D14 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		CAEC3152014497B604C50AA8 /* Marqet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Marqet.entitlements; sourceTree = "<group>"; };
+		CB128AADBB664E68839AA8CD /* WidgetSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSettingsView.swift; sourceTree = "<group>"; };
 		CED3F55DF79B9C905CB17271 /* FoundationModelsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationModelsService.swift; sourceTree = "<group>"; };
+		D0CD05BF7500D47F4C8DB0FF /* TripActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripActivityController.swift; sourceTree = "<group>"; };
 		D4AA41AA76F8C2F0F81A461D /* StoreContextPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreContextPane.swift; sourceTree = "<group>"; };
 		D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPickerView.swift; sourceTree = "<group>"; };
 		D855A0E770123156BA8F7DEF /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		DC3BC97DEAAB181BF352ED72 /* WidgetBarcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBarcode.swift; sourceTree = "<group>"; };
 		DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldGeometry.swift; sourceTree = "<group>"; };
 		E1335C97D860751574A63AE6 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		E317B9F6CBC0892FCE76E7E2 /* BriefingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BriefingCard.swift; sourceTree = "<group>"; };
 		E40A378B97FDB657C2F6FDAF /* HingeObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HingeObserver.swift; sourceTree = "<group>"; };
 		EBFEB8AA2C64FFD0E3AF11D4 /* ComposerTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposerTextField.swift; sourceTree = "<group>"; };
+		EDB9D40EA36AFF1B2B87C1CA /* ActionIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionIntents.swift; sourceTree = "<group>"; };
 		F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreStoresCard.swift; sourceTree = "<group>"; };
+		F1B1112FF21AF3138C1563C0 /* AppModel+Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Widgets.swift"; sourceTree = "<group>"; };
 		F618F2863408E4DA34E045C7 /* Marqet.storekit */ = {isa = PBXFileReference; path = Marqet.storekit; sourceTree = "<group>"; };
 		F6FB75E4BD75DA52E41AB95A /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		F7A00BBDDEBAF86FCCBC9B65 /* PresenceModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresenceModelTests.swift; sourceTree = "<group>"; };
 		F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionView.swift; sourceTree = "<group>"; };
+		F84A96E807F96937603DBFE1 /* SharedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedStore.swift; sourceTree = "<group>"; };
 		F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlacesModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -195,6 +301,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FDCACC0A2540E91E58CA88DF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				75CC248BA2CA553D6BC0B4FF /* MarqetCore in Frameworks */,
+				F6D2F45F32EF7B43ED22A7FC /* MarqetReminders in Frameworks */,
+				AC06688C1A45827C280C1289 /* WidgetKit.framework in Frameworks */,
+				04E61211293E0B962A51C04F /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -204,6 +321,7 @@
 				CAEC1C95745BA381C5801D14 /* ProfileView.swift */,
 				3A201C9C48A4C086168C0474 /* SettingsView.swift */,
 				C9BFF55B4149AA06EB81000A /* StoresSettingsView.swift */,
+				CB128AADBB664E68839AA8CD /* WidgetSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -235,6 +353,27 @@
 			path = Triage;
 			sourceTree = "<group>";
 		};
+		36204E1F8B2F1F420C0B2C2D /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				EDB9D40EA36AFF1B2B87C1CA /* ActionIntents.swift */,
+				1E9F82EBB3EE2B6EAC4096A0 /* ConfigurationIntents.swift */,
+				674C8C721188FD29FC0C3B96 /* Entities.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		424EED65C8CB880CA131736A /* MarqetShared */ = {
+			isa = PBXGroup;
+			children = (
+				36204E1F8B2F1F420C0B2C2D /* Intents */,
+				9EB6EED3C97C2B3A01554E67 /* WidgetUI */,
+				F84A96E807F96937603DBFE1 /* SharedStore.swift */,
+				7986047A7DC02CCED2FF44D8 /* ShoppingActivityAttributes.swift */,
+			);
+			path = MarqetShared;
+			sourceTree = "<group>";
+		};
 		4604E2FD5596111DA6B7F9AE /* Paywall */ = {
 			isa = PBXGroup;
 			children = (
@@ -262,6 +401,7 @@
 				F6FB75E4BD75DA52E41AB95A /* InfoPlist.xcstrings */,
 				01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */,
 				B67963144E95676AB5337753 /* PrivacyInfo.xcprivacy */,
+				BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -274,6 +414,7 @@
 				C80E4BB84CCE5DB3737363AA /* Features */,
 				57770E1FF46D8827E03140E5 /* Resources */,
 				997698A631A4635B7AE98F19 /* Info.plist */,
+				CAEC3152014497B604C50AA8 /* Marqet.entitlements */,
 			);
 			path = Marqet;
 			sourceTree = "<group>";
@@ -283,6 +424,7 @@
 			children = (
 				939362CED74CE9DC640A9D19 /* Marqet.app */,
 				99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */,
+				824A2E347FFBA92040BF6D7B /* MarqetWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -327,18 +469,46 @@
 				511AB2999B3A3E759DDAB14C /* AppModelTests.swift */,
 				422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */,
 				F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */,
+				F7A00BBDDEBAF86FCCBC9B65 /* PresenceModelTests.swift */,
 				3D1EC384AC0DBE1F2196E1DD /* PurchaseTests.swift */,
+				725C14DEC2722E4728B0E5E1 /* WidgetModelTests.swift */,
+				91E00936ACABDB675C75DD98 /* WidgetRenderTests.swift */,
 			);
 			path = MarqetTests;
+			sourceTree = "<group>";
+		};
+		9EB6EED3C97C2B3A01554E67 /* WidgetUI */ = {
+			isa = PBXGroup;
+			children = (
+				B9B44693376CD412EC19A7F6 /* ListWidgetView.swift */,
+				79F6AA10EEC4221451EDD943 /* LoyaltyAndOffersWidgetViews.swift */,
+				0560FF82554628E0CFE6E2FA /* OverviewWidgetView.swift */,
+				1E7A438649CDDFFB6D665E1A /* TripActivityViews.swift */,
+				DC3BC97DEAAB181BF352ED72 /* WidgetBarcode.swift */,
+				6F68A05A39E8357D0141B5FA /* WidgetComponents.swift */,
+				698AD3C2DE7126D084A9616C /* WidgetSample.swift */,
+			);
+			path = WidgetUI;
 			sourceTree = "<group>";
 		};
 		B30D5FE1F38644EFCB3CFE01 /* Places */ = {
 			isa = PBXGroup;
 			children = (
+				6319561D8C1C77D7FE163B85 /* AppModel+Presence.swift */,
 				A87358243D9ADFF22154E6EF /* LocationService.swift */,
 				3D0EE0A78B4173CCEDD984D6 /* PlaceSearch.swift */,
+				1003CA8615DA02EAC3FC84A6 /* PresenceMonitor.swift */,
 			);
 			path = Places;
+			sourceTree = "<group>";
+		};
+		B4CDC185F83D34F7AF66E200 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29E85784FD14BC5F264AC43A /* SwiftUI.framework */,
+				95D767F53855218BC75FF1D8 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		BA209F591724C49ED7A78CC1 /* LoyaltyCards */ = {
@@ -351,6 +521,21 @@
 				3D319615B6B47ECB5A1C3135 /* LoyaltyCardsSection.swift */,
 			);
 			path = LoyaltyCards;
+			sourceTree = "<group>";
+		};
+		BEEC8C76394B74A62F182F17 /* MarqetWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				A47DE3B3A08709F661A254E0 /* Controls.swift */,
+				C4BA037EFBE5348BEE69B6F8 /* HomeScreenWidgets.swift */,
+				C502BF2218D39E2794A5515F /* Info.plist */,
+				7F7E6E148F9332AD3D4BEAED /* MarqetWidgets.entitlements */,
+				83304CA2FC74B1B5938C18CC /* MarqetWidgetsBundle.swift */,
+				6019541D55FAEBE5BE370CEA /* PrivacyInfo.xcprivacy */,
+				91F82A82FCE2B27EA7F8AB97 /* ShoppingTripLiveActivity.swift */,
+				3392BB0023275F7CDC400B11 /* WidgetDataSource.swift */,
+			);
+			path = MarqetWidgets;
 			sourceTree = "<group>";
 		};
 		C3B4E92304770B1AA8BABB84 /* DesignSystem */ = {
@@ -389,12 +574,25 @@
 			isa = PBXGroup;
 			children = (
 				6264ED2C19EC4099099BF46E /* Marqet */,
+				424EED65C8CB880CA131736A /* MarqetShared */,
 				8F00E56301DEC8995117BFDC /* MarqetTests */,
+				BEEC8C76394B74A62F182F17 /* MarqetWidgets */,
 				F3476EDDC27852D171EC2117 /* Packages */,
 				6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */,
 				F618F2863408E4DA34E045C7 /* Marqet.storekit */,
+				B4CDC185F83D34F7AF66E200 /* Frameworks */,
 				64AC9F8E12AD1FB3541251F4 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		E1307A62E7A8438BBB670A5B /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				F1B1112FF21AF3138C1563C0 /* AppModel+Widgets.swift */,
+				3232F1F1E443A03B56471E70 /* IntentActions.swift */,
+				D0CD05BF7500D47F4C8DB0FF /* TripActivityController.swift */,
+			);
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 		ED741428305A056F5C2E53B3 /* Shopping */ = {
@@ -425,6 +623,7 @@
 				B30D5FE1F38644EFCB3CFE01 /* Places */,
 				71E8C15ADF443F2ACDC4C5BB /* Purchases */,
 				057717E3482B745313391D48 /* Voice */,
+				E1307A62E7A8438BBB670A5B /* Widgets */,
 				0D1D792C9DC89E371EA48BE6 /* AppModel.swift */,
 				3CBD3DC827D3CB723EEF2271 /* AppModel+Briefing.swift */,
 				272464385F86F4053729F36E /* AppModel+Categories.swift */,
@@ -480,10 +679,12 @@
 				51FBE193218367CD38B5F3B1 /* Sources */,
 				E48959D83D1C7F550E65B7B0 /* Resources */,
 				297263E493983CFEA23CA7CE /* Frameworks */,
+				944B17F50049ECA8307148D8 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EBEB4E7BCB2EC1D5C15CE024 /* PBXTargetDependency */,
 			);
 			name = Marqet;
 			packageProductDependencies = (
@@ -494,6 +695,27 @@
 			productName = Marqet;
 			productReference = 939362CED74CE9DC640A9D19 /* Marqet.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C3080134A7858FF45583C84B /* MarqetWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 76CBB74E96AAF4A81825ECE8 /* Build configuration list for PBXNativeTarget "MarqetWidgets" */;
+			buildPhases = (
+				25F0346835B182E94F61FE7B /* Sources */,
+				E256639A2F10E48451520EA8 /* Resources */,
+				FDCACC0A2540E91E58CA88DF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MarqetWidgets;
+			packageProductDependencies = (
+				B5187F074C512B706CDA8277 /* MarqetCore */,
+				FA388AD86D4BE4AB8E4A9A3F /* MarqetReminders */,
+			);
+			productName = MarqetWidgets;
+			productReference = 824A2E347FFBA92040BF6D7B /* MarqetWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -508,6 +730,10 @@
 						DevelopmentTeam = C4VHG63LL9;
 					};
 					B57C97E7B88B33900EAB3896 = {
+						DevelopmentTeam = C4VHG63LL9;
+						ProvisioningStyle = Automatic;
+					};
+					C3080134A7858FF45583C84B = {
 						DevelopmentTeam = C4VHG63LL9;
 						ProvisioningStyle = Automatic;
 					};
@@ -533,6 +759,7 @@
 			targets = (
 				B57C97E7B88B33900EAB3896 /* Marqet */,
 				2286EB055C2BEBDF29EB8994 /* MarqetTests */,
+				C3080134A7858FF45583C84B /* MarqetWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -546,6 +773,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E256639A2F10E48451520EA8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BD2D0A51E31AEDA35F3F9E9A /* PrivacyInfo.xcprivacy in Resources */,
+				43852650623644900D5CAD58 /* StoreLogos.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E48959D83D1C7F550E65B7B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -555,16 +791,47 @@
 				EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */,
 				63B6677F47535B463636BFD4 /* Marqet.icon in Resources */,
 				450193FBDCD76730DB3FE4F7 /* PrivacyInfo.xcprivacy in Resources */,
+				A62BFA2F94E59E13E2537E90 /* StoreLogos.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		25F0346835B182E94F61FE7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6861A336C56C34BD11872AF2 /* ActionIntents.swift in Sources */,
+				E3E72DF811407773929DEBCE /* BarcodeView.swift in Sources */,
+				1C843DDC705AF743176C062A /* CategoryStyle.swift in Sources */,
+				9BD926C4C099DE92C61A9E70 /* Color+Hex.swift in Sources */,
+				81885EFCDB1FFBCA037C4AEB /* ConfigurationIntents.swift in Sources */,
+				526E4407608723862D329B31 /* Controls.swift in Sources */,
+				E32358788F49D9624CD78B79 /* Entities.swift in Sources */,
+				CC566AFB8731C03262A9FD36 /* HomeScreenWidgets.swift in Sources */,
+				C3756B4D93AEA4252C18B82B /* ListWidgetView.swift in Sources */,
+				977D476D6645110E6EAD5C27 /* LoyaltyAndOffersWidgetViews.swift in Sources */,
+				D3FD433724825A63078C13D3 /* MarqetWidgetsBundle.swift in Sources */,
+				8B6597D8F36FDEF71DA9F9FA /* OverviewWidgetView.swift in Sources */,
+				FB2FBAF4EDF09AF13F8316D1 /* SharedStore.swift in Sources */,
+				2AFFAF244870CECDE218D409 /* ShoppingActivityAttributes.swift in Sources */,
+				480C44CEC0F7B2F40DB99D52 /* ShoppingTripLiveActivity.swift in Sources */,
+				19B647351CF7F900C9AD680D /* StoreBadge.swift in Sources */,
+				66DC7BDDAAEC57BDEC845D2A /* StoreStyle.swift in Sources */,
+				D979B455F98CB5D7062D5DF0 /* TripActivityViews.swift in Sources */,
+				7F6E445F2A6FB54A244065C1 /* WidgetBarcode.swift in Sources */,
+				080687A18F6C3E19483B2E29 /* WidgetComponents.swift in Sources */,
+				254C901EB9B01F0EA2FD114C /* WidgetDataSource.swift in Sources */,
+				E782D3A54BE68F27010B3BAB /* WidgetSample.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		51FBE193218367CD38B5F3B1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EABB39E1B62E7C44D474594 /* ActionIntents.swift in Sources */,
 				07C2E085A543D3710EC87FE6 /* AdaptiveSplit.swift in Sources */,
 				96BFCE1F769A71C3791B4226 /* AddStoreSheet.swift in Sources */,
 				F8752FF8E53E75FB08AE2BBE /* AppAccentPalette.swift in Sources */,
@@ -573,9 +840,11 @@
 				A971BEE745EF4F4C96EF0E49 /* AppModel+Intelligence.swift in Sources */,
 				7DE206B5AAE73DD1CE6D39D9 /* AppModel+LoyaltyCards.swift in Sources */,
 				CF9679845CC3E2A7EE0000C3 /* AppModel+Places.swift in Sources */,
+				34A0C0B95B043EE163B806C7 /* AppModel+Presence.swift in Sources */,
 				DF44534FF847A4F17DEB54C8 /* AppModel+Stores.swift in Sources */,
 				51DD3BFE4DF5111422602A2E /* AppModel+Triage.swift in Sources */,
 				C9A8068F09544701315D20B3 /* AppModel+Voice.swift in Sources */,
+				9FDD03F60F5E43ED5C2DE250 /* AppModel+Widgets.swift in Sources */,
 				9C93206531726357A9CDC613 /* AppModel.swift in Sources */,
 				403ECFB3302A546326B500BF /* BarcodeScanner.swift in Sources */,
 				044B6898EDC716B338496462 /* BarcodeView.swift in Sources */,
@@ -587,14 +856,19 @@
 				EF10BED0FD28122A5247DA7A /* Color+Hex.swift in Sources */,
 				CB9B39B46AB12BB24FE61916 /* ComposerBar.swift in Sources */,
 				613773694FB25CCEBA86DA75 /* ComposerTextField.swift in Sources */,
+				92A5C4F1CD8DA5C06C14B1F5 /* ConfigurationIntents.swift in Sources */,
 				8D0D88BF82B70EAC320D28A3 /* DictationInterpreter.swift in Sources */,
+				98B54AFBC8DD4FB26F22827B /* Entities.swift in Sources */,
 				71256AEFD69D55ADDA8B96AD /* FoldGeometry.swift in Sources */,
 				33ADF71CC9B5997104B51278 /* FoundationModelsService.swift in Sources */,
 				0C4B737D639C78F40B12A00C /* HingeObserver.swift in Sources */,
+				FDD34DD9D33BCB150F3E116C /* IntentActions.swift in Sources */,
 				54BE956B28391C73DD7626BB /* ItemContextMenu.swift in Sources */,
 				0FFDCC78B7EBBA1E52D5E44E /* ListPickerView.swift in Sources */,
+				516911A7F177FD61FCBBD643 /* ListWidgetView.swift in Sources */,
 				5858F5D9786D1BD19D94DB02 /* LiveTranscriber.swift in Sources */,
 				D90626E755FFF8C19D5E0320 /* LocationService.swift in Sources */,
+				5137785CADB99AB1EEA5EF48 /* LoyaltyAndOffersWidgetViews.swift in Sources */,
 				8679718102E01AFEFE165FEB /* LoyaltyCardEditor.swift in Sources */,
 				2CEF1380FE67C101C8BC46C1 /* LoyaltyCardScreen.swift in Sources */,
 				34BC3E34CA657B3B9360D0A4 /* LoyaltyCardsSection.swift in Sources */,
@@ -605,15 +879,19 @@
 				1894910664A05EB40EFBD368 /* OnboardingFlow.swift in Sources */,
 				422DEA2467FDF2B9463BD0D5 /* OnboardingIllustrations.swift in Sources */,
 				49E2984906CF77951151D50A /* OnboardingLayout.swift in Sources */,
+				1ED3E27CE55AB2D3FD165DE1 /* OverviewWidgetView.swift in Sources */,
 				0F02B258C95A18D427FE79E7 /* PaywallView.swift in Sources */,
 				F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */,
 				A9D51BC9D4221685CADD44F0 /* PlaceSearch.swift in Sources */,
 				43DE49B84637E2AEB86484AB /* PlacesStrings.swift in Sources */,
+				EF0DE1012AD37339EB0509DF /* PresenceMonitor.swift in Sources */,
 				C594E2C33B9AE802CC6F55FD /* ProfileView.swift in Sources */,
 				ADE2EE53C34E3F9D2493582C /* PurchaseManager.swift in Sources */,
 				88167E848566A767ED3889AC /* RootView.swift in Sources */,
 				4D8172B6B4DA85E2884F828B /* SectionOrderSheet.swift in Sources */,
 				0321B39B103F92366C02DDBD /* SettingsView.swift in Sources */,
+				B3CC9E8F9DDE1BE117D11C6B /* SharedStore.swift in Sources */,
+				BFFE6288E208CB5360C808E4 /* ShoppingActivityAttributes.swift in Sources */,
 				0B6038FFD0F934A7B269D97F /* ShoppingScreen.swift in Sources */,
 				913B371BDF029A2FCD814FDA /* StoreBadge.swift in Sources */,
 				64B20D0F187C07196DF1137B /* StoreCard.swift in Sources */,
@@ -625,8 +903,14 @@
 				038DB2893059C807DB6E7A91 /* StoreTile.swift in Sources */,
 				5C5087B9348C11AEDDCEC9CC /* StoresSettingsView.swift in Sources */,
 				38B193C69F2E7033A3EA453F /* TriageScreen.swift in Sources */,
+				FE6E9B8DE167B0E02DB6CF64 /* TripActivityController.swift in Sources */,
+				989ABED2A0206AAA7A3F356D /* TripActivityViews.swift in Sources */,
 				920420903EB2070551DD9CB2 /* VoiceCaptureScreen.swift in Sources */,
 				D38458904B2F33631BF2FFCA /* VoiceSession.swift in Sources */,
+				E1520EEB6F7B6FA0F79C1269 /* WidgetBarcode.swift in Sources */,
+				D922119602DCDC9F93A559A2 /* WidgetComponents.swift in Sources */,
+				C237F4C12DD365E76E34AC2C /* WidgetSample.swift in Sources */,
+				4FD6DD8025873C80B142FD98 /* WidgetSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -637,7 +921,10 @@
 				D906C3C671E00C203D2900D5 /* AppModelTests.swift in Sources */,
 				D230CCE7489CAC2E4CC5C198 /* EventKitRoundTripTests.swift in Sources */,
 				6CE122BF46C50E69135ED788 /* PlacesModelTests.swift in Sources */,
+				9AF198C3AE502F42102C5FBC /* PresenceModelTests.swift in Sources */,
 				60751E32B53AC19C36508E8B /* PurchaseTests.swift in Sources */,
+				B1F6F0A7FB40B7C95376F43E /* WidgetModelTests.swift in Sources */,
+				4B3B977BC42D12BD591B9A8C /* WidgetRenderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -648,6 +935,11 @@
 			isa = PBXTargetDependency;
 			target = B57C97E7B88B33900EAB3896 /* Marqet */;
 			targetProxy = 6B188C882550895185523D8F /* PBXContainerItemProxy */;
+		};
+		EBEB4E7BCB2EC1D5C15CE024 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C3080134A7858FF45583C84B /* MarqetWidgets */;
+			targetProxy = 39122E87BD5D8D8727883F2E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -738,6 +1030,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Marqet;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Marqet/Marqet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				ENABLE_PREVIEWS = YES;
@@ -748,6 +1041,43 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet;
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MARQET_APP";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C969F98710135CA5FCB8FEBE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MarqetWidgets/MarqetWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = MarqetWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet.Widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EBDF1305ABB90489A42FAB50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = MarqetWidgets/MarqetWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = MarqetWidgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet.Widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -757,6 +1087,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Marqet;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Marqet/Marqet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				ENABLE_PREVIEWS = YES;
@@ -767,6 +1098,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.marqet.Marqet;
 				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) MARQET_APP";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -880,6 +1212,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		76CBB74E96AAF4A81825ECE8 /* Build configuration list for PBXNativeTarget "MarqetWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBDF1305ABB90489A42FAB50 /* Debug */,
+				C969F98710135CA5FCB8FEBE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		C287CC3FE11A0BA65C0DCAFA /* Build configuration list for PBXProject "Marqet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -911,11 +1252,19 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = MarqetReminders;
 		};
+		B5187F074C512B706CDA8277 /* MarqetCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetCore;
+		};
 		BB9BA9BB8675621A77EF71D0 /* MarqetCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MarqetCore;
 		};
 		D12C6C9AEC2562DE4F0D5503 /* MarqetReminders */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarqetReminders;
+		};
+		FA388AD86D4BE4AB8E4A9A3F /* MarqetReminders */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MarqetReminders;
 		};

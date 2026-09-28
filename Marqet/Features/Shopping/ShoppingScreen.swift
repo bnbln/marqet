@@ -71,6 +71,7 @@ struct ShoppingScreen: View {
                     .voiceCaptureCover(isPresenter: model.focusedPage == nil)
                     .fullScreenCover(isPresented: triageBinding) {
                         TriageScreen()
+                            .navigationTransition(.zoom(sourceID: TriageButton.zoomID, in: cardZoom))
                     }
                     .fullScreenCover(item: focusBinding) { focused in
                         Group {
@@ -117,8 +118,16 @@ struct ShoppingScreen: View {
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
                             model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
                         }
+                        // `-demo-page aldi-sued`: start on that store's card (screenshots).
+                        let demoStore = UserDefaults.standard.string(forKey: "demo-page").flatMap { key in
+                            model.stores.first { $0.catalogKey == key }.map { PageID.store($0.id) }
+                        }
+                        if loaded, let demoStore {
+                            model.activePage = demoStore
+                            model.pageRequest = demoStore
+                        }
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-focus"),
-                           let store = model.deck.pages.first(where: { $0.storeID != nil }) {
+                           let store = demoStore ?? model.deck.pages.first(where: { $0.storeID != nil }) {
                             model.focus(store)
                         }
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-focus-inbox") {

@@ -776,12 +776,7 @@ struct ItemRow: View {
     }
 
     private func quantityTag(_ value: String) -> some View {
-        Text(value)
-            .font(.caption2.weight(.semibold))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 3)
-            .background(Color(.tertiarySystemFill), in: .capsule)
+        QuantityTag(value: value)
     }
 
     private func startEditing() {
@@ -801,42 +796,6 @@ struct ItemRow: View {
             Task { await model.rename(item, to: title) }
         }
     }
-}
-
-private struct ItemTitleParts {
-    let name: String
-    let prefix: String?
-    let suffix: String?
-
-    init(_ title: String) {
-        var remaining = title
-        var leading: String?
-        var trailing: String?
-        if let match = Self.prefixPattern.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
-           let tagRange = Range(match.range(at: 1), in: remaining),
-           let nameRange = Range(match.range(at: 2), in: remaining) {
-            leading = String(remaining[tagRange])
-            remaining = String(remaining[nameRange])
-        }
-        if let match = Self.suffixPattern.firstMatch(in: remaining, range: NSRange(remaining.startIndex..., in: remaining)),
-           let nameRange = Range(match.range(at: 1), in: remaining),
-           let tagRange = Range(match.range(at: 2), in: remaining) {
-            trailing = String(remaining[tagRange])
-            remaining = String(remaining[nameRange])
-        }
-        name = remaining
-        prefix = leading
-        suffix = trailing
-    }
-
-    private static let prefixPattern = try! NSRegularExpression(
-        pattern: #"^((?:\d+(?:[.,]\d+)?\s*)?(?:x|×|kg|g|mg|l|ml|Stück|Stk\.?))\s+(.+)$"#,
-        options: [.caseInsensitive]
-    )
-    private static let suffixPattern = try! NSRegularExpression(
-        pattern: #"^(.+?)\s+((?:\d+(?:[.,]\d+)?\s*)?(?:x|×|kg|g|mg|l|ml|Stück|Stk\.?))$"#,
-        options: [.caseInsensitive]
-    )
 }
 
 /// Card look in the pager, edge-to-edge surface full screen.

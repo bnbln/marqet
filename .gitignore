@@ -5,3 +5,6 @@ DerivedData/
 .swiftpm/
 __pycache__/
 *.xcresult
+
+# App Store screenshots (scripts/screenshots/make.sh)
+/screenshots/raw/

@@ -94,7 +94,18 @@ public enum SuggestionEngine {
     /// Pro fallback: the category tells the kind of store ("Zahnpasta" → drugstore).
     /// Picks the user's first store of a fitting type; groceries go to supermarkets/discounters.
     public static func storeTypeSuggestion(for category: ItemCategory, stores: [Store]) -> StoreSuggestion? {
-        let preferred: [StoreType] = switch category {
+        let ordered = stores.sorted { $0.sortIndex < $1.sortIndex }
+        for type in preferredStoreTypes(for: category) {
+            if let store = ordered.first(where: { $0.type == type }) {
+                return StoreSuggestion(storeID: store.id, source: .storeType, confidence: .low)
+            }
+        }
+        return nil
+    }
+
+    /// Kinds of store that usually carry a category, best fit first.
+    public static func preferredStoreTypes(for category: ItemCategory) -> [StoreType] {
+        switch category {
         case .personalCare, .baby: [.drugstore, .pharmacy, .supermarket, .discounter]
         case .household: [.drugstore, .supermarket, .discounter]
         case .pet: [.supermarket, .discounter, .drugstore]
@@ -105,13 +116,6 @@ public enum SuggestionEngine {
         case .other: []
         default: [.supermarket, .discounter, .organic]
         }
-        let ordered = stores.sorted { $0.sortIndex < $1.sortIndex }
-        for type in preferred {
-            if let store = ordered.first(where: { $0.type == type }) {
-                return StoreSuggestion(storeID: store.id, source: .storeType, confidence: .low)
-            }
-        }
-        return nil
     }
 
     private static func best(_ counts: [Store.ID: Int], valid: Set<Store.ID>) -> (id: Store.ID, count: Int)? {

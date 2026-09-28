@@ -218,13 +218,36 @@ struct AppModelTests {
         #expect(model.triageProgress == (1, 1))
     }
 
-    @Test func switchingTriageModeIsRemembered() async throws {
+    @Test func triageViewComesFromSettings() async throws {
         let model = try await makeModel(items: [("Milch", nil)])
-        model.startTriage()
-        model.setTriageMode(.board)
-        model.endTriage()
+        model.preferredTriageMode = .board
         model.startTriage()
         #expect(model.triage?.mode == .board)
+    }
+
+    @Test func droppingOnNewChainAddsItAndUndoRemovesIt() async throws {
+        let model = try await makeModel(items: [("Milch", nil)])
+        model.startTriage()
+        let milk = try #require(model.triageQueue.first)
+        let entry = try #require(model.catalogSuggestions.first)
+
+        await model.triageAssign(milk, toNew: entry)
+        #expect(model.stores.contains { $0.catalogKey == entry.key })
+        #expect(model.triageQueue.isEmpty)
+
+        await model.triageUndo()
+        #expect(!model.stores.contains { $0.catalogKey == entry.key })
+        #expect(model.triageQueue.map(\.title) == ["Milch"])
+    }
+
+    @Test func swipeRightWithoutSuggestionMeansLater() async throws {
+        let model = try await makeModel(items: [("Milch", nil)])
+        model.startTriage()
+        let milk = try #require(model.triageQueue.first)
+        #expect(model.suggestion(for: milk) == nil)
+
+        await model.triageAcceptSuggestion(for: milk)
+        #expect(model.triageSkippedItems.map(\.title) == ["Milch"])
     }
 
     @Test func freeUsersGetLearnedSuggestionsNotAutoAssign() async throws {

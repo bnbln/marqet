@@ -81,9 +81,13 @@ struct AddStoreTile: View {
     }
 }
 
-/// "Läden zuordnen" – a glass button like the add button, in the accent color.
+/// "Läden zuordnen" – a glass button like the add button, in the accent color. Zuordnen zooms
+/// out of it when a zoom namespace is around.
 struct TriageButton: View {
+    static let zoomID = "triage"
+
     @Environment(AppModel.self) private var model
+    @Environment(\.cardZoomNamespace) private var zoomNamespace
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
 
     var body: some View {
@@ -99,5 +103,18 @@ struct TriageButton: View {
                 .contentShape(.capsule)
         }
         .buttonStyle(.plain)
+        .modifier(TriageZoomSource(namespace: zoomNamespace))
+    }
+}
+
+private struct TriageZoomSource: ViewModifier {
+    let namespace: Namespace.ID?
+
+    func body(content: Content) -> some View {
+        if let namespace {
+            content.matchedTransitionSource(id: TriageButton.zoomID, in: namespace) { $0.clipShape(.rect(cornerRadius: 26)) }
+        } else {
+            content
+        }
     }
 }

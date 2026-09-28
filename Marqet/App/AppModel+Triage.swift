@@ -3,7 +3,7 @@ import MarqetCore
 
 /// A running "Zuordnen" session (KONZEPT §7.4). Survives folding because it lives in the model.
 struct TriageSession: Equatable {
-    /// `single` = "Nacheinander", `board` = "Übersicht" (raw values stay for the stored preference).
+    /// `single` = card stack (default), `board` = table; chosen in the settings.
     enum Mode: String, CaseIterable {
         case single, board
     }
@@ -22,10 +22,25 @@ struct TriageSession: Equatable {
     var history: [Step] = []
     /// How many of the assigned items Pro would have assigned automatically (upsell line).
     var autoAssignable = 0
+    /// Catalog chains added by dropping an item on them; undo removes them again while empty.
+    var addedStores: Set<Store.ID> = []
 
     var assignedCount: Int {
         history.count { if case .assigned = $0 { true } else { false } }
     }
+}
+
+/// A chain the user does not have yet, filling up the triage grid: cheaper for this item, or a
+/// usual store for its kind of product.
+struct TriageFiller: Identifiable, Equatable {
+    let entry: StoreCatalog.Entry
+    /// Preview for badge and colors; only becomes a store when an item is dropped on it.
+    let store: Store
+    let price: PriceIndex.ChainPrice?
+    /// Clearly cheaper than every own store (tag on the tile).
+    let isCheaper: Bool
+
+    var id: String { entry.key }
 }
 
 /// Pro auto-assignment, shown as a toast with undo.
@@ -56,6 +71,8 @@ extension AppModel {
     }
 
     var lastPriceCheck: Date? {
+        // `priceUpdates` is not observed; the revision is, so the settings row follows each refresh.
+        _ = priceRevision
         let prefix = "\(region.rawValue):\(priceArea.key):"
         return priceUpdates.entries.filter { $0.key.hasPrefix(prefix) }.values.map(\.checkedAt).max()
     }
@@ -65,7 +82,7 @@ extension AppModel {
         guard openPricesEnabled, priceArea.center != nil else { return [] }
         let prefix = "\(region.rawValue):\(priceArea.key):"
         let recent = priceUpdates.entries.filter {
-            $0.key.hasPrefix(prefix) && $0.value.checkedAt > Date().addingTimeInterval(-2 * 24 * 60 * 60)
+            $0.key.hasPrefix(prefix) && Date().timeIntervalSince($0.value.checkedAt) < PriceFreshness.findsDisplayLimit
         }
         var seen = Set<String>()
         return recent.values.flatMap { $0.finds ?? [] }
@@ -80,14 +97,64 @@ extension AppModel {
 
     /// Only downloaded observations can produce a hint.
     func priceHint(for item: ShoppingItem) -> StorePriceHint? {
+        priceMatch(for: item).flatMap { StorePriceHint(match: $0, stores: stores) }
+    }
+
+    /// Prices of every chain for the item's category, not only the user's stores.
+    func priceMatch(for item: ShoppingItem) -> PriceIndex.Match? {
         guard openPricesEnabled else { return nil }
         _ = priceRevision
-        guard let category = PriceIndex.bundled?.category(for: item.title) else { return nil }
-        let key = PriceUpdateService.Cache.key(region: region, area: priceArea, tag: category.tag)
-        guard let update = priceUpdates.entries[key],
-              update.checkedAt > Date().addingTimeInterval(-7 * 24 * 60 * 60),
-              let match = PriceIndex.bundled?.match(categoryTag: category.tag, rows: update.prices) else { return nil }
-        return StorePriceHint(match: match, stores: stores)
+        guard let category = PriceIndex.bundled?.category(for: item.title),
+              let rows = displayablePrices(for: category.tag) else { return nil }
+        return PriceIndex.bundled?.match(categoryTag: category.tag, rows: rows)
+    }
+
+    /// Share a chain must be below the cheapest own store to be offered as "cheaper elsewhere".
+    static let fillerSavingsShare = 0.1
+
+    /// Chains to fill up the triage grid, best first: clearly cheaper ones, then usual stores for
+    /// the item's kind of product (nearest first when known, else catalog order).
+    func triageFillers(for item: ShoppingItem, limit: Int) -> [TriageFiller] {
+        guard limit > 0, let catalog else { return [] }
+        let ownKeys = Set(stores.compactMap(\.catalogKey))
+        let available = catalog.entries(for: region).filter { !ownKeys.contains($0.key) }
+        var fillers: [TriageFiller] = []
+        var seen = Set<String>()
+
+        if let match = priceMatch(for: item) {
+            let reliable = match.prices.filter { $0.count >= StorePriceHint.minimumReliableCount }
+            let ownCheapest = priceHint(for: item)?.storePrices.map(\.price.typical).min()
+            for price in reliable.sorted(by: { $0.typical < $1.typical }) {
+                guard let ownCheapest, price.typical <= ownCheapest * (1 - Self.fillerSavingsShare),
+                      let entry = available.first(where: { $0.key == price.store }),
+                      seen.insert(entry.key).inserted else { continue }
+                fillers.append(TriageFiller(entry: entry, store: entry.makeStore(sortIndex: 0), price: price, isCheaper: true))
+            }
+        }
+
+        let types = SuggestionEngine.preferredStoreTypes(for: category(of: item))
+        let fitting = types.isEmpty ? [.supermarket, .discounter] : types
+        let usual = available
+            .filter { fitting.contains($0.type) && !seen.contains($0.key) }
+            .enumerated()
+            .sorted { lhs, rhs in
+                let (l, r) = (fitting.firstIndex(of: lhs.element.type) ?? 0, fitting.firstIndex(of: rhs.element.type) ?? 0)
+                if l != r { return l < r }
+                let (ld, rd) = (nearbyCatalogDistances[lhs.element.key], nearbyCatalogDistances[rhs.element.key])
+                switch (ld, rd) {
+                case let (ld?, rd?): return ld < rd
+                case (.some, nil): return true
+                case (nil, .some): return false
+                case (nil, nil): return lhs.offset < rhs.offset
+                }
+            }
+            .map(\.element)
+        let match = priceMatch(for: item)
+        for entry in usual {
+            let price = match?.prices.first { $0.store == entry.key }
+            fillers.append(TriageFiller(entry: entry, store: entry.makeStore(sortIndex: 0), price: price, isCheaper: false))
+        }
+        return Array(fillers.prefix(limit))
     }
 
     /// Load categories needed by visible list prices and, when requested, the offers card.
@@ -96,10 +163,6 @@ extension AppModel {
                        includeOffers: Bool = false) async {
         guard openPricesEnabled,
               let catalog, let index = PriceIndex.bundled else { return }
-        if locationAuthorization == .authorized, userLocation == nil {
-            userLocation = await locationProvider.currentLocation()
-        }
-        let area = priceArea
         var tags = Set((visibleItems ?? unsortedItems).filter { !$0.isCompleted }
             .compactMap { index.category(for: $0.title)?.tag })
         if includeOffers {
@@ -111,16 +174,21 @@ extension AppModel {
             queuedPriceTags.formUnion(tags)
             return
         }
+        // Busy before the location fix: that can take seconds, and the settings button shows the spinner.
         isRefreshingPrices = true
         priceRefreshError = nil
         defer { isRefreshingPrices = false }
+        if locationAuthorization == .authorized, userLocation == nil {
+            userLocation = await locationProvider.currentLocation()
+        }
+        let area = priceArea
         var failed = false
         while !tags.isEmpty {
             guard let tag = tags.popFirst() else { break }
             guard openPricesEnabled else { break }
             let key = PriceUpdateService.Cache.key(region: region, area: area, tag: tag)
             if !force, let checked = priceUpdates.entries[key]?.checkedAt,
-               checked > Date().addingTimeInterval(-24 * 60 * 60) {
+               PriceFreshness.state(checkedAt: checked) == .fresh {
                 if tags.isEmpty { tags.formUnion(queuedPriceTags); queuedPriceTags.removeAll() }
                 continue
             }
@@ -219,16 +287,27 @@ extension AppModel {
         return triage.itemIDs.filter(triage.skipped.contains).compactMap { unsorted[$0] }
     }
 
-    /// Switching in the triage toolbar also becomes the start mode next time.
-    func setTriageMode(_ mode: TriageSession.Mode) {
-        triage?.mode = mode
-        preferredTriageMode = mode
-    }
-
     func triageAssign(_ item: ShoppingItem, to store: Store) async {
         if suggestion(for: item)?.allowsAutoAssign == true { triage?.autoAssignable += 1 }
         triage?.history.append(.assigned(item.id, store.id))
         await assign(item, to: store)
+    }
+
+    /// Drop on a chain the user does not have yet: it becomes a store, then gets the item.
+    func triageAssign(_ item: ShoppingItem, toNew entry: StoreCatalog.Entry) async {
+        let isNew = !stores.contains { $0.catalogKey == entry.key }
+        let store = addStore(from: entry, planned: false)
+        if isNew { triage?.addedStores.insert(store.id) }
+        await triageAssign(item, to: store)
+    }
+
+    /// Swipe right: the suggested store, otherwise later.
+    func triageAcceptSuggestion(for item: ShoppingItem) async {
+        if let suggestion = suggestion(for: item), let store = store(suggestion.storeID) {
+            await triageAssign(item, to: store)
+        } else {
+            triageSkip(item)
+        }
     }
 
     func triageSkip(_ item: ShoppingItem) {
@@ -254,6 +333,11 @@ extension AppModel {
             assignmentMemory.penalize(itemKey: key, storeID: storeID)
             try? learning.penalizeAssignment(itemKey: key, storeID: storeID)
             await assign(item, to: nil, learn: false)
+            // A chain added by this drop leaves again once it is empty.
+            if triage?.addedStores.contains(storeID) == true, !items.contains(where: { $0.storeID == storeID }) {
+                triage?.addedStores.remove(storeID)
+                await deleteStore(storeID)
+            }
         case nil:
             break
         }

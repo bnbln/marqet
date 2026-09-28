@@ -82,9 +82,9 @@ struct SettingsView: View {
                     } label: {
                         LabeledContent("Kundenkarten", value: "\(model.loyaltyCards.count)")
                     }
-                    Picker("Zuordnen startet mit", selection: $model.preferredTriageMode) {
-                        Text("Nacheinander").tag(TriageSession.Mode.single)
-                        Text("Übersicht").tag(TriageSession.Mode.board)
+                    Picker("Zuordnen als", selection: $model.preferredTriageMode) {
+                        Text("Karten").tag(TriageSession.Mode.single)
+                        Text("Tabelle").tag(TriageSession.Mode.board)
                     }
                     Toggle("Preise beim Zuordnen", isOn: $openPricesEnabled)
                     Button {

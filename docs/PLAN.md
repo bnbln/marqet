@@ -50,7 +50,7 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 | Zugriff über die Reminders-API, Zuordnung über die Notizen | ✅ | Zeile `🛒 Laden` in den Notizen, Tests auch mit echtem EventKit |
 | Hauptansicht: gewählte Liste, hohe wischbare Laden-Cards | ✅ | 1–4 Cards je Breite |
 | Plus unten in der Ecke, Einträge hinzufügen und abhaken wie in Erinnerungen | ✅ | Serien-Eingabe, Abhaken mit Rückgängig |
-| Unsortierte Einträge per Drag in Läden ziehen, einzeln oder per Drag | ✅ | Zuordnen-Screen mit den Modi Nacheinander und Übersicht, Einstieg über den Footer der Unsortiert-Card (die frühere Nachfrage per Popover ist entfallen) |
+| Unsortierte Einträge per Drag in Läden ziehen, einzeln oder per Drag | ✅ | Zuordnen-Screen als Kartenstapel mit Drag auf Läden (Tabelle optional in den Einstellungen), Einstieg über den Footer der Unsortiert-Card (die frühere Nachfrage per Popover ist entfallen) |
 | Marktreif | 🟡 | siehe §3: Kauf, Rechtliches, Englisch, echte Geräte fehlen |
 | Andere Apps angeschaut, Angebote per API | ✅ Analyse / ❌ Umsetzung | Angebote nur über eine Partnerschaft (v2.0) |
 | Kategorien wie bei Bring! und Erinnerungen | ✅ | ≈ 2.600 Begriffe (Ziel ≈ 2.500 erreicht) |

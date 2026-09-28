@@ -806,7 +806,8 @@ final class AppModel {
         static let autoAssign = "autoAssignEnabled"
         static let intelligence = "intelligenceEnabled"
         static let routeLearning = "routeLearningEnabled"
-        static let triageMode = "triageMode"
+        /// New key: the old one also stored the last toolbar switch; the card stack is the default now.
+        static let triageMode = "triageView"
         static let storeSortMode = "storeSortMode"
         static let travelMode = "travelMode"
         static let sessionTracker = "routeSessionTracker"
@@ -819,25 +820,40 @@ final class AppModel {
 extension AppModel {
     /// A realistic weekly shop across several stores.
     static func demo(isPro: Bool = false) -> AppModel {
-        let demoItems: [(title: String, notes: String?)] = [
-            ("Bananen", "🛒 Aldi Süd"), ("Milch", "laktosefrei\n🛒 Aldi Süd"), ("Vollkornbrot", "🛒 Aldi Süd"),
-            ("Butter", "🛒 Aldi Süd"), ("Eier", "🛒 Aldi Süd"), ("Kaffee", "🛒 Aldi Süd"), ("Tiefkühlpizza", "🛒 Aldi Süd"),
-            ("Gouda", "🛒 Aldi Süd"), ("Zucchini", "🛒 Aldi Süd"),
-            ("Zahnpasta", "🛒 dm"), ("Duschgel", "🛒 dm"), ("Sonnencreme", "LSF 50\n🛒 dm"),
-            ("Erdbeeren", "🛒 Markt"), ("Spargel", "🛒 Markt"),
-            ("Frischkäse", "🛒 Rewe"), ("Joghurt", "🛒 Rewe"),
-            ("Batterien AA", nil), ("Geschenkpapier", nil), ("Hafermilch", nil),
-        ]
+        // Follows the app language (`-AppleLanguages (en)`), so screenshots exist in both.
+        // Store markers stay German: they are the store names, in Reminders as in the app.
+        let isEnglish = Bundle.main.preferredLocalizations.first == "en"
+        let demoItems: [(title: String, notes: String?)] = isEnglish
+            ? [
+                ("Bananas", "🛒 Aldi Süd"), ("Milk", "lactose-free\n🛒 Aldi Süd"), ("Wholegrain bread", "🛒 Aldi Süd"),
+                ("Butter", "🛒 Aldi Süd"), ("Eggs", "🛒 Aldi Süd"), ("Coffee", "🛒 Aldi Süd"), ("Frozen pizza", "🛒 Aldi Süd"),
+                ("Gouda", "🛒 Aldi Süd"), ("Courgettes", "🛒 Aldi Süd"),
+                ("Toothpaste", "🛒 dm"), ("Shower gel", "🛒 dm"), ("Sunscreen", "SPF 50\n🛒 dm"),
+                ("Strawberries", "🛒 Markt"), ("Asparagus", "🛒 Markt"),
+                ("Cream cheese", "🛒 Rewe"), ("Yoghurt", "🛒 Rewe"),
+                ("AA batteries", nil), ("Wrapping paper", nil), ("Oat milk", nil),
+            ]
+            : [
+                ("Bananen", "🛒 Aldi Süd"), ("Milch", "laktosefrei\n🛒 Aldi Süd"), ("Vollkornbrot", "🛒 Aldi Süd"),
+                ("Butter", "🛒 Aldi Süd"), ("Eier", "🛒 Aldi Süd"), ("Kaffee", "🛒 Aldi Süd"), ("Tiefkühlpizza", "🛒 Aldi Süd"),
+                ("Gouda", "🛒 Aldi Süd"), ("Zucchini", "🛒 Aldi Süd"),
+                ("Zahnpasta", "🛒 dm"), ("Duschgel", "🛒 dm"), ("Sonnencreme", "LSF 50\n🛒 dm"),
+                ("Erdbeeren", "🛒 Markt"), ("Spargel", "🛒 Markt"),
+                ("Frischkäse", "🛒 Rewe"), ("Joghurt", "🛒 Rewe"),
+                ("Batterien AA", nil), ("Geschenkpapier", nil), ("Hafermilch", nil),
+            ]
         let model = preview(
             items: ProcessInfo.processInfo.arguments.contains("-demo-empty-unsorted")
                 ? demoItems.filter { $0.notes != nil } : demoItems,
-            stores: ["rewe", "aldi-sued", "dm", "generic-market"]
+            stores: ["rewe", "aldi-sued", "dm", "generic-market"],
+            listTitle: isEnglish ? "Shopping" : "Einkaufen"
         )
         model.hasCompletedOnboarding = true
         model.isPro = isPro
         // Earlier shops taught Marqet where oat milk goes.
         if let rewe = model.stores.first(where: { $0.catalogKey == "rewe" }) {
-            for _ in 0..<2 { model.assignmentMemory.record(itemKey: "hafermilch", storeID: rewe.id) }
+            let key = ItemKeyNormalizer.matchingKey(for: isEnglish ? "Oat milk" : "Hafermilch")
+            for _ in 0..<2 { model.assignmentMemory.record(itemKey: key, storeID: rewe.id) }
         }
         // Branches in Munich's old town, about 900 m apart: for the map and for arrival checks
         // with `xcrun simctl location booted set 48.1321,11.5648` (Aldi Süd).
@@ -856,7 +872,11 @@ extension AppModel {
     }
 
     /// Model with in-memory Reminders, stores and settings, for previews and the demo.
-    static func preview(items: [(title: String, notes: String?)] = [], stores storeKeys: [String] = []) -> AppModel {
+    static func preview(
+        items: [(title: String, notes: String?)] = [],
+        stores storeKeys: [String] = [],
+        listTitle: String = "Einkaufen"
+    ) -> AppModel {
         let gateway = InMemoryReminderGateway()
         let model = AppModel(
             gateway: gateway,

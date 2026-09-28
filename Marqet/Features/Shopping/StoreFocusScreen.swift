@@ -34,6 +34,8 @@ struct StoreFocusScreen: View {
     @State private var isComposerFocused = false
     @State private var showsAddStore = false
     @State private var addFeedback = 0
+    /// Zuordnen zooms out of the triage button in the bottom bar.
+    @Namespace private var triageZoom
     @State private var horizontalSafeAreaInsets = EdgeInsets()
     @State private var viewportWidth: CGFloat = 390
     /// Store context left of the list (iPad, open Duo). Otherwise the system bar carries the actions.
@@ -172,6 +174,7 @@ struct StoreFocusScreen: View {
             // even when it is empty afterwards.
             .fullScreenCover(isPresented: Binding(get: { model.triage != nil }, set: { if !$0 { model.endTriage() } })) {
                 TriageScreen()
+                    .navigationTransition(.zoom(sourceID: TriageButton.zoomID, in: triageZoom))
             }
         }
     }
@@ -227,6 +230,7 @@ struct StoreFocusScreen: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
+        .environment(\.cardZoomNamespace, triageZoom)
     }
 
     @ViewBuilder

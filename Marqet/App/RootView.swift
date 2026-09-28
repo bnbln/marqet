@@ -5,6 +5,8 @@ struct RootView: View {
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
     /// Debug: `-widget-gallery` opens Einstellungen › Widgets for screenshots.
     @State private var showsWidgetGallery = false
+    /// Debug: `-widget-showcase` shows the widgets like a Home Screen (App Store screenshots).
+    @State private var showsWidgetShowcase = false
 
     private var accentColor: Color {
         AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
@@ -52,6 +54,12 @@ struct RootView: View {
             if model.hasLoadedItems, ProcessInfo.processInfo.arguments.contains("-widget-gallery") {
                 showsWidgetGallery = true
             }
+            if model.hasLoadedItems, ProcessInfo.processInfo.arguments.contains("-widget-showcase") {
+                showsWidgetShowcase = true
+            }
+        }
+        .fullScreenCover(isPresented: $showsWidgetShowcase) {
+            WidgetShowcaseView()
         }
         #endif
         .alert(

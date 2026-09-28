@@ -1,14 +1,14 @@
 import MarqetCore
 import SwiftUI
 
-/// Assign inbox items to stores (KONZEPT §7.4) in two modes:
-/// - "Nacheinander": one item at a time above big store tiles. On regular width (iPad, iPhone Duo
-///   inside) item and tiles sit side by side (KONZEPT-DUO-IPAD §4.4).
-/// - "Übersicht": a table with one row per item and one column per store; a tap assigns.
-/// Both offer the pending suggestions as one step and show the last step at the bottom.
+/// Assign inbox items to stores (KONZEPT §7.4). Zooms out of "Läden zuordnen" and closes by pulling
+/// it down. Two views, chosen in the settings:
+/// - Karten (default, `TriageCards`): a stack of items above the store grid – drag onto a store,
+///   swipe aside for later or right for the suggestion.
+/// - Tabelle: one row per item and one column per store; a tap assigns.
+/// Both offer the pending suggestions as one step; the end lists every step of the session.
 struct TriageScreen: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showsAddStore = false
     @State private var undoFeedback = 0
 
@@ -21,27 +21,14 @@ struct TriageScreen: View {
                     TriageSummary()
                 } else if mode == .board {
                     TriageOverview(showsAddStore: $showsAddStore)
-                } else if sizeClass == .regular {
-                    AdaptiveSplit {
-                        ScrollView { SingleItemPane().padding(20) }
-                    } secondary: {
-                        ScrollView { StoreTileGrid(showsAddStore: $showsAddStore).padding(20) }
-                    }
+                        .safeAreaInset(edge: .bottom) { LastStepLine() }
                 } else {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            SingleItemPane()
-                            StoreTileGrid(showsAddStore: $showsAddStore)
-                        }
-                        .padding(20)
-                    }
+                    TriageCards(showsAddStore: $showsAddStore)
                 }
             }
             .background(Color(.systemGroupedBackground))
-            .safeAreaInset(edge: .bottom) {
-                if !model.triageQueue.isEmpty { LastStepLine() }
-            }
-            .animation(.snappy, value: mode)
+            .navigationTitle(model.triageQueue.isEmpty ? String(localized: "Zuordnen") : String(localized: "Wo kaufst du das?"))
+            .navigationSubtitle(subtitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
@@ -53,23 +40,19 @@ struct TriageScreen: View {
         .task { Task { await model.refreshPrices() } }
     }
 
+    /// "3 von 12" on the cards, "12 offen" in the table.
+    private var subtitle: String {
+        guard !model.triageQueue.isEmpty else { return "" }
+        if mode == .board { return String(localized: "\(model.triageQueue.count) offen") }
+        let progress = model.triageProgress
+        return String(localized: "\(progress.position) von \(progress.total)")
+    }
+
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
             Button(role: .close) { model.endTriage() }
                 .tint(.primary)
-        }
-        ToolbarItem(placement: .principal) {
-            if model.triageQueue.isEmpty {
-                Text("Zuordnen").font(.headline)
-            } else {
-                Picker("Modus", selection: Binding(get: { mode }, set: { model.setTriageMode($0) })) {
-                    Text("Nacheinander").tag(TriageSession.Mode.single)
-                    Text("Übersicht").tag(TriageSession.Mode.board)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 240)
-            }
         }
         ToolbarItem(placement: .primaryAction) {
             Button("Rückgängig", systemImage: "arrow.uturn.backward") {
@@ -78,130 +61,6 @@ struct TriageScreen: View {
             }
             .tint(.primary)
             .disabled(model.triage?.history.isEmpty ?? true)
-        }
-    }
-}
-
-// MARK: - Nacheinander
-
-/// Question, progress, suggestions shortcut, the current item and what comes next.
-private struct SingleItemPane: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        if let item = model.triageQueue.first {
-            let progress = model.triageProgress
-            VStack(spacing: 16) {
-                VStack(spacing: 2) {
-                    Text("Wo kaufst du das?")
-                        .font(.title3.bold())
-                    Text("\(progress.position) von \(progress.total)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
-                }
-                if model.triageSuggestions.count >= 2 {
-                    AcceptSuggestionsButton()
-                }
-                ItemCardView(item: item)
-                    .id(item.id)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                        removal: .scale(scale: 0.6, anchor: .bottom).combined(with: .opacity)
-                    ))
-                let upcoming = model.triageQueue.dropFirst().prefix(3).map(\.title)
-                if !upcoming.isEmpty {
-                    Text("Als Nächstes: \(upcoming.joined(separator: ", "))")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 4)
-                }
-            }
-            .animation(.snappy, value: item.id)
-        }
-    }
-}
-
-private struct ItemCardView: View {
-    let item: ShoppingItem
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Text(item.title)
-                .font(.largeTitle.bold())
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.6)
-            if let notes = item.userNotes {
-                Text(notes)
-                    .foregroundStyle(.secondary)
-            }
-            Label(model.category(of: item).displayName, systemImage: model.category(of: item).symbol)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-            if let hint = model.priceHint(for: item) {
-                PriceHintLine(hint: hint)
-                    .font(.footnote.weight(.medium))
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: 140)
-        .padding(20)
-        .cardSurface()
-    }
-}
-
-/// Store tiles in a fixed order (muscle memory); the current item's suggestion is only highlighted.
-/// A tap assigns the current item. Below: "Später" and "Laden hinzufügen".
-private struct StoreTileGrid: View {
-    @Binding var showsAddStore: Bool
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        let item = model.triageQueue.first
-        let highlighted = item.flatMap(model.suggestion(for:))
-        let prices = item.flatMap(model.priceHint(for:))
-        VStack(spacing: 10) {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 84, maximum: 140), spacing: 10)], spacing: 10) {
-                ForEach(model.sortedStores) { store in
-                    let suggestion = highlighted?.storeID == store.id ? highlighted : nil
-                    let price = prices?.price(of: store.id)
-                    let isCheapest = prices?.isCheapest(store.id) == true
-                    Button {
-                        guard let item else { return }
-                        Task { await model.triageAssign(item, to: store) }
-                    } label: {
-                        // A habit keeps its label; otherwise the tile shows the price (tag on the cheapest).
-                        let showsLabel = suggestion != nil && (suggestion?.source != .price || price == nil)
-                        StoreTile(
-                            store: store,
-                            caption: showsLabel ? suggestion?.label : price?.shortText,
-                            captionSymbol: showsLabel ? suggestion?.symbol : (isCheapest ? "tag.fill" : nil),
-                            highlight: suggestion == nil ? nil : store.readableColor,
-                            fill: Color(.secondarySystemGroupedBackground)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(suggestion == nil ? "" : String(localized: "Vorschlag"))
-                    .accessibilityValue(price?.displayText ?? "")
-                }
-            }
-
-            HStack(spacing: 10) {
-                SecondaryTriageButton(title: "Später", symbol: "arrow.turn.up.right") {
-                    guard let item else { return }
-                    withAnimation(.snappy) { model.triageSkip(item) }
-                }
-                SecondaryTriageButton(title: "Laden hinzufügen", symbol: "plus") {
-                    showsAddStore = true
-                }
-            }
-            if prices != nil {
-                OpenPricesAttribution()
-            }
         }
     }
 }
@@ -242,7 +101,7 @@ extension StoreSuggestion {
     }
 }
 
-// MARK: - Übersicht
+// MARK: - Tabelle
 
 /// One row per item, one column per store – like a poll. The first stores in the user's order get
 /// a column; the rest sit behind "…" in each row. A tap assigns right away, there is no selection.
@@ -449,33 +308,43 @@ private struct AcceptSuggestionsButton: View {
 }
 
 /// "Batterien AA → Rewe": where the last step went, next to "Rückgängig" in meaning.
-private struct LastStepLine: View {
+struct LastStepLine: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         Group {
-            switch model.triage?.history.last {
-            case .assigned(let itemID, let storeID):
-                if let item = model.items.first(where: { $0.id == itemID }), let store = model.store(storeID) {
-                    line(Text("\(item.title) → \(store.name)")) { StoreBadge(store: store, size: 20) }
-                        .id(model.triage?.history.count)
-                }
-            case .skipped(let itemID):
-                if let item = model.items.first(where: { $0.id == itemID }) {
-                    line(Text("\(item.title) kommt später")) {
-                        Image(systemName: "arrow.turn.up.right").foregroundStyle(.secondary)
-                    }
+            if let step = model.triage?.history.last {
+                StepPill(step: step)
                     .id(model.triage?.history.count)
-                }
-            case nil:
-                EmptyView()
+                    .padding(.bottom, 8)
             }
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .animation(.snappy, value: model.triage?.history.count)
     }
+}
 
-    private func line(_ text: Text, @ViewBuilder icon: () -> some View) -> some View {
+/// One step of the session as a glass capsule: "Milch → Rewe" or "Brot kommt später".
+private struct StepPill: View {
+    let step: TriageSession.Step
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        switch step {
+        case .assigned(let itemID, let storeID):
+            if let item = model.items.first(where: { $0.id == itemID }), let store = model.store(storeID) {
+                pill(Text("\(item.title) → \(store.name)")) { StoreBadge(store: store, size: 20) }
+            }
+        case .skipped(let itemID):
+            if let item = model.items.first(where: { $0.id == itemID }) {
+                pill(Text("\(item.title) kommt später")) {
+                    Image(systemName: "arrow.turn.up.right").foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func pill(_ text: Text, @ViewBuilder icon: () -> some View) -> some View {
         HStack(spacing: 8) {
             icon()
             text.lineLimit(1)
@@ -484,7 +353,45 @@ private struct LastStepLine: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .glassEffect(.regular, in: .capsule)
-        .padding(.bottom, 8)
+    }
+}
+
+/// Rows of pills, centered, wrapping at the width.
+private struct CenteredFlow: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = rows(of: subviews, width: proposal.width ?? .infinity)
+        let height = rows.map(\.height).reduce(0, +) + spacing * CGFloat(max(0, rows.count - 1))
+        return CGSize(width: proposal.width ?? rows.map(\.width).max() ?? 0, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in rows(of: subviews, width: bounds.width) {
+            var x = bounds.midX - row.width / 2
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            y += row.height + spacing
+        }
+    }
+
+    private func rows(of subviews: Subviews, width: CGFloat) -> [(indices: [Int], width: CGFloat, height: CGFloat)] {
+        var rows: [(indices: [Int], width: CGFloat, height: CGFloat)] = []
+        for (index, subview) in subviews.enumerated() {
+            let size = subview.sizeThatFits(.unspecified)
+            if let last = rows.last, last.width + spacing + size.width <= width {
+                rows[rows.count - 1].indices.append(index)
+                rows[rows.count - 1].width += spacing + size.width
+                rows[rows.count - 1].height = max(last.height, size.height)
+            } else {
+                rows.append(([index], min(size.width, width), size.height))
+            }
+        }
+        return rows
     }
 }
 
@@ -495,6 +402,16 @@ private struct TriageSummary: View {
     @State private var showsPaywall = false
 
     var body: some View {
+        // Centered while it fits; a long session scrolls.
+        ViewThatFits(in: .vertical) {
+            content.frame(maxHeight: .infinity)
+            ScrollView { content }
+        }
+        .sheet(isPresented: $showsPaywall) { PaywallView() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
         let assigned = model.triage?.assignedCount ?? 0
         let autoAssignable = model.triage?.autoAssignable ?? 0
         let skipped = model.triageSkippedItems.count
@@ -516,6 +433,15 @@ private struct TriageSummary: View {
             if assigned > 0, skipped > 0 {
                 Text(skipped == 1 ? "1 Eintrag hast du übersprungen." : "\(skipped) Einträge hast du übersprungen.")
                     .foregroundStyle(.secondary)
+            }
+            // Every step of the session, as the pills that came up while assigning.
+            if let history = model.triage?.history, !history.isEmpty {
+                CenteredFlow {
+                    ForEach(Array(history.enumerated()), id: \.offset) { _, step in
+                        StepPill(step: step)
+                    }
+                }
+                .padding(.vertical, 8)
             }
             if !model.isPro, autoAssignable > 0 {
                 Label(autoAssignable == 1
@@ -543,7 +469,6 @@ private struct TriageSummary: View {
             }
         }
         .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .sheet(isPresented: $showsPaywall) { PaywallView() }
+        .frame(maxWidth: .infinity)
     }
 }

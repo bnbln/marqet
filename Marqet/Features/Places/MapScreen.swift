@@ -111,7 +111,9 @@ struct MapScreen: View {
             .animation(.snappy, value: isTooFarOut)
             #if DEBUG
             .overlay(alignment: .topLeading) {
-                if ProcessInfo.processInfo.arguments.contains("-demo-map") {
+                // Not in App Store screenshots (scripts/screenshots passes `-screenshots`).
+                if ProcessInfo.processInfo.arguments.contains("-demo-map"),
+                   !ProcessInfo.processInfo.arguments.contains("-screenshots") {
                     Text("items=\(showsOnlyStoresWithItems) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) markers=\(markers.count)")
                         .font(.caption2)
                         .fixedSize(horizontal: false, vertical: true)

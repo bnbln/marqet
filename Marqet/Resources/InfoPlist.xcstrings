@@ -63,6 +63,12 @@
             "state" : "new",
             "value" : "Marqet meldet sich bei deinen Läden und zeigt deren Einkaufsliste. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices."
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet alerts you at your stores and shows their shopping list. For local price finds, Marqet sends only a roughly rounded position to Open Prices."
+          }
         }
       }
     },
@@ -73,13 +79,13 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät."
+            "value" : "Marqet zeigt Filialen in deiner Nähe und sortiert Läden nach Entfernung. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marqet shows your stores' branches nearby and can sort your stores by distance. Your location stays on your device."
+            "value" : "Marqet shows branches near you and sorts stores by distance. For local price finds, Marqet sends only a roughly rounded position to Open Prices."
           }
         }
       }

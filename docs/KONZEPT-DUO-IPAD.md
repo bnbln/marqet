@@ -230,8 +230,8 @@ Das Gerät steht wie ein kleiner Laptop auf der Küchenarbeitsplatte, man prüft
 
 | Kontext | Darstellung |
 |---|---|
-| compact (iPhone, Duo außen) | wie KONZEPT (Entscheidung 4): Vollbild-Sheet, Nacheinander \| Übersicht |
-| regular (Duo innen, iPad) | **Nacheinander:** zweiseitig mit `ArrangementView(.split)`, **links** das große Item mit Fortschritt, **rechts** die Laden-Kacheln mit „Später“ und „Laden hinzufügen“. Auf dem Duo liegt die Teilung automatisch auf dem Falz. **Übersicht:** die Tabelle über die volle Breite mit bis zu 8 Laden-Spalten (ohne Ziehen auf Kacheln) |
+| compact (iPhone, Duo außen) | wie KONZEPT (Entscheidung 4): Zoom aus dem Button, Karten oder Tabelle laut Einstellungen |
+| regular (Duo innen, iPad) | **Karten:** zweiseitig mit `ArrangementView(.split)`, **links** der Kartenstapel, **rechts** das Laden-Raster; gezogen wird über die Teilung hinweg. Auf dem Duo liegt die Teilung automatisch auf dem Falz. **Tabelle:** über die volle Breite mit bis zu 8 Laden-Spalten (ohne Ziehen auf Kacheln) |
 | Duo innen, Buchhaltung | wie regular. Zuordnen per Tipp ist bevorzugt, weil das Ziehen über einen angewinkelten Falz unbequem ist. Drag bleibt möglich |
 
 ```

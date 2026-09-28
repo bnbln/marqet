@@ -57,6 +57,9 @@ struct OnboardingFlow: View {
             }
             .navigationBarTitleDisplayMode(.inline)
         }
+        // Prices arrive in the background while the user reads the first screens. Unstructured,
+        // so finishing the onboarding quickly does not cancel the download.
+        .task { Task(priority: .utility) { await model.prefetchStaplePrices() } }
         .onChange(of: model.phase) { _, phase in
             // Access granted (here or in Settings): continue with the list.
             if step == .access, hasAccess(phase) {

@@ -64,27 +64,6 @@ extension StoreCatalog.Region {
     var currencyCode: String { self == .switzerland ? "CHF" : "EUR" }
 }
 
-/// The cheapest of the user's stores for an item, or the one price there is.
-struct PriceHintLine: View {
-    let hint: StorePriceHint
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        if let cheapest = hint.cheapest, let store = model.store(cheapest.storeID) {
-            Label {
-                Text("Am günstigsten: \(store.name), \(cheapest.price.displayText)")
-            } icon: {
-                Image(systemName: "tag.fill")
-            }
-            .foregroundStyle(store.readableColor)
-            .accessibilityHint(Text("Preise von Open Prices"))
-        } else if let only = hint.storePrices.first, let store = model.store(only.storeID) {
-            Label("\(store.name): \(only.price.displayText)", systemImage: "tag")
-                .foregroundStyle(.secondary)
-        }
-    }
-}
-
 #if DEBUG
 extension AppModel {
     /// `-demo -demo-prices`: groceries without a store, at chains Open Prices knows well.

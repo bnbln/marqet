@@ -1,0 +1,95 @@
+{
+  "bundleID": "app.marqet.Marqet",
+  "app": ".build/DerivedData/Build/Products/Debug-iphonesimulator/Marqet.app",
+  "location": [48.1351, 11.5700],
+  "style": {
+    "background": "#F5F3EF",
+    "title": "#1C1C1E",
+    "subtitle": "#6E6E73",
+    "frame": "#1C1C1E"
+  },
+  "languages": [
+    { "code": "de", "locale": "de_DE" },
+    { "code": "en", "locale": "en_GB" }
+  ],
+  "devices": [
+    {
+      "id": "iphone",
+      "simulator": "iPhone 18 Pro Max",
+      "canvas": [1320, 2868],
+      "bezel": "bezels/iphone.png",
+      "titleSize": 0.066,
+      "screenCorner": 0.125
+    },
+    {
+      "id": "ipad",
+      "simulator": "iPad Air 13-inch (M4)",
+      "canvas": [2064, 2752],
+      "bezel": "bezels/ipad.png",
+      "titleSize": 0.052,
+      "screenCorner": 0.03
+    },
+    {
+      "id": "duo-outer",
+      "simulator": "iPhone Duo",
+      "bezel": "bezels/duo-outer.png",
+      "titleSize": 0.066,
+      "screenCorner": 0.09,
+      "display": "1",
+      "prompt": "iPhone Duo zuklappen (Außendisplay, hoch) – im Device Hub."
+    },
+    {
+      "id": "duo-inner",
+      "simulator": "iPhone Duo",
+      "bezel": "bezels/duo-inner.png",
+      "titleSize": 0.06,
+      "screenCorner": 0.06,
+      "display": "3",
+      "prompt": "iPhone Duo aufklappen (Innendisplay, quer) – im Device Hub."
+    }
+  ],
+  "shots": [
+    {
+      "id": "01-home",
+      "args": ["-demo-page", "aldi-sued"],
+      "wait": 8,
+      "title": { "de": "Deine Liste.\nNach Läden sortiert.", "en": "Your list.\nSorted by store." },
+      "subtitle": { "de": "Direkt aus Apple Erinnerungen.", "en": "Straight from Apple Reminders." }
+    },
+    {
+      "id": "02-voice",
+      "args": ["-demo-voice"],
+      "wait": 22,
+      "title": { "de": "Sag einfach,\nwas du brauchst.", "en": "Just say\nwhat you need." },
+      "subtitle": { "de": "Marqet sortiert schon beim Sprechen.", "en": "Marqet sorts it while you speak." }
+    },
+    {
+      "id": "03-store",
+      "args": ["-demo-page", "aldi-sued", "-demo-focus"],
+      "wait": 6,
+      "title": { "de": "Im Laden alles\nauf einen Blick.", "en": "Everything at a glance\nin store." },
+      "subtitle": { "de": "Nach Kategorien geordnet, abhaken mit einem Tipp.", "en": "Grouped by aisle, checked off with a tap." }
+    },
+    {
+      "id": "04-triage",
+      "args": ["-demo-triage"],
+      "wait": 6,
+      "title": { "de": "Ein Tipp,\nund es ist sortiert.", "en": "One tap\nand it's sorted." },
+      "subtitle": { "de": "Marqet merkt sich, wo du was kaufst.", "en": "Marqet remembers where you buy what." }
+    },
+    {
+      "id": "05-map",
+      "args": ["-demo-map", "-mapShowsOnlyStoresWithItems", "YES", "-mapShopCategory", "groceries"],
+      "wait": 9,
+      "title": { "de": "Deine Läden\nin der Nähe.", "en": "Your stores\nnearby." },
+      "subtitle": { "de": "Filialen, Entfernung und Route.", "en": "Branches, distances and directions." }
+    },
+    {
+      "id": "06-widgets",
+      "args": ["-widget-showcase"],
+      "wait": 6,
+      "title": { "de": "Deine Liste\nauf dem Home-Bildschirm.", "en": "Your list\non your Home Screen." },
+      "subtitle": { "de": "Abhaken, ohne die App zu öffnen.", "en": "Check things off without opening the app." }
+    }
+  ]
+}

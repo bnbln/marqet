@@ -1,12 +1,6 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
-    "In deiner Umgebung gibt es noch keine belegten Preisfunde." : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "There are no supported price finds nearby yet." } } }
-    },
-    "Community-Meldung · Preis vor Ort prüfen" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Community report · check the price in store" } } }
-    },
     "" : {
       "localizations" : {
         "en" : {
@@ -18,7 +12,14 @@
       }
     },
     "„%@“ gelöscht" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” deleted"
+          }
+        }
+      }
     },
     "„10 Eier vom Markt und bei Rewe 500 g Hackfleisch“" : {
       "localizations" : {
@@ -31,13 +32,26 @@
       }
     },
     "%@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
     },
     "%@ · %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%1$@ · %2$@"
           }
         }
@@ -60,7 +74,14 @@
       }
     },
     "%@ abhaken" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check off %@"
+          }
+        }
+      }
     },
     "%@ für %@" : {
       "localizations" : {
@@ -77,6 +98,9 @@
           }
         }
       }
+    },
+    "%@ hinzufügen" : {
+
     },
     "%@ ist am nächsten (%@)." : {
       "localizations" : {
@@ -125,7 +149,14 @@
       }
     },
     "%@ nochmal kaufen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy %@ again"
+          }
+        }
+      }
     },
     "%@ zu %@" : {
       "localizations" : {
@@ -196,7 +227,14 @@
       }
     },
     "%@/Stk." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@/pc."
+          }
+        }
+      }
     },
     "%lld" : {
       "localizations" : {
@@ -209,7 +247,14 @@
       }
     },
     "%lld auf der Liste" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld on the list"
+          }
+        }
+      }
     },
     "%lld Einträge" : {
       "localizations" : {
@@ -304,32 +349,94 @@
             "state" : "new",
             "value" : "%1$lld Einträge: %2$@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld items: %2$@"
+          }
         }
       }
     },
     "%lld erledigt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld done"
+          }
+        }
+      }
     },
     "%lld erledigt · läuft" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld done · in progress"
+          }
+        }
+      }
     },
     "%lld Filialen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld branches"
+          }
+        }
+      }
     },
     "%lld Geschäfte" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld stores"
+          }
+        }
+      }
     },
     "%lld in der Inbox" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld in the inbox"
+          }
+        }
+      }
     },
     "%lld Kundenkarten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld loyalty cards"
+          }
+        }
+      }
     },
     "%lld Läden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld stores"
+          }
+        }
+      }
     },
     "%lld Läden mit offenen Einträgen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld stores with open items"
+          }
+        }
+      }
     },
     "%lld Listen" : {
       "localizations" : {
@@ -374,6 +481,12 @@
             "state" : "new",
             "value" : "%1$lld offen · %2$@ %3$lld"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld open · %2$@ %3$lld"
+          }
         }
       }
     },
@@ -383,6 +496,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$lld offen · %2$lld Läden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld open · %2$lld stores"
           }
         }
       }
@@ -444,7 +563,14 @@
       }
     },
     "%lld weitere Läden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more stores"
+          }
+        }
+      }
     },
     "%lld zum Zuordnen" : {
       "localizations" : {
@@ -457,25 +583,74 @@
       }
     },
     "+ %lld weitere" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %lld more"
+          }
+        }
+      }
     },
     "+ %lld weitere Läden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ %lld more stores"
+          }
+        }
+      }
     },
     "+ 1 weiterer" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+ 1 more"
+          }
+        }
+      }
     },
     "+%lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld"
+          }
+        }
+      }
     },
     "−%lld %%" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "−%lld%%"
+          }
+        }
+      }
     },
     "○ %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "○ %@"
+          }
+        }
+      }
     },
     "✓ %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "✓ %@"
+          }
+        }
+      }
     },
     "🛒 Markt" : {
       "extractionState" : "stale",
@@ -500,7 +675,14 @@
       }
     },
     "${list} öffnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open ${list}"
+          }
+        }
+      }
     },
     "1 Eintrag" : {
       "localizations" : {
@@ -583,13 +765,34 @@
       }
     },
     "1 Eintrag: %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 item: %@"
+          }
+        }
+      }
     },
     "1 Filiale" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 branch"
+          }
+        }
+      }
     },
     "1 Laden mit offenen Einträgen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 store with open items"
+          }
+        }
+      }
     },
     "1 Liste" : {
       "localizations" : {
@@ -602,7 +805,14 @@
       }
     },
     "1 offener Eintrag" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 open item"
+          }
+        }
+      }
     },
     "1 Vorschlag übernehmen" : {
       "localizations" : {
@@ -615,7 +825,14 @@
       }
     },
     "1 weiterer Laden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 more store"
+          }
+        }
+      }
     },
     "Abbrechen" : {
       "localizations" : {
@@ -708,16 +925,44 @@
       }
     },
     "Alle Geschäfte" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Stores"
+          }
+        }
+      }
     },
     "Alle Läden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Stores"
+          }
+        }
+      }
     },
     "Alle Läden mit offenen Einträgen auf einen Blick." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All stores with open items, at a glance."
+          }
+        }
+      }
     },
     "Alle Läden wie die Cards in der App, mit „Einkauf starten“." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All stores like the cards in the app, with “Start Shopping”."
+          }
+        }
+      }
     },
     "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
       "extractionState" : "stale",
@@ -741,7 +986,14 @@
       }
     },
     "Alles erledigt – gut eingekauft!" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All done – great shopping!"
+          }
+        }
+      }
     },
     "Alles erledigt bei %@" : {
       "localizations" : {
@@ -795,6 +1047,7 @@
       }
     },
     "Als Nächstes: %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -805,20 +1058,41 @@
       }
     },
     "Am günstigsten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest"
+          }
+        }
+      }
     },
     "Am günstigsten: %@, %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "Am günstigsten: %1$@, %2$@"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cheapest: %1$@, %2$@"
+          }
         }
       }
     },
     "Am Laden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the Store"
+          }
+        }
+      }
     },
     "An der Kasse zeigen" : {
       "localizations" : {
@@ -851,7 +1125,14 @@
       }
     },
     "Anzeigen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show"
+          }
+        }
+      }
     },
     "Anzeigeoptionen" : {
       "localizations" : {
@@ -983,6 +1264,9 @@
         }
       }
     },
+    "Auf einen Laden ziehen · zur Seite wischen für später" : {
+
+    },
     "Aufnahme beenden" : {
       "localizations" : {
         "en" : {
@@ -1034,7 +1318,14 @@
       }
     },
     "Automatisch" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        }
+      }
     },
     "Automatisch zuordnen" : {
       "localizations" : {
@@ -1057,7 +1348,14 @@
       }
     },
     "Automatisch: laufender Einkauf oder nächste Card" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic: current shopping trip or next card"
+          }
+        }
+      }
     },
     "Baby" : {
       "localizations" : {
@@ -1140,22 +1438,64 @@
       }
     },
     "Bearbeiten schließen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close Editing"
+          }
+        }
+      }
     },
     "Beauty & Drogerie" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beauty & Drugstore"
+          }
+        }
+      }
     },
     "Beauty & Parfümerie" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beauty & Perfumery"
+          }
+        }
+      }
     },
     "Beenden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End"
+          }
+        }
+      }
     },
     "Bei Ankunft melden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notify on Arrival"
+          }
+        }
+      }
     },
     "Beim Abhaken automatisch starten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Automatically When Checking Off"
+          }
+        }
+      }
     },
     "Beim Umbenennen passt Marqet die Zeile „🛒 %@“ in allen offenen Einträgen an." : {
       "localizations" : {
@@ -1178,7 +1518,14 @@
       }
     },
     "Beobachtet" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watched"
+          }
+        }
+      }
     },
     "Bernstein" : {
       "localizations" : {
@@ -1191,10 +1538,24 @@
       }
     },
     "Bevorzugen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prefer"
+          }
+        }
+      }
     },
     "Bevorzugt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preferred"
+          }
+        }
+      }
     },
     "Bioladen" : {
       "localizations" : {
@@ -1227,19 +1588,54 @@
       }
     },
     "Bücher" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Books"
+          }
+        }
+      }
     },
     "ca. %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "approx. %@"
+          }
+        }
+      }
     },
     "ca. %@/kg" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "approx. %@/kg"
+          }
+        }
+      }
     },
     "ca. %@/l" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "approx. %@/l"
+          }
+        }
+      }
     },
     "ca. %@/Stk." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "approx. %@/pc."
+          }
+        }
+      }
     },
     "Code 128 erlaubt keine Umlaute oder Sonderzeichen." : {
       "localizations" : {
@@ -1247,6 +1643,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Code 128 doesn’t allow accented or special characters."
+          }
+        }
+      }
+    },
+    "Community-Meldung · Preis vor Ort prüfen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Community report · check the price in store"
           }
         }
       }
@@ -1272,10 +1678,24 @@
       }
     },
     "Datenbank unter der Open Database License (ODbL 1.0), Inhalte unter der Database Contents License (DbCL 1.0)." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Database under the Open Database License (ODbL 1.0), contents under the Database Contents License (DbCL 1.0)."
+          }
+        }
+      }
     },
     "Datenquellen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data Sources"
+          }
+        }
+      }
     },
     "Datenschutz" : {
       "localizations" : {
@@ -1319,10 +1739,24 @@
       }
     },
     "Deine Filiale" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your Branch"
+          }
+        }
+      }
     },
     "Deine Kundenkarte, ein Tipp bis zum Barcode an der Kasse." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your loyalty card, one tap away from the barcode at checkout."
+          }
+        }
+      }
     },
     "Deine Läden" : {
       "localizations" : {
@@ -1335,7 +1769,14 @@
       }
     },
     "Deine Ladenkarten sind gerade nach %@ sortiert. Sobald du hier ziehst, gilt deine eigene Reihenfolge." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your store cards are currently sorted by %@. As soon as you drag here, your own order applies."
+          }
+        }
+      }
     },
     "Deine Listen bleiben in Apple Erinnerungen. Läden und Kundenkarten speichert Marqet auf diesem Gerät." : {
       "localizations" : {
@@ -1390,7 +1831,14 @@
       }
     },
     "Der Barcode für die Kasse und die Prospekte deiner Läden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The barcode for checkout and the leaflets from your stores."
+          }
+        }
+      }
     },
     "Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“." : {
       "localizations" : {
@@ -1403,7 +1851,14 @@
       }
     },
     "Der Laden steht sichtbar in den Notizen des Eintrags – auch für alle, mit denen du die Liste teilst." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The store is visible in the item’s notes – also for anyone you share the list with."
+          }
+        }
+      }
     },
     "Der nächste Laden steht vorn. Läden ohne Filiale folgen in deiner Reihenfolge." : {
       "localizations" : {
@@ -1436,7 +1891,14 @@
       }
     },
     "Die aktuellen Prospekte deiner Läden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The current leaflets from your stores."
+          }
+        }
+      }
     },
     "Die bevorzugte Filiale bestimmt Entfernung, Kartenpunkt und die Adresse auf der Card." : {
       "localizations" : {
@@ -1480,7 +1942,14 @@
       }
     },
     "Die Notiz steht auch in der Erinnerungen-App." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The note also appears in the Reminders app."
+          }
+        }
+      }
     },
     "Die Nummer braucht %lld Ziffern." : {
       "localizations" : {
@@ -1615,13 +2084,34 @@
       }
     },
     "Du bist bei %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re at %@"
+          }
+        }
+      }
     },
     "Du bist hier" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are here"
+          }
+        }
+      }
     },
     "Du bist hier · %lld offen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are here · %lld open"
+          }
+        }
+      }
     },
     "Eigenen Laden anlegen" : {
       "localizations" : {
@@ -1644,13 +2134,34 @@
       }
     },
     "Ein Laden, die Inbox, der nächste Laden oder zuletzt Erledigtes – abhaken direkt im Widget." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A store, the inbox, the next store, or recently completed items – check off directly in the widget."
+          }
+        }
+      }
     },
     "Eine ganze Seite des Home-Bildschirms – ideal auf dem aufgeklappten iPhone Duo." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A whole Home Screen page – ideal on an unfolded iPhone Duo."
+          }
+        }
+      }
     },
     "Eine Liste aus Marqet: ein Laden, die Inbox, der nächste Laden oder zuletzt Erledigtes." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A list from Marqet: a store, the inbox, the next store, or recently completed items."
+          }
+        }
+      }
     },
     "Einen Moment …" : {
       "localizations" : {
@@ -1663,7 +2174,14 @@
       }
     },
     "Eingabe schließen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close Input"
+          }
+        }
+      }
     },
     "Einige Preise konnten nicht aktualisiert werden." : {
       "localizations" : {
@@ -1676,10 +2194,24 @@
       }
     },
     "Einkauf an- oder ausschalten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Shopping On or Off"
+          }
+        }
+      }
     },
     "Einkauf beenden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Shopping"
+          }
+        }
+      }
     },
     "Einkauf bei %@" : {
       "localizations" : {
@@ -1692,28 +2224,84 @@
       }
     },
     "Einkauf bei %@ beenden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End shopping at %@"
+          }
+        }
+      }
     },
     "Einkauf bei %@ gestartet." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping at %@ started."
+          }
+        }
+      }
     },
     "Einkauf bei %@ starten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start shopping at %@"
+          }
+        }
+      }
     },
     "Einkauf bei ${store} starten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start shopping at ${store}"
+          }
+        }
+      }
     },
     "Einkauf fertig" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping Done"
+          }
+        }
+      }
     },
     "Einkauf jetzt starten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Shopping Now"
+          }
+        }
+      }
     },
     "Einkauf läuft" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping in Progress"
+          }
+        }
+      }
     },
     "Einkauf läuft · %lld erledigt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping in progress · %lld done"
+          }
+        }
+      }
     },
     "Einkauf starten" : {
       "localizations" : {
@@ -1816,7 +2404,14 @@
       }
     },
     "Eintrag abhaken" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Off Item"
+          }
+        }
+      }
     },
     "Eintrag hinzufügen" : {
       "localizations" : {
@@ -1839,10 +2434,24 @@
       }
     },
     "Einträge ohne Laden landen hier." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Items without a store land here."
+          }
+        }
+      }
     },
     "Einträge werden geladen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading items"
+          }
+        }
+      }
     },
     "Eintragen mit Siri" : {
       "localizations" : {
@@ -1855,7 +2464,14 @@
       }
     },
     "Elektronik" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Electronics"
+          }
+        }
+      }
     },
     "Entfernen" : {
       "localizations" : {
@@ -1959,7 +2575,14 @@
       }
     },
     "Extragroß" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extra Large"
+          }
+        }
+      }
     },
     "Familie" : {
       "localizations" : {
@@ -2012,7 +2635,14 @@
       }
     },
     "Filiale in der Nähe" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branch Nearby"
+          }
+        }
+      }
     },
     "Filialen" : {
       "localizations" : {
@@ -2025,7 +2655,14 @@
       }
     },
     "Filialen deiner Läden in der Nähe" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branches of your stores nearby"
+          }
+        }
+      }
     },
     "Filialen in der Nähe suchen" : {
       "localizations" : {
@@ -2038,10 +2675,24 @@
       }
     },
     "Filter" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter"
+          }
+        }
+      }
     },
     "Finde Läden in deiner Nähe und hake Einkäufe ab." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find stores nearby and check off your shopping."
+          }
+        }
+      }
     },
     "Fisch" : {
       "localizations" : {
@@ -2104,7 +2755,14 @@
       }
     },
     "Für Ankunftsmeldungen braucht Marqet den Standort „Immer“ und Mitteilungen. Ohne sie zeigt die App die Liste des Ladens trotzdem, sobald du sie öffnest." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For arrival notifications, Marqet needs location access “Always” and notifications. Without them, the app still shows the store’s list as soon as you open it."
+          }
+        }
+      }
     },
     "Für deine Region sind noch keine offiziellen Angebotsseiten hinterlegt." : {
       "localizations" : {
@@ -2177,13 +2835,34 @@
       }
     },
     "Gerade ist nichts zu besorgen." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There’s nothing to get right now."
+          }
+        }
+      }
     },
     "Geschäfte" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stores"
+          }
+        }
+      }
     },
     "Geschätzter Richtwert: %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated guide price: %@"
+          }
+        }
+      }
     },
     "Getränke" : {
       "localizations" : {
@@ -2214,6 +2893,9 @@
           }
         }
       }
+    },
+    "Günstiger als deine Läden" : {
+
     },
     "Guten Abend" : {
       "localizations" : {
@@ -2266,7 +2948,14 @@
       }
     },
     "Halten und ziehen ändert die Reihenfolge deiner Ladenkarten, nach links wischen löscht." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold and drag to change the order of your store cards, swipe left to delete."
+          }
+        }
+      }
     },
     "Haushalt" : {
       "localizations" : {
@@ -2319,7 +3008,14 @@
       }
     },
     "Home-Bildschirm gedrückt halten, „Bearbeiten“ › „Widget hinzufügen“ und nach Marqet suchen." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press and hold the Home Screen, tap “Edit” › “Add Widget”, and search for Marqet."
+          }
+        }
+      }
     },
     "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser." : {
       "extractionState" : "stale",
@@ -2332,8 +3028,25 @@
         }
       }
     },
+    "In deiner Umgebung gibt es noch keine belegten Preisfunde." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There are no supported price finds nearby yet."
+          }
+        }
+      }
+    },
     "In den Einstellungen erlauben" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow in Settings"
+          }
+        }
+      }
     },
     "In den letzten 7 Tagen nichts erledigt." : {
       "localizations" : {
@@ -2346,10 +3059,24 @@
       }
     },
     "In der Nähe" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nearby"
+          }
+        }
+      }
     },
     "In der Nähe öffnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Nearby"
+          }
+        }
+      }
     },
     "Inbox" : {
       "localizations" : {
@@ -2362,10 +3089,24 @@
       }
     },
     "Inbox %lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inbox %lld"
+          }
+        }
+      }
     },
     "Inbox zeigen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Inbox"
+          }
+        }
+      }
     },
     "Intelligenz" : {
       "localizations" : {
@@ -2378,7 +3119,14 @@
       }
     },
     "Jeder Laden kann als eigener Laden angelegt werden. Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any store can be added as your own store. Marqet has no connection to the retail chains mentioned. All trademarks belong to their respective owners."
+          }
+        }
+      }
     },
     "Jetzt zuordnen" : {
       "localizations" : {
@@ -2401,7 +3149,14 @@
       }
     },
     "Karte des Ladens, in dem du einkaufst" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card for the store you’re shopping in"
+          }
+        }
+      }
     },
     "Karte mit der gespeicherten Filiale von %@" : {
       "localizations" : {
@@ -2422,6 +3177,9 @@
           }
         }
       }
+    },
+    "Karten" : {
+
     },
     "Kartennummer" : {
       "localizations" : {
@@ -2454,7 +3212,14 @@
       }
     },
     "Kategorie" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        }
+      }
     },
     "Kategorie ändern" : {
       "extractionState" : "stale",
@@ -2468,7 +3233,14 @@
       }
     },
     "Kategorien zeigen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Categories"
+          }
+        }
+      }
     },
     "Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten." : {
       "localizations" : {
@@ -2491,10 +3263,24 @@
       }
     },
     "Kaufhaus" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Department Store"
+          }
+        }
+      }
     },
     "Kaufhäuser" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Department Stores"
+          }
+        }
+      }
     },
     "Keine Angebote verfügbar" : {
       "localizations" : {
@@ -2547,7 +3333,14 @@
       }
     },
     "Keine Prospekte für deine Region" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No leaflets for your region"
+          }
+        }
+      }
     },
     "Keine weiteren Läden" : {
       "localizations" : {
@@ -2580,13 +3373,34 @@
       }
     },
     "Klein und einfarbig – für den nächsten Laden, alle Läden oder die Kundenkarte." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Small and single-colour – for the next store, all stores, or the loyalty card."
+          }
+        }
+      }
     },
     "Kontrollzentrum: „Eintrag hinzufügen“, „Kundenkarte“ und „Einkauf“ – auch für die Aktionstaste." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control Center: “Add Item”, “Loyalty Card”, and “Shopping” – also available for the Action button."
+          }
+        }
+      }
     },
     "Kopieren" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        }
+      }
     },
     "Koralle" : {
       "localizations" : {
@@ -2609,7 +3423,14 @@
       }
     },
     "Kundenkarte & Angebote" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loyalty Card & Offers"
+          }
+        }
+      }
     },
     "Kundenkarte hinzufügen" : {
       "localizations" : {
@@ -2742,7 +3563,14 @@
       }
     },
     "Läden mit Einträgen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stores with Items"
+          }
+        }
+      }
     },
     "Laden oder Adresse suchen" : {
       "localizations" : {
@@ -2775,7 +3603,14 @@
       }
     },
     "Laden zuordnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assign Store"
+          }
+        }
+      }
     },
     "Läden zuordnen" : {
       "localizations" : {
@@ -2808,7 +3643,14 @@
       }
     },
     "leer" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "empty"
+          }
+        }
+      }
     },
     "Leer" : {
       "localizations" : {
@@ -2851,13 +3693,34 @@
       }
     },
     "Liste" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List"
+          }
+        }
+      }
     },
     "Liste des Ladens zeigen, an dem ich bin" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show the list for the store I’m at"
+          }
+        }
+      }
     },
     "Liste öffnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open List"
+          }
+        }
+      }
     },
     "Listen" : {
       "localizations" : {
@@ -2880,10 +3743,24 @@
       }
     },
     "Live Activity und Widgets zeigen dir, was noch offen ist." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activity and widgets show you what’s still open."
+          }
+        }
+      }
     },
     "Live-Aktivität „Einkauf“" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activity “Shopping”"
+          }
+        }
+      }
     },
     "Lokale Preisfunde anzeigen" : {
       "localizations" : {
@@ -3079,7 +3956,14 @@
       }
     },
     "Marqet sortiert sie nach Läden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet sorts them by store."
+          }
+        }
+      }
     },
     "Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
       "localizations" : {
@@ -3143,7 +4027,14 @@
       }
     },
     "Meiste Einträge zuerst" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most Items First"
+          }
+        }
+      }
     },
     "Metzgerei" : {
       "localizations" : {
@@ -3227,12 +4118,27 @@
       }
     },
     "Mode" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fashion"
+          }
+        }
+      }
     },
     "Mode & Schuhe" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fashion & Shoes"
+          }
+        }
+      }
     },
     "Modus" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3252,7 +4158,11 @@
         }
       }
     },
+    "Nach unten auf einen Laden ziehen, zur Seite wischen für später" : {
+
+    },
     "Nacheinander" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3263,10 +4173,24 @@
       }
     },
     "Nächster Laden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Store"
+          }
+        }
+      }
     },
     "Nächster Laden zuerst" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Store First"
+          }
+        }
+      }
     },
     "Name" : {
       "localizations" : {
@@ -3309,7 +4233,14 @@
       }
     },
     "Neue Einträge findest du in der Inbox." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ll find new items in the inbox."
+          }
+        }
+      }
     },
     "Neue Einträge landen in der Inbox. Von dort ordnest du sie mit einem Tipp einem Laden zu." : {
       "extractionState" : "stale",
@@ -3403,7 +4334,14 @@
       }
     },
     "Noch %lld offen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld still open"
+          }
+        }
+      }
     },
     "Noch keine Einträge" : {
       "localizations" : {
@@ -3436,7 +4374,14 @@
       }
     },
     "Noch nicht in deinen Läden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not yet in your stores"
+          }
+        }
+      }
     },
     "Nochmal kaufen" : {
       "localizations" : {
@@ -3449,13 +4394,34 @@
       }
     },
     "Nochmal kaufen mit ↺" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy again with ↺"
+          }
+        }
+      }
     },
     "Notiz bearbeiten" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Note"
+          }
+        }
+      }
     },
     "Notiz hinzufügen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Note"
+          }
+        }
+      }
     },
     "Nutzungsbedingungen" : {
       "localizations" : {
@@ -3488,10 +4454,24 @@
       }
     },
     "offen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "open"
+          }
+        }
+      }
     },
     "Offen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open"
+          }
+        }
+      }
     },
     "Offizielle Angebotsseiten der Händler" : {
       "localizations" : {
@@ -3514,10 +4494,24 @@
       }
     },
     "Öffne Marqet einmal, um deine Einkaufsliste zu verbinden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Marqet once to connect your shopping list."
+          }
+        }
+      }
     },
     "Öffne Marqet, um deine Einkaufsliste zu verbinden." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Marqet to connect your shopping list."
+          }
+        }
+      }
     },
     "Öffnet die offizielle Angebotsseite von %@" : {
       "localizations" : {
@@ -3530,10 +4524,24 @@
       }
     },
     "Öffnet einen Laden, die Inbox oder zuletzt Erledigtes in Marqet." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens a store, the inbox, or recently completed items in Marqet."
+          }
+        }
+      }
     },
     "Öffnet Marqet mit der Tastatur auf der gewählten Liste." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens Marqet with the keyboard on the chosen list."
+          }
+        }
+      }
     },
     "Ohne Benutzerkonto" : {
       "localizations" : {
@@ -3597,13 +4605,34 @@
       }
     },
     "Online-Shops" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online Shops"
+          }
+        }
+      }
     },
     "Open Database License" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Database License"
+          }
+        }
+      }
     },
     "Open Prices" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Prices"
+          }
+        }
+      }
     },
     "Open Prices · Daten bis %@" : {
       "localizations" : {
@@ -3626,7 +4655,14 @@
       }
     },
     "Ort" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location"
+          }
+        }
+      }
     },
     "Österreich" : {
       "localizations" : {
@@ -3679,7 +4715,14 @@
       }
     },
     "Preise beim Zuordnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices When Assigning"
+          }
+        }
+      }
     },
     "Preise jetzt aktualisieren" : {
       "localizations" : {
@@ -3703,7 +4746,15 @@
       }
     },
     "Preise von Open Prices" : {
-
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices from Open Prices"
+          }
+        }
+      }
     },
     "Preise werden bei Bedarf von Open Prices geladen und auf dem Gerät gespeichert. Die Anfrage enthält Produktkategorien, aber keine Eintragstexte oder angelegten Läden." : {
       "localizations" : {
@@ -3726,7 +4777,14 @@
       }
     },
     "Preise: Open Prices (ODbL), Einstiegspreise der Kategorie, ohne Angebote" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices: Open Prices (ODbL), entry-level prices for the category, excluding offers"
+          }
+        }
+      }
     },
     "Preisführer" : {
       "localizations" : {
@@ -3739,7 +4797,14 @@
       }
     },
     "prices.openfoodfacts.org" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prices.openfoodfacts.org"
+          }
+        }
+      }
     },
     "Profil" : {
       "localizations" : {
@@ -3762,7 +4827,14 @@
       }
     },
     "Prospekt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaflet"
+          }
+        }
+      }
     },
     "Prospekt %@" : {
       "localizations" : {
@@ -3936,7 +5008,14 @@
       }
     },
     "Scanne sie einmal in Marqet." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan them once in Marqet."
+          }
+        }
+      }
     },
     "Schließen" : {
       "localizations" : {
@@ -4015,7 +5094,14 @@
       }
     },
     "So geht’s" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How It Works"
+          }
+        }
+      }
     },
     "Sonstiges" : {
       "localizations" : {
@@ -4048,10 +5134,24 @@
       }
     },
     "Sperrbildschirm" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock Screen"
+          }
+        }
+      }
     },
     "Sport" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sports"
+          }
+        }
+      }
     },
     "Sprachmodell wird geladen" : {
       "localizations" : {
@@ -4085,10 +5185,24 @@
       }
     },
     "Standort für Läden in deiner Nähe" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Location for stores near you"
+          }
+        }
+      }
     },
     "Stehst du in einem deiner Läden, zeigen App und Widgets dessen Liste. Mit „Bei Ankunft melden“ beobachtet Marqet die nächsten Filialen deiner Läden mit offenen Einträgen: Läuft ein Einkauf, meldet sich die Live-Aktivität, sonst eine Mitteilung. Dein Standort bleibt auf dem Gerät." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you’re at one of your stores, the app and widgets show its list. With “Notify on Arrival”, Marqet watches the nearest branches of your stores with open items: if a shopping trip is running, the Live Activity lets you know, otherwise a notification does. Your location stays on the device."
+          }
+        }
+      }
     },
     "Supermarkt" : {
       "localizations" : {
@@ -4101,7 +5215,14 @@
       }
     },
     "Supermärkte & Lebensmittel" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supermarkets & Groceries"
+          }
+        }
+      }
     },
     "Symbol" : {
       "localizations" : {
@@ -4113,8 +5234,18 @@
         }
       }
     },
-    "Teilen" : {
+    "Tabelle" : {
 
+    },
+    "Teilen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        }
+      }
     },
     "Tiefkühl" : {
       "localizations" : {
@@ -4137,10 +5268,24 @@
       }
     },
     "Tierbedarf" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet Supplies"
+          }
+        }
+      }
     },
     "Tippe +, um etwas hinzuzufügen." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to add something."
+          }
+        }
+      }
     },
     "Tippe auf „Weitersprechen“ und versuch es noch einmal." : {
       "localizations" : {
@@ -4205,7 +5350,14 @@
       }
     },
     "Trag Einkäufe mit Siri, in Erinnerungen oder in Marqet ein." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add items with Siri, in Reminders, or in Marqet."
+          }
+        }
+      }
     },
     "Trag Einkäufe wie gewohnt ein: mit Siri, in Erinnerungen oder in Marqet." : {
       "extractionState" : "stale",
@@ -4229,9 +5381,17 @@
       }
     },
     "Überblick" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview"
+          }
+        }
+      }
     },
     "Übersicht" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4262,10 +5422,24 @@
       }
     },
     "Unterwegs · %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the way · %@"
+          }
+        }
+      }
     },
     "Unterwegs zu %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the way to %@"
+          }
+        }
+      }
     },
     "Vergleicht Preise aus Open Prices für Artikel ohne Laden. Bei der Aktualisierung fragt Marqet Produktkategorien ab. Ohne aktuelle Vergleichsdaten zeigt es die Preise aus der App." : {
       "extractionState" : "stale",
@@ -4279,7 +5453,14 @@
       }
     },
     "Verschieben nach" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move to"
+          }
+        }
+      }
     },
     "Version" : {
       "localizations" : {
@@ -4382,7 +5563,14 @@
       }
     },
     "Wähle gleich die Einkaufsliste aus, die Marqet sortieren soll." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now choose the shopping list Marqet should sort."
+          }
+        }
+      }
     },
     "Was du schon zweimal im selben Laden gekauft hast, landet von selbst dort." : {
       "localizations" : {
@@ -4445,10 +5633,24 @@
       }
     },
     "Weiter zu %@" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue to %@"
+          }
+        }
+      }
     },
     "Weiter zum nächsten Laden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue to Next Store"
+          }
+        }
+      }
     },
     "Weitere" : {
       "localizations" : {
@@ -4461,7 +5663,14 @@
       }
     },
     "Weitere Geschäfte" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More Stores"
+          }
+        }
+      }
     },
     "Weitere Info" : {
       "localizations" : {
@@ -4514,10 +5723,24 @@
       }
     },
     "Widget gedrückt halten › „Widget bearbeiten“: Liste, Reihenfolge oder Kundenkarte wählen." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press and hold the widget › “Edit Widget”: choose list, order, or loyalty card."
+          }
+        }
+      }
     },
     "Widgets & Live-Aktivität" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets & Live Activity"
+          }
+        }
+      }
     },
     "Wie beim letzten Mal" : {
       "localizations" : {
@@ -4530,7 +5753,14 @@
       }
     },
     "Wie in der App" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Like in the App"
+          }
+        }
+      }
     },
     "Wie zuletzt" : {
       "localizations" : {
@@ -4584,10 +5814,24 @@
       }
     },
     "Wohnen & Baumarkt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home & Hardware"
+          }
+        }
+      }
     },
     "z. B. laktosefrei, 1,5 %" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e.g. lactose-free, 1.5%"
+          }
+        }
+      }
     },
     "Zahnpasta" : {
       "extractionState" : "stale",
@@ -4601,13 +5845,34 @@
       }
     },
     "Zeigt auf dem Sperrbildschirm und in der Dynamic Island die nächsten Einträge im Laufweg, den Fortschritt und deine Kundenkarte. Sie wandert mit, wenn du im nächsten Laden abhakst, und endet von selbst, wenn alles erledigt ist oder 30 Minuten nichts passiert." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the next items along your route, your progress, and your loyalty card on the Lock Screen and in the Dynamic Island. It moves along as you check off items in the next store, and ends on its own once everything is done or nothing happens for 30 minutes."
+          }
+        }
+      }
     },
     "Zeigt den Barcode deiner Kundenkarte im Vollbild mit voller Helligkeit." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows the barcode of your loyalty card full-screen at full brightness."
+          }
+        }
+      }
     },
     "Zeigt den Einkauf als Live-Aktivität: nächste Einträge, Fortschritt und Kundenkarte auf dem Sperrbildschirm." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows your shopping trip as a Live Activity: next items, progress, and loyalty card on the Lock Screen."
+          }
+        }
+      }
     },
     "Ziehe die Abschnitte in die Reihenfolge deines Wegs durch %@." : {
       "localizations" : {
@@ -4630,10 +5895,24 @@
       }
     },
     "Zoome näher heran, um Geschäfte zu laden" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zoom in closer to load stores"
+          }
+        }
+      }
     },
     "Zu %@ zuordnen" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assign to %@"
+          }
+        }
+      }
     },
     "Zu Fuß" : {
       "localizations" : {
@@ -4676,7 +5955,14 @@
       }
     },
     "Zuletzt erledigt" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recently Completed"
+          }
+        }
+      }
     },
     "Zuordnen" : {
       "localizations" : {
@@ -4688,7 +5974,11 @@
         }
       }
     },
+    "Zuordnen als" : {
+
+    },
     "Zuordnen startet mit" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

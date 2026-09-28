@@ -32,6 +32,19 @@ struct VoiceParsingTests {
         #expect(entries.allSatisfy { $0.storeName == "Aldi Süd" })
     }
 
+    @Test func containerUnits() {
+        let entries = VoiceRuleParser.parse(
+            "eine Dose Tomaten, 1 Tafel Schokolade, zwei Packungen Nudeln, ein Dutzend Eier und ein paar Äpfel",
+            lexicon: lexicon
+        )
+        #expect(entries.map(\.title) == ["1 Dose Tomaten", "1 Tafel Schokolade", "2 Packungen Nudeln", "12 Eier", "Äpfel"])
+    }
+
+    @Test func englishContainerUnits() {
+        let entries = VoiceRuleParser.parse("two cans of tomatoes, two bars of chocolate", lexicon: lexicon)
+        #expect(entries.map(\.title) == ["2 cans Tomatoes", "2 bars Chocolate"])
+    }
+
     @Test func articleIsNoQuantity() {
         let entries = VoiceRuleParser.parse("Eine Gurke und einen Brokkoli", lexicon: lexicon)
         #expect(entries == [SpokenEntry(name: "Gurke"), SpokenEntry(name: "Brokkoli")])

@@ -17,6 +17,8 @@ struct ItemKeyNormalizerTests {
         ("3 Stück Paprika", "paprika"),
         ("3 Eier", "eier"),
         ("2 Dosen Tomaten", "tomaten"),
+        ("1 Tafel Schokolade", "schokolade"),
+        ("3 Schachteln Streichhölzer", "streichhölzer"),
         ("1 l Milch", "milch"),
         ("6 Flaschen Wasser", "wasser"),
         ("3 lachs", "lachs"),

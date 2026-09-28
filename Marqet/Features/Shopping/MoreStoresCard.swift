@@ -16,7 +16,7 @@ struct MoreStoresCard: View {
     var body: some View {
         GeometryReader { proxy in
             let columnCount = max(1, Int((proxy.size.width - 40 + 12) / 104))
-            let availableGridHeight = max(120, proxy.size.height - 40 - 42 - 54 - 24)
+            let availableGridHeight = max(120, proxy.size.height - 20 - 42 - 12 - 96)
             let rowsThatFit = max(1, Int((availableGridHeight + 12) / 116))
             let hidden = distanceSorted(model.hiddenStores) { distance(for: $0.id) }
             let suggestions = distanceSorted(model.catalogSuggestions) { distance(forCatalogKey: $0.key) }
@@ -30,6 +30,7 @@ struct MoreStoresCard: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 header
+                    .padding(.horizontal, 20)
                 if rows.isEmpty {
                     ContentUnavailableView(
                         "Keine weiteren Läden",
@@ -46,12 +47,20 @@ struct MoreStoresCard: View {
                         }
                         .frame(minHeight: availableGridHeight, alignment: .center)
                         .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
                     }
                     .scrollIndicators(.visible)
+                    .scrollEdgeEffectStyle(.soft, for: .bottom)
                 }
-                addStoreButton
             }
-            .padding(20)
+            // The button floats unblurred above the soft edge effect, at the same height as
+            // "Läden zuordnen". The list runs to the card edge underneath it.
+            .safeAreaBar(edge: .bottom, spacing: 0) {
+                addStoreButton
+                    .padding(.top, 10)
+                    .padding(.bottom, 34)
+            }
+            .padding(.top, 20)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -98,16 +107,19 @@ struct MoreStoresCard: View {
         }
     }
 
+    /// Secondary counterpart of `TriageButton`: same glass capsule, without the accent tint.
     private var addStoreButton: some View {
         Button { showsAddStore = true } label: {
             Label("Laden hinzufügen", systemImage: "plus")
                 .font(.body.weight(.semibold))
                 .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity, minHeight: 54)
-                .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 18))
-                .contentShape(.rect(cornerRadius: 18))
+                .padding(.horizontal, 22)
+                .frame(height: 52)
+                .glassEffect(.regular.interactive(), in: .capsule)
+                .contentShape(.capsule)
         }
-            .buttonStyle(.plain)
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 
     private func tile(_ tile: Tile, name: String, @ViewBuilder badge: () -> some View) -> some View {

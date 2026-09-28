@@ -20,7 +20,6 @@ struct StoreCard: View {
     /// The user's finger is on the list – only then does pulling up open the card full screen.
     @State private var isDraggingList = false
     /// Measured height of the inbox footer, so the last item can scroll above it.
-    @State private var triageFooterHeight: CGFloat = 100
     @State private var revealLoadedContent = false
     @State private var hasShownSkeleton = false
     @State private var skeletonPulse = false
@@ -237,19 +236,19 @@ struct StoreCard: View {
             // A parent tap handles unused white space; row buttons keep their own actions.
             .onTapGesture(perform: handleBackgroundTap)
             .scrollIndicators(.visible)
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                Color.clear.frame(height: isExpanded ? 72 : (showsTriageFooter ? triageFooterHeight : 54))
-            }
-            .overlay(alignment: .bottom) {
+            // Every card blurs its list progressively above the bottom controls (mic, add, dots,
+            // triage), which float unblurred on top. The bar reserves the space and drives the effect.
+            .scrollEdgeEffectStyle(.soft, for: .bottom)
+            .safeAreaBar(edge: .bottom, spacing: 0) {
                 if showsTriageFooter {
                     triageFooter
-                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { triageFooterHeight = $0 }
-                        .padding(.bottom, 4)
-                        // Keep the action at the card edge when the keyboard appears;
-                        // the keyboard may cover it until the user dismisses the composer.
-                        .ignoresSafeArea(.keyboard, edges: .bottom)
+                } else {
+                    Color.clear.frame(height: isExpanded ? 72 : 54)
                 }
             }
+            // The pager already sizes the card above keyboard and composer. Without this the bar
+            // would ride up with the keyboard; the button stays at the card edge instead.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             // Pulling the list up opens the card full screen (not while typing or when full screen).
             .onScrollPhaseChange { _, phase in
                 isDraggingList = phase == .interacting
@@ -327,8 +326,7 @@ struct StoreCard: View {
         TriageButton()
             .frame(maxWidth: .infinity)
             .padding(.top, 10)
-            .padding(.bottom, 30)
-            .background(Color(.secondarySystemGroupedBackground))
+            .padding(.bottom, 34)
     }
 
     @ViewBuilder

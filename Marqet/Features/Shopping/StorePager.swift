@@ -33,7 +33,7 @@ struct StorePager: View {
                             .padding(.top, 8)
                             // Keep the active card close to the composer while typing so more
                             // of its list remains visible above the keyboard.
-                            .padding(.bottom, model.composerTarget == nil ? (slot.page == .brochures ? 8 : 32) : 8)
+                            .padding(.bottom, model.composerTarget == nil ? 32 : 8)
                     }
                 }
                 .scrollTargetLayout()

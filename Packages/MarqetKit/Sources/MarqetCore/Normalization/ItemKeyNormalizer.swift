@@ -45,7 +45,7 @@ public enum ItemKeyNormalizer {
 
     // "2x ", "500 g ", "3 Stück ", "1,5 l " …
     private static var leadingQuantity: Regex<Substring> {
-        #/^\d+(?:[.,]\d+)?\s*(?:x|×|stk\.?|st\.?|stück|g|gr\.?|kg|kilo|l|liter|ml|cl|pck\.?|pkg\.?|packung(?:en)?|pack|dosen?|flaschen?|becher|gläser|glas|bund|netz|tüten?|beutel)?\s+/#
+        #/^\d+(?:[.,]\d+)?\s*(?:x|×|stk\.?|st\.?|stück|g|gr\.?|kg|kilo|l|liter|ml|cl|pck\.?|pkg\.?|packung(?:en)?|pack|päckchen|paket(?:e)?|schachtel(?:n)?|dosen?|konserven?|flaschen?|kasten|kästen|kisten?|becher|schalen?|gläser|glas|bund|netz|tüten?|beutel|tuben?|tafeln?|riegel|rollen?|scheiben?|köpfe?|kopf|zehen?|stangen?|säcke?|sack|dutzend|dl|el|tl)?\s+/#
     }
 
     // " 2x", " 3 Stück", " x2"

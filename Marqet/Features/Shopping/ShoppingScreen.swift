@@ -319,6 +319,16 @@ struct ShoppingScreen: View {
             .opacity(1 - briefingAmount)
         }
         .sharedBackgroundVisibility(.hidden)
+        if model.lastUndoAction != nil {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                    undoFeedback += 1
+                    Task { await model.undoLastAction() }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+            }
+        }
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Button(model.showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen",
@@ -341,21 +351,16 @@ struct ShoppingScreen: View {
             Button("Profil", systemImage: "person.crop.circle") { showsProfile = true }
             Button("Kundenkarten", systemImage: "wallet.pass") { showsLoyaltyCards = true }
             Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }
-            if model.lastUndoAction != nil {
-                Section("Letzte Aktion") {
-                    Button("Rückgängig", systemImage: "arrow.uturn.backward") {
-                        undoFeedback += 1
-                        Task { await model.undoLastAction() }
-                    }
-                }
-            }
         } label: {
-            Label("Profil und mehr", systemImage: "person.fill")
-                .labelStyle(.iconOnly)
-                .font(.title3.weight(.semibold))
+            Image("MarqetLogo")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 26)
+                .foregroundStyle(Color.accentColor)
         }
         .accessibilityLabel("Profil und mehr")
-        .tint(.primary)
+        .tint(.accentColor)
     }
 }
 

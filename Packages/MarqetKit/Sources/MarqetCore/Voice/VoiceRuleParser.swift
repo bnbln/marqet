@@ -314,7 +314,7 @@ public enum VoiceRuleParser {
             index += 1
             if index < words.count, articles.contains(words[index].folded) { index += 1 }
         }
-        if index < words.count, words[index].folded == "dozen" {
+        if index < words.count, ["dozen", "dutzend", "dutzende"].contains(words[index].folded) {
             value = String((Int(value ?? "1") ?? 1) * 12)
             fromArticle = false
             index += 1
@@ -409,14 +409,29 @@ public enum VoiceRuleParser {
         "l": "l", "liter": "l", "liters": "l", "litre": "l", "litres": "l", "ml": "ml", "milliliter": "ml",
         "lb": "lb", "lbs": "lb", "pound": "lb", "pounds": "lb", "pfund": "Pfund",
         "oz": "oz", "ounce": "oz", "ounces": "oz",
-        "stueck": "Stück", "stk": "Stück", "packung": nil, "packungen": nil, "pack": nil, "packs": nil,
-        "dose": nil, "dosen": nil, "flasche": nil, "flaschen": nil, "bund": nil, "becher": nil,
-        "glas": nil, "glaeser": nil, "netz": nil, "tuete": nil, "tueten": nil, "beutel": nil,
-        "kiste": nil, "kisten": nil, "tafel": nil, "tafeln": nil, "rolle": nil, "rollen": nil,
-        "scheiben": nil, "kopf": nil, "koepfe": nil,
-        "package": nil, "packages": nil, "cans": nil, "bottle": nil, "bottles": nil,
-        "bag": nil, "bags": nil, "bunch": nil, "bunches": nil, "box": nil, "boxes": nil, "jar": nil,
-        "jars": nil, "loaf": nil, "loaves": nil, "head": nil, "heads": nil, "piece": nil, "pieces": nil,
-        "carton": nil, "cartons": nil, "slices": nil,
+        "cl": "cl", "dl": "dl", "el": "EL", "tl": "TL", "essloeffel": "EL", "teeloeffel": "TL",
+        "tablespoon": "EL", "tablespoons": "EL", "tbsp": "EL", "teaspoon": "TL", "teaspoons": "TL", "tsp": "TL",
+        "stueck": "Stück", "stk": "Stück", "st": "Stück", "stuecke": "Stück",
+        "packung": nil, "packungen": nil, "pack": nil, "packs": nil, "pckg": nil, "pkg": nil, "paeckchen": nil,
+        "paket": nil, "pakete": nil, "packerl": nil, "schachtel": nil, "schachteln": nil,
+        "dose": nil, "dosen": nil, "konserve": nil, "konserven": nil,
+        "flasche": nil, "flaschen": nil, "kasten": nil, "kaesten": nil, "kiste": nil, "kisten": nil,
+        "kanister": nil, "sixpack": nil, "palette": nil, "paletten": nil, "karton": nil, "kartons": nil,
+        "tetrapak": nil, "tetrapaks": nil, "tetrapack": nil,
+        "bund": nil, "buendel": nil, "strauss": nil, "stiel": nil, "stiele": nil, "stange": nil, "stangen": nil,
+        "zehe": nil, "zehen": nil, "knolle": nil, "knollen": nil, "zweig": nil, "zweige": nil,
+        "becher": nil, "schale": nil, "schalen": nil, "portion": nil, "portionen": nil, "tiegel": nil,
+        "tube": nil, "tuben": nil, "riegel": nil, "tafel": nil, "tafeln": nil, "rolle": nil, "rollen": nil,
+        "glas": nil, "glaeser": nil, "netz": nil, "netze": nil, "tuete": nil, "tueten": nil, "beutel": nil,
+        "sack": nil, "saecke": nil, "eimer": nil, "spritzer": nil, "prise": nil, "prisen": nil, "handvoll": nil,
+        "scheibe": nil, "scheiben": nil, "blatt": nil, "blaetter": nil, "laib": nil, "laibe": nil,
+        "kopf": nil, "koepfe": nil, "kugel": nil, "kugeln": nil, "wuerfel": nil,
+        "package": nil, "packages": nil, "cans": nil, "tin": nil, "tins": nil,
+        "bottle": nil, "bottles": nil, "bag": nil, "bags": nil, "bunch": nil, "bunches": nil,
+        "box": nil, "boxes": nil, "jar": nil, "jars": nil, "loaf": nil, "loaves": nil,
+        "head": nil, "heads": nil, "piece": nil, "pieces": nil, "carton": nil, "cartons": nil,
+        "slice": nil, "slices": nil, "bar": nil, "bars": nil, "stick": nil, "sticks": nil,
+        "clove": nil, "cloves": nil, "tubes": nil, "pinch": nil, "handful": nil, "roll": nil, "rolls": nil,
+        "sacks": nil, "crate": nil, "crates": nil, "pot": nil, "pots": nil, "tray": nil, "trays": nil,
     ]
 }

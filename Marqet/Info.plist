@@ -23,6 +23,17 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.marqet.Marqet</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>marqet</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -33,6 +44,8 @@
 	<string>Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

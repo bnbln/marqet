@@ -64,6 +64,14 @@ struct SettingsView: View {
 
                 Section {
                     NavigationLink {
+                        WidgetSettingsView()
+                    } label: {
+                        Label("Widgets & Live-Aktivität", systemImage: "square.grid.2x2")
+                    }
+                }
+
+                Section {
+                    NavigationLink {
                         StoresSettingsView()
                     } label: {
                         LabeledContent("Läden verwalten", value: "\(model.stores.count)")

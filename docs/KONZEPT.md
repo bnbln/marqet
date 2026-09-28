@@ -1,6 +1,7 @@
 # Marqet – MVP-Konzept
 
-Stand: 28.09.2026 (Rev. 7: Angebote-Card, Kundenkarten) · Status: M1 umgesetzt, als Nächstes M0-Duo-Spike + M2
+Stand: 28.09.2026 (Rev. 9: Widgets, Live-Aktivität, Steuerelemente) · Status: M1–M6 umgesetzt, Widgets vorgezogen
+Widgets & Live-Aktivität: [KONZEPT-WIDGETS.md](KONZEPT-WIDGETS.md)
 Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYSE.md) · iPhone Duo & iPad: [KONZEPT-DUO-IPAD.md](KONZEPT-DUO-IPAD.md)
 
 > Marqet ist eine iOS-App, die die Einkaufsliste aus Apple Erinnerungen nach Läden sortiert.
@@ -59,6 +60,14 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 43 | Systemleiste auf Markenfarbe | *Rev. 8 (28.09.):* Im kompakten Laden-Vollbild übernehmen Toolbar-Buttons und Statusleiste die helle oder dunkle Variante passend zur Markenfarbe (`toolbarColorScheme`), wie die Header-Schrift: weiß auf Aldi-Blau oder Rewe-Rot, schwarz auf Edeka- oder Netto-Gelb. Die Inbox (grau) nutzt die dunkle Variante |
 | 44 | Onboarding-Raster | *Rev. 8:* Jeder Schritt nutzt dasselbe Raster: Bildbühne 300 × 184, Überschrift mit immer zwei reservierten Zeilen, darunter Text. Der Abstand nach oben hängt nur von der Bildschirmhöhe ab, deshalb stehen Bild, Überschrift und Textanfang auf allen Seiten gleich hoch. Duo aufgeklappt: Bild links, Text und Button rechts vom Falz. Die Willkommensseite zeigt in einer Schleife, wie drei Einträge aus einer Liste in ihre Laden-Cards fliegen; die anderen Schritte haben kleine erklärende Illustrationen. Reduce Motion zeigt den Endzustand |
 | 45 | Läden aus dem Onboarding | *Rev. 8:* Gewählte Läden werden **geplant** angelegt und erscheinen sofort als Cards (vorher unsichtbar bis zum ersten Eintrag). Eine offensichtliche Einkaufsliste wird vorausgewählt, „Neue Liste anlegen“ legt keine Dublette an |
+| 46 | Widgets | *Rev. 9 (28.09.):* **Vorgezogen aus v1.1, Free.** Vier Widgets: **Liste** (für jede Liste der App konfigurierbar: Nächster Laden, Inbox, jeder Laden, Zuletzt erledigt), **Überblick**, **Kundenkarte**, **Angebote**. Jedes Widget ist eine Miniatur der Card (Kopf in Markenfarbe, Laufweg). Alle Größen inkl. XL hoch (iOS 27) und Sperrbildschirm. Details: KONZEPT-WIDGETS |
+| 47 | Abhaken im Widget | *Rev. 9:* Jede Zeile hat einen Kreis zum Abhaken; Inbox-Zeilen zeigen den gelernten Laden als Chip („→ Rewe“), ein Tipp ordnet zu und lernt mit. Kein Rückgängig im Widget – das bleibt in der App, „↺“ in „Zuletzt erledigt“ |
+| 48 | Live-Aktivität „Einkauf“ | *Rev. 9:* **Vorgezogen aus v1.3.** Startet automatisch beim ersten Abhaken in einem Laden (abschaltbar) oder bewusst. Der Laden steckt im Zustand, nicht in den Attributen: Die Aktivität wandert mit („Weiter zu dm“), endet, wenn alles erledigt ist oder nach 30 Minuten ohne Abhaken. Kundenkarte als Knopf auf dem Sperrbildschirm |
+| 49 | Ein Weg für Änderungen | *Rev. 9:* Alle Knöpfe in Widgets, Live-Aktivität und Steuerelementen sind `LiveActivityIntent`s und laufen im App-Prozess über das `AppModel` – mit Lernen, Einkaufssitzung und Rückgängig. Die Erweiterung liest nur |
+| 50 | Daten für Widgets | *Rev. 9:* Die App schreibt Registry und Snapshot in die App Group; die Erweiterung liest Erinnerungen selbst und baut mit **derselben Funktion** (`WidgetSnapshotBuilder`) neu – Siri-Einträge erscheinen ohne App-Start |
+| 51 | Steuerelemente | *Rev. 9:* Kontrollzentrum, Sperrbildschirm, Aktionstaste: „Eintrag hinzufügen“ (öffnet die Eingabe), „Kundenkarte“, Schalter „Einkauf“ |
+| 52 | Deep Links | *Rev. 9:* `marqet://` mit `page`, `compose`, `triage`, `completed`, `card`, `offers`, `trip`. Kommen sie vor dem Laden der Liste, warten sie |
+| 53 | Widget-Galerie in der App | *Rev. 9:* Einstellungen › „Widgets & Live-Aktivität“ zeigt alle Widgets mit den eigenen Listen (dieselben Ansichten wie auf dem Home-Bildschirm) und den Schalter für den automatischen Start |
 
 ---
 

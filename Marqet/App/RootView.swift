@@ -3,6 +3,8 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppModel.self) private var model
     @AppStorage(AppAccentPalette.storageKey) private var accentPaletteKey = AppAccentPalette.leaf.rawValue
+    /// Debug: `-widget-gallery` opens Einstellungen › Widgets for screenshots.
+    @State private var showsWidgetGallery = false
 
     private var accentColor: Color {
         AppAccentPalette(rawValue: accentPaletteKey)?.color ?? AppAccentPalette.leaf.color
@@ -28,9 +30,30 @@ struct RootView: View {
             }
         }
         .tint(accentColor)
+        // Widgets, the Live Activity and controls (KONZEPT-WIDGETS §8).
+        .onOpenURL { model.open($0) }
         .sheet(isPresented: $model.showsPaywall) {
             PaywallView()
         }
+        .fullScreenCover(item: $model.presentedLoyaltyCards) { presentation in
+            LoyaltyCardScreen(cards: presentation.cards, initialCardID: presentation.initialCardID)
+        }
+        .sheet(item: $model.presentedLeaflet) { leaflet in
+            SafariView(url: leaflet.url).ignoresSafeArea()
+        }
+        .onChange(of: accentPaletteKey) {
+            Task { await model.syncWidgetsNow() }
+        }
+        #if DEBUG
+        .sheet(isPresented: $showsWidgetGallery) {
+            NavigationStack { WidgetSettingsView() }
+        }
+        .task(id: model.hasLoadedItems) {
+            if model.hasLoadedItems, ProcessInfo.processInfo.arguments.contains("-widget-gallery") {
+                showsWidgetGallery = true
+            }
+        }
+        #endif
         .alert(
             "Das hat nicht geklappt",
             isPresented: Binding(

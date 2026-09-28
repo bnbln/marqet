@@ -99,9 +99,9 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 | Version | Inhalt | Status | Grundlage im Code |
 |---|---|---|---|
 | **v1.0** | wie oben plus iPad-Kurzbefehle, Zeiger-Effekte, mehrere Fenster, Items per Drag sortieren, Kategorie per Drag, Wörterbuch ≈ 2.500 Begriffe | 🟡 | – |
-| **v1.1 „Schneller“** | Siri und Kurzbefehle (App Intents), interaktive Widgets, Prospekt-Link, **Kundenkarten im Laden-Vollbild** (KONZEPT #42), `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen | ❌ | Katalog-Felder `leafletURL` vorbereitet, `onHingeChange` im SDK; Kundenkarten brauchen `loyaltyPrograms` im Katalog und `LoyaltyCard` im Schema |
+| **v1.1 „Schneller“** | Siri und Kurzbefehle (App Intents) – *Widgets, Steuerelemente und Kurzbefehle für Einkauf/Kundenkarte sind seit 28.09. umgesetzt (KONZEPT #46–#53)*, Prospekt-Link, **Kundenkarten im Laden-Vollbild** (KONZEPT #42), `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen | ❌ | Katalog-Felder `leafletURL` vorbereitet, `onHingeChange` im SDK; Kundenkarten brauchen `loyaltyPrograms` im Katalog und `LoyaltyCard` im Schema |
 | **v1.0 (vorgezogen, E2): „Orte“** | Filialen per MapKit, Karte, Laden aus der Karte anlegen, Sortierung nach Entfernung und „Smart“ | ❌ | `address` als Freitext vorhanden, `mapSearchTerms` im Katalog, Spezifikation in KONZEPT §14 |
-| **v1.3 „Unterwegs“** | Einkaufsrunde mit Routenoptimierung, Standort-Hinweise, Apple Watch, Live Activity | ❌ | Spezifikation in KONZEPT §14.3 |
+| **v1.3 „Unterwegs“** | Einkaufsrunde mit Routenoptimierung, Standort-Hinweise, Apple Watch, Live Activity (*Live-Aktivität „Einkauf“ inkl. Watch-Smart-Stack seit 28.09. umgesetzt, KONZEPT #48*) | 🟡 | Spezifikation in KONZEPT §14.3 |
 | **v2.0 „Angebote“** | Angebote passend zur Liste über einen Partner (ShopFully oder Bonial) | ❌ | Geschäftsthema, Gates G1–G4 in der MARKTANALYSE |
 
 ---

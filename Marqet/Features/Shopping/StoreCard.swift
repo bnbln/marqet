@@ -415,6 +415,12 @@ struct StoreActionsMenu<MenuLabel: View>: View {
     var body: some View {
         Menu {
             Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
+            // The Live Activity "Einkauf" (KONZEPT-WIDGETS §5).
+            if model.trip?.storeID == store.id {
+                Button("Einkauf beenden", systemImage: "cart.badge.minus") { Task { await model.endTrip() } }
+            } else if !items.isEmpty {
+                Button("Einkauf starten", systemImage: "cart") { Task { await model.startTrip(at: store.id) } }
+            }
             Button("Karte", systemImage: "map") { showsMap = true }
             Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
             Button("Kundenkarte hinzufügen", systemImage: "wallet.pass") { showsLoyaltyEditor = true }

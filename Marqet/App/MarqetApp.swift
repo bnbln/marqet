@@ -13,6 +13,8 @@ struct MarqetApp: App {
         // `-demo`: in-memory data for screenshots and simulator checks without Reminders access.
         if ProcessInfo.processInfo.arguments.contains("-demo") {
             let model = AppModel.demo(isPro: ProcessInfo.processInfo.arguments.contains("-pro"))
+            model.sharesWithWidgets = true
+            AppModel.active = model
             _model = State(initialValue: model)
             _purchases = State(initialValue: PurchaseManager { [weak model] in model?.hasProEntitlement = $0 })
             return
@@ -26,6 +28,9 @@ struct MarqetApp: App {
             container = try! PersistenceContainer.make(inMemory: true)
         }
         let model = AppModel(container: container)
+        // Widget and Live Activity buttons run in this process and act through this model.
+        model.sharesWithWidgets = true
+        AppModel.active = model
         _model = State(initialValue: model)
         _purchases = State(initialValue: PurchaseManager { [weak model] in model?.hasProEntitlement = $0 })
     }
@@ -54,6 +59,10 @@ struct MarqetApp: App {
             // No background push from EventKit – refresh whenever the app comes to the foreground.
             if phase == .active {
                 Task { await model.refreshPhase() }
+            }
+            // Leaving the app: widgets get the latest state right away, not after the debounce.
+            if phase == .background {
+                Task { await model.syncWidgetsNow() }
             }
         }
     }

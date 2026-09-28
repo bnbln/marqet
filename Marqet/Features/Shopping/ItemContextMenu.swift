@@ -4,16 +4,16 @@ import UIKit
 
 /// Long-press menu of a shopping item.
 ///
-/// iOS shows at most three labelled actions in the top row of a context menu (four without
-/// labels), too few for the stores. So the top row holds the main actions, like Reminders,
-/// and the stores follow directly below as a scrollable row of logos – one tap to move.
+/// Moving an item to another store is a drag, not a menu tap (the item row is `.draggable`
+/// and store cards are drop targets) – the old "Verschieben nach" row of tiny store logos
+/// scrolled sideways and its touch targets were too small. Deleting is a swipe action on the
+/// row instead of living here, so this menu only holds actions, like Reminders' does.
 struct ItemContextMenu: View {
     let item: ShoppingItem
     let onEdit: () -> Void
     let onEditNote: () -> Void
 
     @Environment(AppModel.self) private var model
-    @Environment(\.displayScale) private var displayScale
 
     var body: some View {
         ControlGroup {
@@ -22,42 +22,9 @@ struct ItemContextMenu: View {
                 Task { await model.toggleCompletion(item) }
             }
             Button("Bearbeiten", systemImage: "pencil", action: onEdit)
-            Button(role: .destructive) {
-                Task { await model.delete(item) }
-            } label: {
-                // The top row draws symbols as templates; only an original-mode image stays red.
-                Label { Text("Löschen") } icon: { Self.redTrash }
-            }
-        }
-
-        if !deckTargets.isEmpty || item.storeID != nil {
-            Section {
-                ControlGroup {
-                    ForEach(deckTargets) { store in
-                        Button { move(to: store) } label: {
-                            Label { Text(store.name) } icon: { badge(store) }
-                        }
-                    }
-                    if item.storeID != nil {
-                        Button("Inbox", systemImage: "tray") { move(to: nil) }
-                    }
-                } label: {
-                    Text("Verschieben nach")
-                }
-                .controlGroupStyle(.palette)
-            }
         }
 
         Section {
-            if !hiddenTargets.isEmpty {
-                Menu("Weitere Läden", systemImage: "storefront") {
-                    ForEach(hiddenTargets) { store in
-                        Button { move(to: store) } label: {
-                            Label { Text(store.name) } icon: { badge(store) }
-                        }
-                    }
-                }
-            }
             categoryMenu
             Button(item.userNotes == nil ? "Notiz hinzufügen" : "Notiz bearbeiten",
                    systemImage: "note.text", action: onEditNote)
@@ -74,11 +41,6 @@ struct ItemContextMenu: View {
     }
 
     // MARK: Parts
-
-    private static let redTrash: Image = {
-        let symbol = UIImage(systemName: "trash")?.withTintColor(.systemRed, renderingMode: .alwaysOriginal)
-        return symbol.map(Image.init(uiImage:)) ?? Image(systemName: "trash")
-    }()
 
     private var categoryMenu: some View {
         let current = model.category(of: item)
@@ -98,39 +60,8 @@ struct ItemContextMenu: View {
         }
     }
 
-    /// Menus only take images, so the badge is rendered to a bitmap that keeps its colours.
-    private func badge(_ store: Store) -> Image {
-        let renderer = ImageRenderer(content: StoreBadge(store: store, size: 30))
-        renderer.scale = displayScale
-        guard let image = renderer.uiImage else { return Image(systemName: "storefront") }
-        return Image(uiImage: image.withRenderingMode(.alwaysOriginal))
-    }
-
-    // MARK: Targets
-
-    /// Stores with a card in the pager, in card order; the suggested store comes first.
-    private var deckTargets: [Store] {
-        let targets = model.deck.pages.compactMap { page -> Store? in
-            guard case .store(let id) = page, id != item.storeID else { return nil }
-            return model.store(id)
-        }
-        guard let suggested = model.suggestion(for: item)?.storeID,
-              let index = targets.firstIndex(where: { $0.id == suggested }) else { return targets }
-        var ordered = targets
-        ordered.insert(ordered.remove(at: index), at: 0)
-        return ordered
-    }
-
-    private var hiddenTargets: [Store] {
-        model.hiddenStores.filter { $0.id != item.storeID }
-    }
-
     private var shareText: String {
         [item.title, item.userNotes].compactMap(\.self).joined(separator: "\n")
-    }
-
-    private func move(to store: Store?) {
-        Task { await model.assign(item, to: store) }
     }
 }
 

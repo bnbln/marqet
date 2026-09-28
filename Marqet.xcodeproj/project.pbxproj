@@ -95,6 +95,7 @@
 		9FDD03F60F5E43ED5C2DE250 /* AppModel+Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1B1112FF21AF3138C1563C0 /* AppModel+Widgets.swift */; };
 		A62BFA2F94E59E13E2537E90 /* StoreLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */; };
 		A971BEE745EF4F4C96EF0E49 /* AppModel+Intelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0E8B4F520039DCC556877E1 /* AppModel+Intelligence.swift */; };
+		A98A0BC78A0ABFBF27C511B3 /* MapClustering.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF547BF4BCABFD1F3F33B93 /* MapClustering.swift */; };
 		A9D51BC9D4221685CADD44F0 /* PlaceSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0EE0A78B4173CCEDD984D6 /* PlaceSearch.swift */; };
 		AC06688C1A45827C280C1289 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 95D767F53855218BC75FF1D8 /* WidgetKit.framework */; };
 		ADE2EE53C34E3F9D2493582C /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D855A0E770123156BA8F7DEF /* PurchaseManager.swift */; };
@@ -128,6 +129,7 @@
 		EF10BED0FD28122A5247DA7A /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1335C97D860751574A63AE6 /* Color+Hex.swift */; };
 		EF60F9ED7BB8C574FECA9601 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 01BC7ACFB10D575A11B24091 /* Localizable.xcstrings */; };
 		F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F05B1BB6FCBCA549A378B691 /* MoreStoresCard.swift */; };
+		F44944E7C5350C361F5FE69A /* MapClusteringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DC08D4210C565FC8E926EE /* MapClusteringTests.swift */; };
 		F67CF1C2A67BEB9DD0A5D3B7 /* PermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D83B5583DD42E71A3C9AEF /* PermissionView.swift */; };
 		F6D2F45F32EF7B43ED22A7FC /* MarqetReminders in Frameworks */ = {isa = PBXBuildFile; productRef = FA388AD86D4BE4AB8E4A9A3F /* MarqetReminders */; };
 		F8752FF8E53E75FB08AE2BBE /* AppAccentPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79A664A8D158899340160E9D /* AppAccentPalette.swift */; };
@@ -239,6 +241,7 @@
 		99BF67F414AB817A3B7B4C9F /* MarqetTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MarqetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingIllustrations.swift; sourceTree = "<group>"; };
 		A0D9EA769AB46A730187DA10 /* CategoryStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStyle.swift; sourceTree = "<group>"; };
+		A0DC08D4210C565FC8E926EE /* MapClusteringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClusteringTests.swift; sourceTree = "<group>"; };
 		A0E8B4F520039DCC556877E1 /* AppModel+Intelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Intelligence.swift"; sourceTree = "<group>"; };
 		A3A02B8744040BFA2926AD1A /* AddStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreSheet.swift; sourceTree = "<group>"; };
 		A47DE3B3A08709F661A254E0 /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
@@ -264,6 +267,7 @@
 		D4AA41AA76F8C2F0F81A461D /* StoreContextPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreContextPane.swift; sourceTree = "<group>"; };
 		D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListPickerView.swift; sourceTree = "<group>"; };
 		D855A0E770123156BA8F7DEF /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		DAF547BF4BCABFD1F3F33B93 /* MapClustering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClustering.swift; sourceTree = "<group>"; };
 		DC3BC97DEAAB181BF352ED72 /* WidgetBarcode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBarcode.swift; sourceTree = "<group>"; };
 		DEF6A9F43697DC60C8D755B2 /* FoldGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoldGeometry.swift; sourceTree = "<group>"; };
 		E1335C97D860751574A63AE6 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
@@ -339,6 +343,7 @@
 			children = (
 				68440EB6E1E9D12D43C573CF /* BranchPickerSection.swift */,
 				27499D7335CBDA7C48845546 /* MapCard.swift */,
+				DAF547BF4BCABFD1F3F33B93 /* MapClustering.swift */,
 				06F844C60FB84DFBBE4EC1C8 /* MapScreen.swift */,
 				A555236677087D1E17AECE59 /* PlacesStrings.swift */,
 			);
@@ -468,6 +473,7 @@
 			children = (
 				511AB2999B3A3E759DDAB14C /* AppModelTests.swift */,
 				422EF297EFD2067DF2383392 /* EventKitRoundTripTests.swift */,
+				A0DC08D4210C565FC8E926EE /* MapClusteringTests.swift */,
 				F97E4B8529443CBDF529C6FD /* PlacesModelTests.swift */,
 				F7A00BBDDEBAF86FCCBC9B65 /* PresenceModelTests.swift */,
 				3D1EC384AC0DBE1F2196E1DD /* PurchaseTests.swift */,
@@ -873,6 +879,7 @@
 				2CEF1380FE67C101C8BC46C1 /* LoyaltyCardScreen.swift in Sources */,
 				34BC3E34CA657B3B9360D0A4 /* LoyaltyCardsSection.swift in Sources */,
 				7F17A4EDE155D84A9BD89293 /* MapCard.swift in Sources */,
+				A98A0BC78A0ABFBF27C511B3 /* MapClustering.swift in Sources */,
 				B7560C024A6A0AF82F652812 /* MapScreen.swift in Sources */,
 				2872F84D739D1BDF7690C190 /* MarqetApp.swift in Sources */,
 				F2A7657FC9FE3102614248FF /* MoreStoresCard.swift in Sources */,
@@ -920,6 +927,7 @@
 			files = (
 				D906C3C671E00C203D2900D5 /* AppModelTests.swift in Sources */,
 				D230CCE7489CAC2E4CC5C198 /* EventKitRoundTripTests.swift in Sources */,
+				F44944E7C5350C361F5FE69A /* MapClusteringTests.swift in Sources */,
 				6CE122BF46C50E69135ED788 /* PlacesModelTests.swift in Sources */,
 				9AF198C3AE502F42102C5FBC /* PresenceModelTests.swift in Sources */,
 				60751E32B53AC19C36508E8B /* PurchaseTests.swift in Sources */,

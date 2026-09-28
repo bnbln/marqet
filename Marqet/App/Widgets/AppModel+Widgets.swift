@@ -237,6 +237,9 @@ extension AppModel {
         }
         pendingLink = nil
         switch link {
+        case .home:
+            closeOverlays()
+            focusedPage = nil
         case .page(let page):
             show(page)
         case .compose(let page):

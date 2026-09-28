@@ -99,23 +99,27 @@ Aufbau wie die Card: **Kopfband** in Markenfarbe (Verlauf wie in der App, Abzeic
 **Erledigt-Variante:** Zeilen durchgestrichen, rechts „↺“ = Nochmal kaufen.
 **Leerzustände** wie in der App: „Alles erledigt bei Aldi“ (Häkchen-Siegel), „Noch leer – tippe +“, „Alles sortiert“.
 
-### 4.3 Überblick
+### 4.3 Überblick („Einkaufen“)
+
+*Rev. 2 (28.09.):* Jede Größe trägt einen **Kopf in der Marqet-Akzentfarbe** mit dem Wagen des App-Icons, „Einkaufen“ und der Gesamtzahl – wie der farbige Kopf der Listen-Widgets, nur in Marqets eigener Farbe statt in einer Ladenfarbe. So ist das Widget auf den ersten Blick als Marqet erkennbar. Wenig Text: kein Listenname, kein Zusammenfassungssatz, keine „in 4 Läden“-Zeile.
 
 | Größe | Inhalt |
 |---|---|
-| Klein | Einträge der Läden groß, „in 4 Läden“, **Farbleiste** (Segmente in Markenfarben, Breite = Anteil), Inbox als eigene Zeile – die große Zahl zählt nur, was die Zeile darunter nennt |
-| Mittel | **Mini-Pager:** bis zu vier kleine Cards nebeneinander (Kopf in Markenfarbe, große Zahl, Name), die Inbox zuerst, „+2“ am Ende. Jede Mini-Card öffnet ihre Card |
-| Groß | „Einkaufen“ + Zusammenfassung in einem Satz (Regeln wie #40: „23 Einträge bei 4 Läden. Aldi ist am nächsten (650 m).“), Zeilen pro Laden mit Vorschau der ersten Einträge, Anzahl und Entfernung, Inbox-Zeile mit „Zuordnen“, Schaltfläche **„Einkauf bei Aldi starten“** |
-| XL hoch | Zusammenfassung plus Raster aus Mini-Cards (2 × 3) **mit abhakbaren Einträgen** – das ganze Einkaufs-Dashboard auf einer Home-Seite |
-| XL (iPad) | Raster aus Mini-Cards (4 × 2) mit Einträgen |
+| Klein | Kopf, darunter die Einträge der Läden groß, **Farbleiste** (Segmente in Markenfarben, Breite = Anteil), Inbox als Symbol mit Zahl |
+| Mittel | Kopf, darunter der **Mini-Pager:** bis zu vier kleine Cards nebeneinander (Kopf in Markenfarbe, große Zahl, Name), die Inbox zuerst, „+2“ am Ende. Jede Mini-Card öffnet ihre Card, „+2“ öffnet Home |
+| Groß | Kopf, Zeilen pro Laden mit Vorschau der ersten Einträge, Anzahl und Entfernung, Inbox-Zeile (Zeile → Inbox, „Zuordnen“ → Zuordnen), Schaltfläche **„Einkauf bei Aldi starten“** mit 16 pt Abstand zu Rand und Liste |
+| XL hoch | Kopf plus Raster aus Mini-Cards (2 × 3) **mit abhakbaren Einträgen** – das ganze Einkaufs-Dashboard auf einer Home-Seite |
+| XL (iPad) | Kopf plus Raster aus Mini-Cards (4 × 2) mit Einträgen |
 | Sperrbildschirm | „23 offen · 4 Läden“ und „Aldi 9 · dm 3 · Rewe 2“; rund: Anzahl mit Wagen; Zeile: „🛒 23 offen · Aldi 9“ |
+
+**Tipp außerhalb einer Card oder Zeile:** genau ein Laden → dessen Card; nur die Inbox → Inbox; sonst **Home** (`marqet://home`), nie die Inbox, nur weil sie vorne steht.
 
 ### 4.4 Kundenkarte
 
 | Größe | Inhalt |
 |---|---|
-| Klein | Karte in ihrer Farbe, Name, Abzeichen der Läden, Barcode-Symbol. Tippen = Vollbild mit maximaler Helligkeit |
-| Mittel | Links Farbfeld mit Name und Läden, rechts der **echte Barcode** auf Weiß mit Nummer |
+| Klein | Karte in ihrer Farbe, oben die Logos der Läden, groß **„Kundenkarte“** (die Marke steht schon im Logo; ohne Laden der Kartenname), maskierte Nummer. Tippen = Vollbild mit maximaler Helligkeit |
+| Mittel | Links Farbfeld mit Logos oben und „Kundenkarte“, rechts der **echte Barcode** auf Weiß mit Nummer |
 | Sperrbildschirm | Name + „An der Kasse zeigen“ |
 
 Barcode und Nummer sind `privacySensitive()`: Auf dem gesperrten Gerät werden sie verborgen.
@@ -153,7 +157,7 @@ Prospekt-Cover wie im Regal der Angebote-Card (Markenfarbe, Logo, KW). Klein: ei
 
 | Ort | Inhalt |
 |---|---|
-| **Sperrbildschirm** | Kopf: Abzeichen, „Einkauf bei Aldi Süd“, „4 von 9 erledigt“, Fortschrittsbalken in Markenfarbe. Darunter die **nächsten drei Einträge im Laufweg mit Kreis** (abhaken). Rechts **Kundenkarte** (öffnet den Barcode) und „×“. Unten „Danach: dm 3 · Markt 2“ |
+| **Sperrbildschirm** | *Rev. 2 (28.09.):* Kopf: Abzeichen mit **Fortschrittsring**, „Einkauf bei Aldi Süd“, „4 von 9 erledigt“. Darunter die **nächsten sechs Einträge im Laufweg mit Kreis** (abhaken), drei Reihen à zwei mit mehr Luft (24 pt Zeile, 6 pt Abstand). Rechts **Kundenkarte** (öffnet den Barcode) und „×“. „Danach: dm 3 · Markt 2“ nur bei höchstens vier Einträgen – das System schneidet das Banner bei 160 pt ab |
 | **Dynamic Island kompakt** | Links Abzeichen, rechts verbleibende Anzahl mit Fortschrittsring in Markenfarbe |
 | **Dynamic Island quer (iOS 27)** | `isDynamicIslandLimitedInWidth`: rechts nur die Zahl, ohne Ring |
 | **Minimal** | Ring mit Zahl |
@@ -164,7 +168,7 @@ Prospekt-Cover wie im Regal der Angebote-Card (Markenfarbe, Logo, KW). Klein: ei
 ### 5.3 Daten (ActivityKit, < 4 KB)
 
 - **Attribute (fest):** Listentitel, Einkaufs-ID.
-- **Zustand (dynamisch):** aktueller Laden (Name, Farbe, Symbol, Katalog-Schlüssel), nächste bis zu 4 Einträge (ID, Titel, Notiz), offen, erledigt, bis zu 3 nächste Läden (Name, Farbe, Anzahl), „hat Kundenkarte“, fertig ja/nein.
+- **Zustand (dynamisch):** aktueller Laden (Name, Farbe, Symbol, Katalog-Schlüssel), nächste bis zu 6 Einträge (ID, Titel, Notiz), offen, erledigt, bis zu 3 nächste Läden (Name, Farbe, Anzahl), „hat Kundenkarte“, fertig ja/nein.
 - Der Laden liegt im **Zustand**, nicht in den Attributen: Die Aktivität begleitet die ganze Runde.
 
 ---
@@ -195,6 +199,7 @@ Die Entitäten für die Widgets (Liste, Laden, Kundenkarte) tragen auch Siri und
 | „↺“ | Nochmal kaufen | `RestoreItemIntent` (`LiveActivityIntent`) |
 | „Einkauf starten“ / „Weiter zu dm“ / „×“ | Live-Aktivität | `StartTripIntent`, `NextStoreIntent`, `EndTripIntent` |
 | Kopf, Zeile, Mini-Card | Card im Vollbild | `marqet://page/store:<id>` |
+| Überblick außerhalb einer Card | Home, nichts geöffnet | `marqet://home` |
 | „+“ | Eingabe auf dieser Card | `marqet://compose/store:<id>` |
 | „Läden zuordnen“ | Zuordnen | `marqet://triage` |
 | Kundenkarte | Barcode im Vollbild | `marqet://card/<id>` |

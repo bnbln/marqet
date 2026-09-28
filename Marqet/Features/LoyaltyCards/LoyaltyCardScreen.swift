@@ -53,7 +53,9 @@ struct LoyaltyCardScreen: View {
                 LoyaltyCardEditor(card: card)
             }
         }
-        .tint(.primary)
+        // Text and bar icons in the text color, never the accent (`.primary` does not reach
+        // the UIKit navigation bar, the label color does).
+        .tint(Color(uiColor: .label))
         .onAppear {
             selection = initialCardID ?? cards.first?.id
             brightness.raise()

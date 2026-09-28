@@ -17,7 +17,7 @@ final class VoiceSession {
         case listening
         /// Last words are finalized, the model reads the whole dictation once more.
         case finishing
-        /// "Zu deinen Listen hinzufügen?"
+        /// "Hinzufügen?" with the entries per list.
         case review
         case failed(String, canOpenSettings: Bool)
     }

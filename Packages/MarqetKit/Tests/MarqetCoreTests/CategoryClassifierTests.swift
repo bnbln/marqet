@@ -125,8 +125,8 @@ struct CategoryClassifierTests {
     }
 
     @Test func dictionaryIsLarge() {
-        // ≈ 1.000 Begriffe in v1 (Ziel laut Konzept ≈ 2.500, Ausbau mit echten Beta-Listen).
-        #expect(classifier.dictionary.wordCount >= 950)
+        // Ausgebaut von ≈ 1.000 auf ≈ 2.500 Begriffe (bekannte Lücke, KONZEPT §6.3).
+        #expect(classifier.dictionary.wordCount >= 2500)
         print("Dictionary: \(classifier.dictionary.wordCount) words")
     }
 

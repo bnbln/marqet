@@ -15,23 +15,29 @@ struct StoreOrderSheet: View {
                         HStack(spacing: 12) {
                             StoreBadge(store: store, size: 32)
                             Text(store.name)
+                            Spacer(minLength: 0)
+                            // Always visible: the rows can be dragged right away, without an edit mode.
+                            Image(systemName: "line.3.horizontal")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
                         }
                     }
+                    // Applies at once: Home reorders behind the sheet while the user drags.
                     .onMove { model.moveStores(from: $0, to: $1) }
                     .onDelete { offsets in
                         pendingDelete = offsets.first.map { model.sortedStores[$0] }
                     }
                     Button("Laden hinzufügen", systemImage: "plus") { showsAddStore = true }
                 } footer: {
-                    Text("Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten.")
+                    Text(footer)
                 }
             }
             .navigationTitle("Läden sortieren")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) { EditButton() }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Fertig") { dismiss() }
+                    Button(role: .confirm) { dismiss() }
                 }
             }
             .sheet(isPresented: $showsAddStore) {
@@ -55,5 +61,14 @@ struct StoreOrderSheet: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+    }
+
+    private var footer: LocalizedStringKey {
+        switch model.storeSortMode {
+        case .manual:
+            "Halten und ziehen ändert die Reihenfolge deiner Ladenkarten, nach links wischen löscht."
+        case .distance, .smart:
+            "Deine Ladenkarten sind gerade nach \(model.storeSortMode.title) sortiert. Sobald du hier ziehst, gilt deine eigene Reihenfolge."
+        }
     }
 }

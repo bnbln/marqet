@@ -108,6 +108,8 @@ struct LoyaltyCardsSettingsView: View {
         }
         .sheet(item: $editedCard) { LoyaltyCardEditor(card: $0) }
         .sheet(isPresented: $showsNewCard) { LoyaltyCardEditor(for: nil) }
+        // Text and bar icons in the text color, never the accent.
+        .tint(Color(uiColor: .label))
     }
 
     private func storeNames(of card: LoyaltyCard) -> String {

@@ -64,6 +64,7 @@ extension FoundationModelsService {
         Du liest ein gesprochenes Einkaufs-Diktat und machst daraus Einträge für Einkaufslisten.
         Regeln:
         - Ein Eintrag pro Artikel. Füllwörter („ich brauche“, „ah“, „will … kaufen“) gehören nicht dazu.
+        - Im Diktat fehlen oft Kommas: „Butter Zwiebeln“ sind zwei Artikel, „Rote Bete“ ist einer.
         - Mengen und Einheiten kommen in „menge“ („500 g“, „10“, „2 Packungen“), nicht in „artikel“.
         - Gesprochene Eigenschaften bleiben beim Artikel, nach einem Komma: „Milch laktosefrei“ → „Milch, laktosefrei“.
           Erfinde keine Eigenschaften, die nicht gesagt wurden.
@@ -88,6 +89,7 @@ extension FoundationModelsService {
         You read a spoken shopping dictation and turn it into shopping list entries.
         Rules:
         - One entry per item, written in English as spoken. Filler words (“I need”, “oh”, “I want to buy”) are not items.
+        - Dictations often lack commas: “butter onions” are two items, “peanut butter” is one.
         - Quantities and units go into “menge” (“500 g”, “10”, “2 packs”), not into “artikel”.
         - Spoken properties stay with the item, after a comma: “lactose-free milk” → “Milk, lactose-free”.
           Never add properties that were not said.

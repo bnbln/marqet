@@ -191,7 +191,7 @@ struct WidgetSnapshotTests {
     // MARK: Deep links
 
     @Test(arguments: [
-        MarqetLink.page(.unsorted), .page(.store(UUID())), .compose(.store(UUID())), .compose(.unsorted),
+        MarqetLink.home, .page(.unsorted), .page(.store(UUID())), .compose(.store(UUID())), .compose(.unsorted),
         .triage, .completed, .loyaltyCard(UUID()), .storeLoyaltyCards(UUID()), .offers, .offer(catalogKey: "aldi-sued"), .trip,
     ])
     func deepLinksRoundTrip(link: MarqetLink) {

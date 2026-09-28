@@ -129,6 +129,8 @@ struct WidgetCardHeader: View {
     var badgeSize: CGFloat = 26
     var height: CGFloat = 46
     var trailing: Trailing = .count
+    /// Shown instead of the page's own count, for headers that sum up several cards.
+    var count: Int? = nil
 
     @Environment(\.widgetRenderingMode) private var renderingMode
 
@@ -158,8 +160,8 @@ struct WidgetCardHeader: View {
             case .none:
                 EmptyView()
             case .count:
-                if page.openCount > 0 {
-                    Text(page.openCount, format: .number)
+                if (count ?? page.openCount) > 0 {
+                    Text(count ?? page.openCount, format: .number)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .monospacedDigit()
                         .contentTransition(.numericText())

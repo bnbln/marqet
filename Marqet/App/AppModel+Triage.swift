@@ -78,10 +78,10 @@ extension AppModel {
         Task { await prepareIntelligentSuggestions(for: unsortedItems) }
     }
 
-    /// End of onboarding: existing unsorted items go straight into triage (KONZEPT §7.4).
+    /// End of onboarding. Triage never opens by itself – not here, not at launch: the user starts
+    /// it from the inbox, the briefing or a widget (KONZEPT #11).
     func completeOnboarding() {
         hasCompletedOnboarding = true
-        startTriage()
     }
 
     func endTriage() {

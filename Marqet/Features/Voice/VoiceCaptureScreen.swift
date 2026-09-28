@@ -6,7 +6,7 @@ import SwiftUI
 /// Top: the live transcript, recognized stores in their color. Middle: one card per store in
 /// the order they were mentioned, rows flying in as they are heard (and across cards when a
 /// store is corrected). Bottom: the microphone. After "Fertig" the same screen asks
-/// "Zu deinen Listen hinzufügen?" – rows can be deselected, moved or removed before adding.
+/// "Hinzufügen?" – rows can be deselected, moved or removed before adding.
 struct VoiceCaptureScreen: View {
     let request: VoiceRequest
 
@@ -46,6 +46,7 @@ struct VoiceCaptureScreen: View {
                 }
             }
             .navigationTitle(session.map(title(for:)) ?? "")
+            .navigationSubtitle(session.map(subtitle(for:)) ?? "")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
         }
@@ -72,6 +73,17 @@ struct VoiceCaptureScreen: View {
         case .finishing: String(localized: "Wird sortiert …")
         case .review: String(localized: "Hinzufügen?")
         }
+    }
+
+    /// Review: what "Hinzufügen" will do, right under the question.
+    private func subtitle(for session: VoiceSession) -> String {
+        guard session.phase == .review, !session.groups.isEmpty else { return "" }
+        let items = session.selectedCount
+        guard items > 0 else { return String(localized: "Nichts ausgewählt") }
+        let stores = session.targetCount
+        let itemText = items == 1 ? String(localized: "1 Eintrag") : String(localized: "\(items) Einträge")
+        let storeText = stores == 1 ? String(localized: "1 Liste") : String(localized: "\(stores) Listen")
+        return String(localized: "\(itemText) für \(storeText)")
     }
 
     @ToolbarContentBuilder
@@ -131,7 +143,6 @@ private struct VoiceCaptureContent: View {
                 // iPad and the open Duo: what was said on the left, the lists on the right.
                 AdaptiveSplit {
                     VStack(alignment: .leading, spacing: 20) {
-                        header
                         TranscriptView(session: session, isExpanded: true)
                         Spacer(minLength: 0)
                     }
@@ -141,11 +152,8 @@ private struct VoiceCaptureContent: View {
                 }
             } else {
                 VStack(spacing: 0) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        header
-                        TranscriptView(session: session, isExpanded: session.phase != .review)
-                    }
-                    .padding(.horizontal, 20)
+                    TranscriptView(session: session, isExpanded: session.phase != .review)
+                        .padding(.horizontal, 20)
                     .padding(.top, 4)
                     lists
                 }
@@ -155,29 +163,6 @@ private struct VoiceCaptureContent: View {
             AmbientGlow(color: activeColor, level: session.phase == .listening ? session.level : 0)
                 .animation(.easeInOut(duration: 0.6), value: session.activeChoice)
         }
-    }
-
-    @ViewBuilder
-    private var header: some View {
-        if session.phase == .review {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(session.selectedCount == 0 ? "Nichts ausgewählt" : "Zu deinen Listen hinzufügen?")
-                    .font(.title2.bold())
-                Text(summary)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .contentTransition(.numericText())
-            }
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-
-    private var summary: String {
-        let items = session.selectedCount
-        let stores = session.targetCount
-        let itemText = items == 1 ? String(localized: "1 Eintrag") : String(localized: "\(items) Einträge")
-        let storeText = stores == 1 ? String(localized: "1 Liste") : String(localized: "\(stores) Listen")
-        return String(localized: "\(itemText) für \(storeText). Tippe auf einen Eintrag, um ihn abzuwählen.")
     }
 
     private var lists: some View {
@@ -197,6 +182,14 @@ private struct VoiceCaptureContent: View {
                         )
                         .id(group.id)
                         .transition(cardTransition)
+                    }
+                    if session.phase == .review, !session.groups.isEmpty {
+                        Text("Tippen zum Abwählen, gedrückt halten zum Verschieben.")
+                            .font(.footnote)
+                            .foregroundStyle(.tertiary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                            .transition(.opacity)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -248,7 +241,7 @@ private struct TranscriptView: View {
                     .contentTransition(.interpolate)
             }
         }
-        .font(isExpanded ? .title3.weight(.medium) : .subheadline)
+        .font(isExpanded ? .title3.weight(.medium) : .footnote)
         .lineSpacing(3)
         .frame(maxWidth: .infinity, alignment: .leading)
         // Listening: the newest words matter, older ones scroll out at the top.
@@ -500,7 +493,7 @@ private struct EmptyDictationHint: View {
                     .foregroundStyle(.secondary)
                 Text("Keine Einträge erkannt")
                     .font(.headline)
-                Text("Tippe auf das Mikrofon und versuch es noch einmal.")
+                Text("Tippe auf „Weitersprechen“ und versuch es noch einmal.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -595,21 +588,26 @@ private struct VoiceControls: View {
     }
 
     private var reviewBar: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 6) {
             Button {
                 Task { await session.resume() }
             } label: {
-                Image(systemName: "mic.fill")
-                    .font(.title3.weight(.semibold))
-                    .frame(width: 56, height: 56)
+                Label("Weitersprechen", systemImage: "mic.fill")
+                    .font(.body.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .contentShape(.capsule)
             }
             .buttonStyle(.plain)
-            .glassEffect(.regular.interactive(), in: .circle)
-            .accessibilityLabel("Weitersprechen")
+            .foregroundStyle(.primary)
 
             Button(action: onCommit) {
-                HStack {
-                    if isCommitting { ProgressView().tint(.white) }
+                HStack(spacing: 8) {
+                    if isCommitting {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "plus")
+                    }
                     Text(commitTitle)
                         .contentTransition(.numericText())
                 }

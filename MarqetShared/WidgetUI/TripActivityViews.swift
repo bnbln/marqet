@@ -6,16 +6,25 @@ import WidgetKit
 // The Live Activity "Einkauf" (KONZEPT-WIDGETS §5.2): Lock Screen, Dynamic Island, Watch and CarPlay.
 
 /// Lock Screen and StandBy: the store's colored header as the whole banner.
+/// The system cuts the banner at 160 pt: progress is a ring around the badge instead of its own
+/// bar, so up to six items fit with air between the rows.
 struct TripLockScreenView: View {
     let status: TripStatus
 
     private var store: Store { status.store }
     private var foreground: Color { store.foregroundOnColor }
+    /// Three rows of two; with four items or fewer there is room for the next stops.
+    private var lines: [TripStatus.Line] { Array(status.next.prefix(6)) }
+    private var showsStops: Bool { !status.stops.isEmpty && !status.isStoreDone && lines.count <= 4 }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 9) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                WidgetBadge(store: store, size: 38)
+                ZStack {
+                    ProgressRing(progress: status.progress, color: foreground)
+                    WidgetBadge(store: store, size: 30)
+                }
+                .frame(width: 38, height: 38)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(.system(size: 16, weight: .bold))
@@ -23,6 +32,7 @@ struct TripLockScreenView: View {
                     Text(progressText)
                         .font(.system(size: 13, weight: .medium))
                         .opacity(0.85)
+                        .lineLimit(1)
                         .contentTransition(.numericText())
                 }
                 Spacer(minLength: 4)
@@ -45,21 +55,18 @@ struct TripLockScreenView: View {
                 .accessibilityLabel("Einkauf beenden")
             }
 
-            ProgressBar(progress: status.progress, color: foreground)
-                .frame(height: 5)
-
             if status.isStoreDone {
                 doneRow
             } else {
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], alignment: .leading, spacing: 2) {
-                    ForEach(status.next.prefix(4)) { line in
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], alignment: .leading, spacing: 6) {
+                    ForEach(lines) { line in
                         TripLineButton(line: line, color: foreground, fontSize: 14)
-                            .frame(height: 26)
+                            .frame(height: 24)
                     }
                 }
             }
 
-            if !status.stops.isEmpty, !status.isStoreDone {
+            if showsStops {
                 Text("Danach: " + status.stops.map { "\($0.name) \($0.count)" }.joined(separator: " · "))
                     .font(.system(size: 12, weight: .medium))
                     .opacity(0.8)
@@ -67,7 +74,8 @@ struct TripLockScreenView: View {
             }
         }
         .foregroundStyle(foreground)
-        .padding(14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
     }
 
     private var title: String {
@@ -151,6 +159,24 @@ struct TripLineButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(line.title) abhaken")
+    }
+}
+
+/// Progress around the store badge on the Lock Screen.
+struct ProgressRing: View {
+    let progress: Double
+    let color: Color
+
+    var body: some View {
+        ZStack {
+            Circle().stroke(color.opacity(0.25), lineWidth: 3)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(color, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+        .padding(1.5)
+        .accessibilityHidden(true)
     }
 }
 

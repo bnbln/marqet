@@ -20,56 +20,99 @@ struct MapScreen: View {
     @State private var selectedPin: MapPin?
     @State private var isLoading = false
     @State private var shouldFrameDiscovery = true
+    /// Pins for the current data, rebuilt only when places, stores or items change – matching
+    /// hundreds of places against the catalog on every frame made the map sluggish.
+    @State private var pins: [MapPin] = []
+    @State private var openCounts: [Store.ID: Int] = [:]
+    /// Suggestion pins show the chain as a store; built once per chain.
+    @State private var chainStores: [String: Store] = [:]
+    /// Single pins and cluster bubbles for the visible area.
+    @State private var markers: [MapMarker] = []
+    @State private var visibleRect: MKMapRect?
+    @State private var mapWidth: CGFloat = 390
+    @State private var selection: String?
+    /// Zoomed out beyond a city: no searches, only what is already known (in clusters).
+    @State private var isTooFarOut = false
     @AppStorage("mapShowsOnlyStoresWithItems") private var showsOnlyStoresWithItems = true
     @AppStorage("mapShopCategory") private var shopCategory: NearbyShopCategory = .groceries
 
     private static let initialRadius: Double = 2_500
+    /// Above this radius the map stops searching for shops (MapKit results get meaningless).
+    private static let maximumLoadRadius: Double = 12_000
 
     init(focusedStoreID: Store.ID? = nil) {
         self.focusedStoreID = focusedStoreID
     }
 
     var body: some View {
-        let pins = model.mapPins(found: found + discovered, includeUnmatched: !showsOnlyStoresWithItems).filter { pin in
-            if showsOnlyStoresWithItems {
-                guard let store = pin.store else { return false }
-                return model.openItemCount(of: store.id) > 0
-            }
-            if let store = pin.store { return shopCategory.includes(store.type) }
-            if case .suggestion(_, let key) = pin.kind,
-               let chain = model.catalog?.entry(forKey: key) { return shopCategory.includes(chain.type) }
-            return true
-        }
         NavigationStack {
-            Map(position: $position) {
+            Map(position: $position, selection: $selection) {
                 UserAnnotation()
-                ForEach(pins) { pin in
-                    Annotation(title(of: pin), coordinate: pin.coordinate.clCoordinate) {
-                        // Annotation content does not inherit the environment – pass what the pin shows.
-                        Button { selectedPin = pin } label: {
-                            PinView(pin: pin, openCount: pin.store.map { model.openItemCount(of: $0.id) } ?? 0, chainStore: chainStore(of: pin))
+                ForEach(markers) { marker in
+                    switch marker {
+                    case .pin(let pin):
+                        // No buttons inside annotations: MapKit's own selection keeps pinch and
+                        // pan working when a finger lands on a pin.
+                        Annotation(title(of: pin), coordinate: pin.coordinate.clCoordinate) {
+                            // Annotation content does not inherit the environment – pass what the pin shows.
+                            PinView(pin: pin, openCount: pin.store.map { openCounts[$0.id] ?? 0 } ?? 0, chainStore: chainStore(of: pin))
                         }
-                            .buttonStyle(.plain)
+                        .annotationTitles(showsTitle(of: pin) ? .automatic : .hidden)
+                        .tag(marker.id)
+                    case .cluster(let cluster):
+                        Annotation("", coordinate: cluster.coordinate.clCoordinate) {
+                            ClusterView(stores: clusterStores(cluster), count: cluster.pins.count)
+                        }
+                        .annotationTitles(.hidden)
+                        .tag(marker.id)
                     }
-                    .annotationTitles(!showsOnlyStoresWithItems || isOwn(pin) ? .automatic : .hidden)
                 }
             }
             .mapControls {
                 MapUserLocationButton()
                 MapCompass()
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { mapWidth = $0 }
             .onMapCameraChange(frequency: .onEnd) { context in
+                visibleRect = context.rect
+                rebuildMarkers()
                 let region = context.region
                 let radius = min(region.span.latitudeDelta * 111_000, region.span.longitudeDelta * 111_000 * cos(region.center.latitude * .pi / 180)) / 2
+                isTooFarOut = radius > Self.maximumLoadRadius
+                guard !isTooFarOut else { return }
                 scheduleLoad(center: GeoPoint(latitude: region.center.latitude, longitude: region.center.longitude), radius: radius)
             }
-            .overlay(alignment: .top) {
-                if !searchResults.isEmpty { searchResultList }
+            .onChange(of: pinInputs, initial: true) { rebuildPins() }
+            .onChange(of: pins) { rebuildMarkers() }
+            .onChange(of: mapWidth) { rebuildMarkers() }
+            .onChange(of: selection) { _, id in
+                guard let id else { return }
+                selection = nil
+                switch markers.first(where: { $0.id == id }) {
+                case .pin(let pin): selectedPin = pin
+                case .cluster(let cluster): withAnimation(.smooth) { position = .rect(cluster.zoomRect) }
+                case nil: break
+                }
             }
+            .overlay(alignment: .top) {
+                if !searchResults.isEmpty {
+                    searchResultList
+                } else if isTooFarOut {
+                    Label("Zoome näher heran, um Geschäfte zu laden", systemImage: "plus.magnifyingglass")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .glassEffect(.regular, in: .capsule)
+                        .padding(.top, 8)
+                        .transition(.opacity)
+                }
+            }
+            .animation(.snappy, value: isTooFarOut)
             #if DEBUG
             .overlay(alignment: .topLeading) {
                 if ProcessInfo.processInfo.arguments.contains("-demo-map") {
-                    Text("items=\(showsOnlyStoresWithItems) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) names=\(discovered.map(\.name).joined(separator: ", "))")
+                    Text("items=\(showsOnlyStoresWithItems) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) markers=\(markers.count)")
                         .font(.caption2)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(5)
@@ -111,14 +154,14 @@ struct MapScreen: View {
                 found = []
                 discovered = []
                 shouldFrameDiscovery = true
-                guard let lastLoad else { return }
+                guard let lastLoad, !isTooFarOut else { return }
                 scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
             }
             .onChange(of: shopCategory) {
                 found = []
                 discovered = []
                 shouldFrameDiscovery = true
-                guard !showsOnlyStoresWithItems, let lastLoad else { return }
+                guard !showsOnlyStoresWithItems, let lastLoad, !isTooFarOut else { return }
                 scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
             }
             .sheet(item: $selectedPin) { pin in
@@ -133,6 +176,58 @@ struct MapScreen: View {
             }
         }
         .tint(Color(uiColor: .label))
+    }
+
+    // MARK: Pins
+
+    /// Everything the pins depend on; the pins are rebuilt only when this changes.
+    private var pinInputs: PinInputs {
+        PinInputs(
+            found: found,
+            discovered: discovered,
+            showsOnlyStoresWithItems: showsOnlyStoresWithItems,
+            shopCategory: shopCategory,
+            locations: model.locations,
+            stores: model.stores.map(\.id),
+            openCounts: Dictionary(model.items.lazy.filter { !$0.isCompleted }.compactMap(\.storeID).map { ($0, 1) }, uniquingKeysWith: +)
+        )
+    }
+
+    private struct PinInputs: Equatable {
+        let found: [PlaceResult]
+        let discovered: [PlaceResult]
+        let showsOnlyStoresWithItems: Bool
+        let shopCategory: NearbyShopCategory
+        let locations: [StoreLocation]
+        let stores: [Store.ID]
+        let openCounts: [Store.ID: Int]
+    }
+
+    private func rebuildPins() {
+        let inputs = pinInputs
+        openCounts = inputs.openCounts
+        var chains = chainStores
+        pins = model.mapPins(found: found + discovered, includeUnmatched: !showsOnlyStoresWithItems).filter { pin in
+            if showsOnlyStoresWithItems {
+                guard let store = pin.store else { return false }
+                return (inputs.openCounts[store.id] ?? 0) > 0
+            }
+            if let store = pin.store { return shopCategory.includes(store.type) }
+            if case .suggestion(_, let key) = pin.kind, let chain = model.catalog?.entry(forKey: key) {
+                if chains[key] == nil { chains[key] = chain.makeStore(sortIndex: 0) }
+                return shopCategory.includes(chain.type)
+            }
+            return true
+        }
+        chainStores = chains
+    }
+
+    private func rebuildMarkers() {
+        guard let visibleRect else {
+            markers = pins.map(MapMarker.pin)
+            return
+        }
+        markers = MapClustering.markers(for: pins, in: visibleRect, viewWidth: mapWidth)
     }
 
     private var filterMenu: some View {
@@ -159,11 +254,23 @@ struct MapScreen: View {
 
     private func chainStore(of pin: MapPin) -> Store? {
         guard case .suggestion(_, let key) = pin.kind else { return nil }
-        return model.catalog?.entry(forKey: key)?.makeStore(sortIndex: 0)
+        return chainStores[key]
     }
 
-    private func isOwn(_ pin: MapPin) -> Bool {
-        if case .saved = pin.kind { true } else { false }
+    /// Names only for own branches and search results – dozens of labels would cover the map.
+    private func showsTitle(of pin: MapPin) -> Bool {
+        switch pin.kind {
+        case .saved, .place: true
+        case .branch, .suggestion: false
+        }
+    }
+
+    /// Up to three different stores for the bubble's badges, own stores first.
+    private func clusterStores(_ cluster: MapCluster) -> [Store] {
+        var seen = Set<String>()
+        let own = cluster.pins.compactMap(\.store)
+        let chains = cluster.pins.compactMap(chainStore(of:))
+        return Array((own + chains).filter { seen.insert($0.catalogKey ?? $0.id.uuidString).inserted }.prefix(3))
     }
 
     // MARK: Loading
@@ -208,9 +315,11 @@ struct MapScreen: View {
             results += (try? await model.placeSearch.branches(of: store, chain: chain, near: center, radius: radius)) ?? []
         }
         guard !Task.isCancelled else { return }
-        // Keep what was found elsewhere, so panning back does not empty the map.
+        // Keep what was found nearby, so panning back does not empty the map – but not the
+        // whole city: far away places only cost layout time.
+        let keepRadius = max(radius * 4, 15_000)
         var seen = Set(results.map(\.id))
-        found = results + found.filter { seen.insert($0.id).inserted }
+        found = results + found.filter { seen.insert($0.id).inserted && $0.coordinate.distance(to: center) < keepRadius }
     }
 
     private func search() async {
@@ -355,6 +464,34 @@ private struct PinView: View {
                 .font(.title)
                 .foregroundStyle(.white, .red)
         }
+    }
+}
+
+/// Several shops close together: their badges stacked, and how many there are.
+private struct ClusterView: View {
+    let stores: [Store]
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 6) {
+            HStack(spacing: -12) {
+                ForEach(stores) { store in
+                    StoreBadge(store: store, size: 26)
+                        .overlay(Circle().strokeBorder(.white, lineWidth: 1.5))
+                }
+            }
+            Text("\(count)")
+                .font(.subheadline.bold())
+                .monospacedDigit()
+                .foregroundStyle(Color(uiColor: .label))
+        }
+        .padding(.leading, 4)
+        .padding(.trailing, 10)
+        .padding(.vertical, 4)
+        .background(Color(uiColor: .systemBackground), in: .capsule)
+        .shadow(color: .black.opacity(0.2), radius: 3, y: 1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(count) Geschäfte")
     }
 }
 

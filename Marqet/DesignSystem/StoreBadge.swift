@@ -56,6 +56,11 @@ struct StoreBadge: View {
     private static let fullBleedLogos: Set<String> = [
         "rewe", "lidl", "ikea", "penny", "billa", "bipa", "norma", "aldi-suisse",
         "bio-company", "tegut", "volg", "obi", "hornbach",
+        // Already laid out for the circle (ASSET_SOURCES.md).
+        "nahkauf", "hit", "famila", "combi", "budni", "sephora", "douglas", "flaconi", "kadewe",
+        "breuninger", "galeria", "peek-cloppenburg", "hm", "zara", "uniqlo", "c-and-a", "tk-maxx",
+        "primark", "deichmann", "snipes", "mediamarkt", "saturn", "cyberport", "decathlon",
+        "intersport", "thalia", "hugendubel", "fressnapf", "zoo-and-co", "moemax", "xxxlutz",
     ]
 
     private var logoAsset: String? {
@@ -89,6 +94,10 @@ private enum StoreBrandLogos {
         "globus", "marktkauf", "tegut", "dm", "rossmann", "mueller", "alnatura", "denns", "bio-company",
         "hornbach", "obi", "bauhaus", "ikea", "getraenke-hoffmann", "billa", "billa-plus", "spar", "hofer",
         "bipa", "mpreis", "migros", "coop", "denner", "aldi-suisse", "volg", "manor",
+        "nahkauf", "hit", "famila", "combi", "budni", "sephora", "douglas", "flaconi", "kadewe",
+        "breuninger", "galeria", "peek-cloppenburg", "hm", "zara", "uniqlo", "c-and-a", "tk-maxx",
+        "primark", "deichmann", "snipes", "mediamarkt", "saturn", "cyberport", "decathlon",
+        "intersport", "thalia", "hugendubel", "fressnapf", "zoo-and-co", "moemax", "xxxlutz",
     ]
 }
 

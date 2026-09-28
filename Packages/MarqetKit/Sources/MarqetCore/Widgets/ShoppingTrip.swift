@@ -137,7 +137,8 @@ public struct TripStatus: Codable, Sendable, Hashable {
     /// Nothing left anywhere.
     public var isFinished: Bool { openCount == 0 && stops.isEmpty }
 
-    public static let maximumLines = 4
+    /// Three rows of two on the Lock Screen.
+    public static let maximumLines = 6
 
     /// `nil` when the trip's store no longer exists.
     public static func make(snapshot: WidgetSnapshot, trip: ShoppingTrip) -> TripStatus? {

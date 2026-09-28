@@ -11,6 +11,9 @@
         }
       }
     },
+    "„%@“ gelöscht" : {
+
+    },
     "„10 Eier vom Markt und bei Rewe 500 g Hackfleisch“" : {
       "localizations" : {
         "en" : {
@@ -43,18 +46,18 @@
     "%@ abhaken" : {
 
     },
-    "%@ für %@. Tippe auf einen Eintrag, um ihn abzuwählen." : {
+    "%@ für %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "%1$@ für %2$@. Tippe auf einen Eintrag, um ihn abzuwählen."
+            "value" : "%1$@ für %2$@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ for %2$@. Tap an item to deselect it."
+            "value" : "%1$@ for %2$@"
           }
         }
       }
@@ -209,26 +212,6 @@
         }
       }
     },
-    "%lld Einträge bei %@." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld Einträge bei %2$@."
-          }
-        }
-      }
-    },
-    "%lld Einträge bei %lld Läden." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld Einträge bei %2$lld Läden."
-          }
-        }
-      }
-    },
     "%lld Einträge für %@." : {
       "localizations" : {
         "de" : {
@@ -264,9 +247,6 @@
           }
         }
       }
-    },
-    "%lld Einträge ohne Laden" : {
-
     },
     "%lld Einträge übersprungen" : {
       "localizations" : {
@@ -315,6 +295,9 @@
 
     },
     "%lld Filialen" : {
+
+    },
+    "%lld Geschäfte" : {
 
     },
     "%lld in der Inbox" : {
@@ -461,7 +444,7 @@
         }
       }
     },
-    "%lld warten in der Inbox." : {
+    "%lld weitere Läden" : {
 
     },
     "%lld zum Zuordnen" : {
@@ -535,9 +518,6 @@
         }
       }
     },
-    "1 Eintrag bei %@." : {
-
-    },
     "1 Eintrag für %@." : {
       "localizations" : {
         "en" : {
@@ -567,9 +547,6 @@
           }
         }
       }
-    },
-    "1 Eintrag ohne Laden" : {
-
     },
     "1 Eintrag übersprungen" : {
       "localizations" : {
@@ -632,6 +609,9 @@
           }
         }
       }
+    },
+    "1 weiterer Laden" : {
+
     },
     "Abbrechen" : {
       "localizations" : {
@@ -1153,9 +1133,6 @@
     "Beenden" : {
 
     },
-    "bei %@" : {
-
-    },
     "Bei Ankunft melden" : {
 
     },
@@ -1310,6 +1287,9 @@
         }
       }
     },
+    "Deine Ladenkarten sind gerade nach %@ sortiert. Sobald du hier ziehst, gilt deine eigene Reihenfolge." : {
+
+    },
     "Deine Listen bleiben in Apple Erinnerungen. Läden und Kundenkarten speichert Marqet auf diesem Gerät." : {
       "localizations" : {
         "en" : {
@@ -1450,6 +1430,7 @@
       }
     },
     "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1561,9 +1542,6 @@
       }
     },
     "Du bist bei %@" : {
-
-    },
-    "Du bist bei %@." : {
 
     },
     "Du bist hier" : {
@@ -2065,9 +2043,6 @@
         }
       }
     },
-    "Für heute ist nichts offen." : {
-
-    },
     "Gelernte Zuordnungen für diesen Laden gehen verloren." : {
       "localizations" : {
         "en" : {
@@ -2194,6 +2169,9 @@
         }
       }
     },
+    "Halten und ziehen ändert die Reihenfolge deiner Ladenkarten, nach links wischen löscht." : {
+
+    },
     "Haushalt" : {
       "localizations" : {
         "en" : {
@@ -2257,9 +2235,6 @@
         }
       }
     },
-    "in %lld Läden" : {
-
-    },
     "In den Einstellungen erlauben" : {
 
     },
@@ -2272,9 +2247,6 @@
           }
         }
       }
-    },
-    "in der Inbox" : {
-
     },
     "Inbox" : {
       "localizations" : {
@@ -3889,6 +3861,16 @@
     "Tippe +, um etwas hinzuzufügen." : {
 
     },
+    "Tippe auf „Weitersprechen“ und versuch es noch einmal." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap “Keep Talking” and try again."
+          }
+        }
+      }
+    },
     "Tippe auf +, um etwas für %@ hinzuzufügen." : {
       "localizations" : {
         "en" : {
@@ -3899,22 +3881,22 @@
         }
       }
     },
-    "Tippe auf das Mikrofon und versuch es noch einmal." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap the microphone and try again."
-          }
-        }
-      }
-    },
     "Tippe deine Läden in der Reihenfolge an, in der du sie am häufigsten besuchst." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tap your stores in the order you visit them most often."
+          }
+        }
+      }
+    },
+    "Tippen zum Abwählen, gedrückt halten zum Verschieben." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to deselect, touch and hold to move."
           }
         }
       }
@@ -3996,9 +3978,6 @@
 
     },
     "Unterwegs zu %@" : {
-
-    },
-    "Verschieben nach" : {
 
     },
     "Version" : {
@@ -4190,9 +4169,6 @@
         }
       }
     },
-    "weitere Läden" : {
-
-    },
     "Weitere Läden" : {
       "localizations" : {
         "en" : {
@@ -4202,9 +4178,6 @@
           }
         }
       }
-    },
-    "weiterer Laden" : {
-
     },
     "Weitersprechen" : {
       "localizations" : {
@@ -4350,18 +4323,11 @@
         }
       }
     },
-    "Zu %@ zuordnen" : {
+    "Zoome näher heran, um Geschäfte zu laden" : {
 
     },
-    "Zu deinen Listen hinzufügen?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add to your lists?"
-          }
-        }
-      }
+    "Zu %@ zuordnen" : {
+
     },
     "Zu Fuß" : {
       "localizations" : {

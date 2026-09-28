@@ -53,7 +53,7 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 | Unsortierte Einträge per Drag in Läden ziehen, einzeln oder per Drag | ✅ | Zuordnen-Screen mit den Modi Nacheinander und Übersicht, Einstieg über den Footer der Unsortiert-Card (die frühere Nachfrage per Popover ist entfallen) |
 | Marktreif | 🟡 | siehe §3: Kauf, Rechtliches, Englisch, echte Geräte fehlen |
 | Andere Apps angeschaut, Angebote per API | ✅ Analyse / ❌ Umsetzung | Angebote nur über eine Partnerschaft (v2.0) |
-| Kategorien wie bei Bring! und Erinnerungen | ✅ | ≈ 1.000 Begriffe, Ziel ≈ 2.500 |
+| Kategorien wie bei Bring! und Erinnerungen | ✅ | ≈ 2.600 Begriffe (Ziel ≈ 2.500 erreicht) |
 | Neue Läden anlegen | ✅ | Katalog, eigene Läden, Adresse als Freitext |
 | Karte mit Läden, Routen, Sortierung nach Entfernung oder „Smart“ | ❌ | v1.2 und v1.3 („Orte“, „Unterwegs“) |
 | Laden ohne Einträge vom Hauptscreen aus befüllen | ✅ | Card „Weitere Läden“, Chips, Long Press auf Plus |
@@ -71,10 +71,10 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 | M7 Kauf (StoreKit 2, Paywall, Familienfreigabe) | ❌ | Pro nur über den Debug-Schalter |
 | M8 Launch-Reife | ❌ | siehe §3 |
 | Laden-Konfiguration per CloudKit auf eigenen Geräten syncen | ❌ | `cloudKitDatabase: .none`, dafür fehlen Developer-Team und iCloud-Container |
-| Items innerhalb eines Abschnitts per Drag sortieren (Free) | ❌ | alphabetisch |
-| Kategorie-Korrektur per Drag zwischen Abschnitten | 🟡 | nur über das Menü |
+| Items innerhalb eines Abschnitts per Drag sortieren (Free) | ✅ | Ziehen speichert eine manuelle Position je Kategorie (`setItemOrder`), Free ersetzt damit die alphabetische Sortierung, Pro-Laufweg verfeinert weiter |
+| Kategorie-Korrektur per Drag zwischen Abschnitten | ✅ | bewusst nur über das Menü, nicht per Ziehen (siehe Kommentar in `ItemContextMenu.swift`) – Ziehen bleibt für den Laden-Wechsel reserviert |
 | iPad: Kurzbefehle, Zeiger, mehrere Fenster | ❌ | `UIApplicationSupportsMultipleScenes: false` |
-| Löschen mit Rückgängig | ✅ | über das globale Rückgängig in der Toolbar (seit `2c99e7b`) |
+| Löschen mit Rückgängig | ✅ | Toast direkt nach dem Wischen-Löschen („… gelöscht · Rückgängig“, 5 s), zusätzlich weiter über das globale Rückgängig im Profil-Menü |
 | Englisch | ❌ | 195 Texte, 0 davon übersetzt |
 | Barrierefreiheit (VoiceOver, Dynamic Type AX5, Kontrast) | 🟡 | Teile vorhanden, kein systematischer Audit. Neue lesbare Laden-Farben (4,5:1) sind in Arbeit |
 
@@ -122,7 +122,7 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 
 | Version | Inhalt | Status | Grundlage im Code |
 |---|---|---|---|
-| **v1.0** | wie oben plus iPad-Kurzbefehle, Zeiger-Effekte, mehrere Fenster, Items per Drag sortieren, Kategorie per Drag, Wörterbuch ≈ 2.500 Begriffe | 🟡 | – |
+| **v1.0** | wie oben plus iPad-Kurzbefehle, Zeiger-Effekte, mehrere Fenster | 🟡 | Items per Drag sortieren, Kategorie-Korrektur und Wörterbuch ≈ 2.500 Begriffe sind erledigt |
 | **v1.1 „Schneller“** | Siri und Kurzbefehle (App Intents) – *Widgets, Steuerelemente und Kurzbefehle für Einkauf/Kundenkarte sind seit 28.09. umgesetzt (KONZEPT #46–#53)*, Prospekt-Link, **Kundenkarten im Laden-Vollbild** (KONZEPT #42), `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen | ❌ | Katalog-Felder `leafletURL` vorbereitet, `onHingeChange` im SDK; Kundenkarten brauchen `loyaltyPrograms` im Katalog und `LoyaltyCard` im Schema |
 | **v1.0 (vorgezogen, E2): „Orte“** | Filialen per MapKit, Karte, Laden aus der Karte anlegen, Sortierung nach Entfernung und „Smart“ | ❌ | `address` als Freitext vorhanden, `mapSearchTerms` im Katalog, Spezifikation in KONZEPT §14 |
 | **v1.3 „Unterwegs“** | Einkaufsrunde mit Routenoptimierung, Standort-Hinweise, Apple Watch, Live Activity (*Live-Aktivität „Einkauf“ inkl. Watch-Smart-Stack seit 28.09. umgesetzt, KONZEPT #48*) | 🟡 | Spezifikation in KONZEPT §14.3 |
@@ -169,9 +169,9 @@ Die Reihenfolge folgt dem kritischen Pfad zum Launch. Alles, was nicht auf ihm l
 
 ### Phase 4 · Restliche v1.0-Lücken (parallel zu Phase 3)
 - iPad: Kurzbefehle (⌘N, ⌘←/→, ⌘1–9, Leertaste, ⌘⌫), Zeiger-Effekte, mehrere Fenster (Status pro Szene prüfen).
-- Items innerhalb eines Abschnitts per Drag sortieren (Free), Kategorie per Drag zwischen Abschnitten ändern.
 - Duo-Befunde aus Phase 1 umsetzen.
-- Wörterbuch mit Beta-Daten auf ≈ 2.500 Begriffe ausbauen.
+- ~~Items innerhalb eines Abschnitts per Drag sortieren (Free), Kategorie per Drag zwischen Abschnitten ändern.~~ erledigt.
+- ~~Wörterbuch mit Beta-Daten auf ≈ 2.500 Begriffe ausbauen.~~ erledigt (≈ 2.600 Begriffe).
 
 ### Phase 5 · „Orte“ für v1.0 (E2)
 1. **MapKit-Spike** (Teil von Phase 1): Finden `MKLocalSearch` und `MKLocalPointsOfInterestRequest` die Filialen der Katalog-Ketten in DE, AT und CH zuverlässig? Wie trifft die Ketten-Erkennung über `mapSearchTerms`? Wie verhält sich MapKit beim Rate-Limit?

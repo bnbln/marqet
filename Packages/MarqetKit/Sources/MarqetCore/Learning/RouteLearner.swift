@@ -99,4 +99,15 @@ public enum RouteLearner {
             (category, OrderPosition(value: Double(index) / denominator, samples: 1, isManual: true))
         })
     }
+
+    /// Positions of manually reordered items inside one category, evenly spread in the given
+    /// order and merged into the store's existing positions (other categories' items keep theirs).
+    public static func manualItemPositions(for order: [String], mergingInto positions: [String: OrderPosition]) -> [String: OrderPosition] {
+        let denominator = Double(max(order.count - 1, 1))
+        var result = positions
+        for (index, key) in order.enumerated() {
+            result[key] = OrderPosition(value: Double(index) / denominator, samples: 1, isManual: true)
+        }
+        return result
+    }
 }

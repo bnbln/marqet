@@ -101,6 +101,31 @@ struct VoiceParsingTests {
         #expect(entries == [SpokenEntry(name: "Hackfleisch", storeName: "Rewe")])
     }
 
+    // MARK: Missing commas
+
+    @Test func dictationWithoutCommas() {
+        // As transcribed on device: the commas between the items are missing.
+        let transcript = "Ich möchte Brot auf dem Markt kaufen Klopapier bei Rewe. Milch, Butter Zwiebeln bei Rewe."
+        let entries = VoiceRuleParser.parse(transcript, lexicon: lexicon)
+        #expect(entries == [
+            SpokenEntry(name: "Brot", storeName: "Markt"),
+            SpokenEntry(name: "Klopapier", storeName: "Rewe"),
+            SpokenEntry(name: "Milch", storeName: "Rewe"),
+            SpokenEntry(name: "Butter", storeName: "Rewe"),
+            SpokenEntry(name: "Zwiebeln", storeName: "Rewe"),
+        ])
+    }
+
+    @Test func storeFirstClausesSplitBeforeEachStore() {
+        let entries = VoiceRuleParser.parse("Bei Rewe Milch bei Aldi Butter", lexicon: lexicon)
+        #expect(entries == [SpokenEntry(name: "Milch", storeName: "Rewe"), SpokenEntry(name: "Butter", storeName: "Aldi Süd")])
+    }
+
+    @Test func knownPhrasesAndAdjectivesStayTogether() {
+        let entries = VoiceRuleParser.parse("Rote Bete, frische Milch, Kinder Riegel und 500 g Butter Zwiebeln", lexicon: lexicon)
+        #expect(entries.map(\.title) == ["Rote Bete", "Frische Milch", "Kinder Riegel", "500 g Butter", "Zwiebeln"])
+    }
+
     // MARK: English
 
     @Test func englishDictation() {

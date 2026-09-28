@@ -178,6 +178,19 @@ struct StoreCard: View {
                                     .listRowSeparator(.visible, edges: .bottom)
                                     .listRowSeparatorTint(Color(.separator).opacity(0.4))
                                     .id(item.id)
+                                    // Known-gap fix: drag to reorder within a section (Free:
+                                    // alphabetical, Pro: walking order – both now start from a
+                                    // manual drag). Dropping on another store's card still moves
+                                    // it there; the category itself only changes via the menu.
+                                    .dropDestination(for: String.self) { ids, _ in
+                                        guard let store, let draggedID = ids.first, draggedID != item.id,
+                                              let dragged = model.items.first(where: { $0.id == draggedID }),
+                                              dragged.storeID == store.id,
+                                              model.category(of: dragged) == model.category(of: item)
+                                        else { return false }
+                                        model.reorderItem(dragged, before: item, in: section.items)
+                                        return true
+                                    }
                             }
                         } header: {
                             if let category = section.category {
@@ -685,6 +698,13 @@ struct ItemRow: View {
         .draggable(item.id)
         .contextMenu {
             ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) {
+                Task { await model.delete(item) }
+            } label: {
+                Label("Löschen", systemImage: "trash")
+            }
         }
         .sheet(isPresented: $isEditingNote) {
             ItemNoteSheet(item: item)

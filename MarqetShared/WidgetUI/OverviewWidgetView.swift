@@ -33,7 +33,7 @@ struct OverviewWidgetView: View {
                 }
             }
         }
-        .widgetURL(MarqetLink.page(.unsorted).url)
+        .widgetURL(model.link)
     }
 
     private var model: OverviewModel {
@@ -41,7 +41,7 @@ struct OverviewWidgetView: View {
     }
 }
 
-/// Stores in the configured order plus the numbers and the one-sentence summary.
+/// Stores in the configured order plus the numbers and where a tap goes.
 struct OverviewModel {
     let snapshot: WidgetSnapshot
     let stores: [WidgetSnapshot.Page]
@@ -84,33 +84,44 @@ struct OverviewModel {
         return stores.first
     }
 
-    /// Fixed rules, never the language model – the numbers must be right (KONZEPT #40).
-    var summary: String {
-        var sentences: [String] = []
-        if let presence = snapshot.presence, let here = stores.first(where: { $0.store?.id == presence.storeID }),
-           let name = here.store?.name {
-            sentences.append(String(localized: "Du bist bei \(name)."))
+    /// Where a tap outside a card or row goes: the one card that is meant, else Home – never
+    /// the inbox just because it comes first.
+    var link: URL {
+        if stores.count == 1, let pageID = stores[0].pageID { return MarqetLink.page(pageID).url }
+        if stores.isEmpty, inbox != nil { return MarqetLink.page(.unsorted).url }
+        return MarqetLink.home.url
+    }
+}
+
+/// The widget's header band in the Marqet accent color with the cart of the app icon, so the
+/// widget reads as Marqet at a glance – like the store headers of the other widgets.
+private struct OverviewHeader: View {
+    enum Size { case small, medium, large }
+
+    let model: OverviewModel
+    var size: Size = .large
+
+    var body: some View {
+        WidgetCardHeader(
+            page: WidgetSnapshot.Page(id: "overview", store: nil, state: nil, sections: []),
+            title: String(localized: "Einkaufen"),
+            systemImage: "cart.fill",
+            tint: model.snapshot.accentColor,
+            badgeSize: size == .small ? 22 : (size == .medium ? 26 : 30),
+            height: height,
+            trailing: size == .small ? .none : .count,
+            count: model.total
+        )
+    }
+
+    var height: CGFloat { Self.height(for: size) }
+
+    static func height(for size: Size) -> CGFloat {
+        switch size {
+        case .small: 40
+        case .medium: 44
+        case .large: 50
         }
-        if stores.isEmpty {
-            sentences.append(String(localized: "Für heute ist nichts offen."))
-        } else if stores.count == 1, let name = stores[0].store?.name {
-            sentences.append(storeTotal == 1
-                ? String(localized: "1 Eintrag bei \(name).")
-                : String(localized: "\(storeTotal) Einträge bei \(name)."))
-        } else {
-            sentences.append(String(localized: "\(storeTotal) Einträge bei \(stores.count) Läden."))
-        }
-        if stores.count > 1,
-           let nearest = stores.filter({ $0.distanceMeters != nil }).min(by: { $0.distanceMeters! < $1.distanceMeters! }),
-           let name = nearest.store?.name, let meters = nearest.distanceMeters {
-            sentences.append(String(localized: "\(name) ist am nächsten (\(WidgetFormat.distance(meters)))."))
-        }
-        if let inbox {
-            sentences.append(inbox.openCount == 1
-                ? String(localized: "1 Eintrag wartet in der Inbox.")
-                : String(localized: "\(inbox.openCount) warten in der Inbox."))
-        }
-        return sentences.joined(separator: " ")
     }
 }
 
@@ -118,56 +129,39 @@ struct OverviewModel {
 
 private struct SmallOverview: View {
     let model: OverviewModel
-    @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 4) {
-                Text("Einkaufen")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
+        VStack(spacing: 0) {
+            OverviewHeader(model: model, size: .small)
+            VStack(alignment: .leading, spacing: 0) {
                 Spacer(minLength: 0)
-                Image(systemName: "cart.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(renderingMode == .fullColor ? model.snapshot.accentColor : .primary)
+                // Store items only; the inbox has its own line below.
+                Text(onlyInbox ? model.total : model.storeTotal, format: .number)
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .minimumScaleFactor(0.6)
                     .widgetAccentable()
+                ColorBar(stores: model.stores)
+                    .frame(height: 8)
+                    .padding(.top, 4)
+                if let inbox = model.inbox, !onlyInbox {
+                    Label("\(inbox.openCount)", systemImage: "tray.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .labelStyle(CompactLabelStyle())
+                        .padding(.top, 8)
+                        .accessibilityLabel("\(inbox.openCount) in der Inbox")
+                }
             }
-            Spacer(minLength: 0)
-            // Store items only: the line below says "in 4 Läden", the inbox has its own line.
-            Text(onlyInbox ? model.total : model.storeTotal, format: .number)
-                .font(.system(size: 46, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .contentTransition(.numericText())
-                .minimumScaleFactor(0.6)
-                .widgetAccentable()
-            Text(storesLine)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            ColorBar(stores: model.stores)
-                .frame(height: 8)
-                .padding(.top, 8)
-            if let inbox = model.inbox, !onlyInbox {
-                Label("\(inbox.openCount) in der Inbox", systemImage: "tray")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .labelStyle(CompactLabelStyle())
-                    .padding(.top, 6)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.top, 6)
+            .padding(.bottom, 14)
         }
-        .padding(16)
     }
 
     private var onlyInbox: Bool { model.stores.isEmpty && model.inbox != nil }
-
-    private var storesLine: String {
-        if onlyInbox { return String(localized: "in der Inbox") }
-        return switch model.stores.count {
-        case 0: String(localized: "Alles erledigt")
-        case 1: String(localized: "bei \(model.stores[0].store?.name ?? "")")
-        default: String(localized: "in \(model.stores.count) Läden")
-        }
-    }
 }
 
 /// Segments in the store colors, each as wide as its share of the open items.
@@ -293,29 +287,35 @@ private struct MiniPager: View {
 
     var body: some View {
         let cards = model.cards
-        if cards.isEmpty {
-            AllDoneView(model: model)
-        } else {
-            let overflow = cards.count > slots
-            let shown = overflow ? Array(cards.prefix(slots - 1)) : cards
-            HStack(spacing: 8) {
-                ForEach(shown) { page in
-                    if let pageID = page.pageID {
-                        Link(destination: pageID == .unsorted ? MarqetLink.page(.unsorted).url : MarqetLink.page(pageID).url) {
-                            MiniCard(page: page)
+        VStack(spacing: 0) {
+            OverviewHeader(model: model, size: .medium)
+            if cards.isEmpty {
+                AllDoneView(model: model)
+            } else {
+                let overflow = cards.count > slots
+                let shown = overflow ? Array(cards.prefix(slots - 1)) : cards
+                HStack(spacing: 8) {
+                    ForEach(shown) { page in
+                        if let pageID = page.pageID {
+                            Link(destination: MarqetLink.page(pageID).url) {
+                                MiniCard(page: page, compact: true)
+                            }
+                        }
+                    }
+                    if overflow {
+                        // Several stores behind one tile: Home, where all cards are.
+                        Link(destination: MarqetLink.home.url) {
+                            MoreStoresTile(pages: Array(cards.dropFirst(slots - 1)))
+                        }
+                    } else {
+                        ForEach(0..<(slots - shown.count), id: \.self) { _ in
+                            Color.clear.frame(maxWidth: .infinity)
                         }
                     }
                 }
-                if overflow {
-                    MoreStoresTile(pages: Array(cards.dropFirst(slots - 1)))
-                } else {
-                    ForEach(0..<(slots - shown.count), id: \.self) { _ in
-                        Color.clear.frame(maxWidth: .infinity)
-                    }
-                }
+                .foregroundStyle(.primary)
+                .padding(10)
             }
-            .foregroundStyle(.primary)
-            .padding(12)
         }
     }
 }
@@ -333,11 +333,9 @@ private struct MoreStoresTile: View {
             }
             Text("+\(pages.count)")
                 .font(.system(size: 20, weight: .bold, design: .rounded))
-            Text(pages.count == 1 ? "weiterer Laden" : "weitere Läden")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(pages.count == 1 ? "1 weiterer Laden" : "\(pages.count) weitere Läden")
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(.rect(cornerRadius: 16, style: .continuous))
@@ -370,73 +368,54 @@ private struct AllDoneView: View {
 private struct LargeOverview: View {
     let model: OverviewModel
 
+    /// Space around the list and the button – the button keeps clear of the rounded corners.
+    private static let inset: CGFloat = 16
+
     var body: some View {
         GeometryReader { geometry in
-            // Summary can take two lines. Reserve its full height, the trip button and the
-            // overflow label before choosing how many store rows fit on this device.
-            let rowBudget = max(1, Int((geometry.size.height - 176) / 41))
+            // Header, insets, list padding, the button with its gap and the overflow label.
+            let reserved = OverviewHeader.height(for: .large) + 12 + 8 + 16 + 44 + Self.inset + 18
+            let rowBudget = max(1, Int((geometry.size.height - reserved) / 41))
             let storeLimit = max(0, min(5, rowBudget - (model.inbox == nil ? 0 : 1)))
             let rows = Array(model.stores.prefix(storeLimit))
-            VStack(alignment: .leading, spacing: 0) {
-                OverviewTitle(model: model)
-                    .frame(height: 66, alignment: .top)
-                    .padding(.bottom, 8)
-                VStack(spacing: 0) {
-                    ForEach(rows) { page in
-                        StoreRow(page: page)
-                        Divider().padding(.leading, 44)
+            VStack(spacing: 0) {
+                OverviewHeader(model: model, size: .large)
+                if model.cards.isEmpty {
+                    AllDoneView(model: model)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(rows) { page in
+                            StoreRow(page: page)
+                            if page.id != rows.last?.id || model.inbox != nil {
+                                Divider().padding(.leading, 44)
+                            }
+                        }
+                        if let inbox = model.inbox {
+                            InboxRow(page: inbox)
+                        }
+                        if model.stores.count > rows.count {
+                            Link(destination: MarqetLink.home.url) {
+                                Text("+ \(model.stores.count - rows.count) weitere Läden")
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.leading, 44)
+                                    .frame(height: 18)
+                            }
+                        }
                     }
-                    if let inbox = model.inbox {
-                        InboxRow(page: inbox)
-                    }
-                    if model.stores.count > rows.count {
-                        Text("+ \(model.stores.count - rows.count) weitere Läden")
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.leading, 44)
-                            .frame(height: 18)
-                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+                    Spacer(minLength: 16)
+                    TripButton(model: model)
+                        .padding(.horizontal, Self.inset)
+                        .padding(.bottom, Self.inset)
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
-                Spacer(minLength: 8)
-                TripButton(model: model)
             }
-            .padding(14)
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
-        }
-    }
-}
-
-private struct OverviewTitle: View {
-    let model: OverviewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Einkaufen")
-                    .font(.system(size: 20, weight: .bold))
-                // The list's own name, unless it is "Einkaufen" anyway.
-                if model.snapshot.listTitle.localizedCaseInsensitiveCompare(String(localized: "Einkaufen")) != .orderedSame {
-                    Text(model.snapshot.listTitle)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                Spacer(minLength: 0)
-                Text(model.total, format: .number)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(model.snapshot.accentColor)
-                    .widgetAccentable()
-            }
-            Text(model.summary)
-                .font(.system(size: 13))
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -488,17 +467,22 @@ private struct InboxRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            WidgetBadge(store: nil, size: 30)
-                .background(Color(.systemGray), in: .circle)
-                .foregroundStyle(.white)
-            VStack(alignment: .leading, spacing: 1) {
-                Text("Inbox")
-                    .font(.system(size: 15, weight: .semibold))
-                Text(page.openCount == 1 ? "1 Eintrag ohne Laden" : "\(page.openCount) Einträge ohne Laden")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+            // Badge, name and count open the inbox; only the button starts triage.
+            Link(destination: MarqetLink.page(.unsorted).url) {
+                HStack(spacing: 10) {
+                    WidgetBadge(store: nil, size: 30)
+                        .background(Color(.systemGray), in: .circle)
+                        .foregroundStyle(.white)
+                    Text("Inbox")
+                        .font(.system(size: 15, weight: .semibold))
+                    Text(page.openCount, format: .number)
+                        .font(.system(size: 13, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 4)
+                }
+                .contentShape(.rect)
             }
-            Spacer(minLength: 4)
             Link(destination: MarqetLink.triage.url) {
                 Text("Zuordnen")
                     .font(.system(size: 12, weight: .semibold))
@@ -549,7 +533,7 @@ private struct TripButton: View {
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(renderingMode == .fullColor ? store.foregroundOnColor : .primary)
                 .frame(maxWidth: .infinity)
-                .frame(height: 40)
+                .frame(height: 44)
                 .background(renderingMode == .fullColor ? AnyShapeStyle(store.headerGradient) : AnyShapeStyle(Color.primary.opacity(0.12)),
                             in: .capsule)
                 .widgetAccentable()
@@ -571,35 +555,37 @@ private struct CardGrid: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let cardHeight = max(1, (geometry.size.height - 28 - 66 - 40 - 20 - CGFloat(rows - 1) * 10) / CGFloat(rows))
+            let available = geometry.size.height - OverviewHeader.height(for: .large) - 32 - 44 - 16
+            let cardHeight = max(1, (available - CGFloat(rows - 1) * 10) / CGFloat(rows))
             let visibleItems = min(itemsPerCard, max(0, Int((cardHeight - 30 - 27 - 12 - 16) / 23)))
-            VStack(alignment: .leading, spacing: 10) {
-                OverviewTitle(model: model)
-                    .frame(height: 66, alignment: .top)
+            VStack(spacing: 0) {
+                OverviewHeader(model: model, size: .large)
                 let cards = Array(model.cards.prefix(columns * rows))
                 if cards.isEmpty {
                     AllDoneView(model: model)
                 } else {
-                    Grid(horizontalSpacing: 10, verticalSpacing: 10) {
-                        ForEach(0..<rows, id: \.self) { row in
-                            GridRow {
-                                ForEach(0..<columns, id: \.self) { column in
-                                    let index = row * columns + column
-                                    if index < cards.count {
-                                        MiniCard(page: cards[index], itemCount: visibleItems, compact: cardHeight < 105)
-                                            .frame(height: cardHeight)
-                                    } else {
-                                        Color.clear.frame(height: cardHeight)
+                    VStack(spacing: 0) {
+                        Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+                            ForEach(0..<rows, id: \.self) { row in
+                                GridRow {
+                                    ForEach(0..<columns, id: \.self) { column in
+                                        let index = row * columns + column
+                                        if index < cards.count {
+                                            MiniCard(page: cards[index], itemCount: visibleItems, compact: cardHeight < 105)
+                                                .frame(height: cardHeight)
+                                        } else {
+                                            Color.clear.frame(height: cardHeight)
+                                        }
                                     }
                                 }
                             }
                         }
+                        Spacer(minLength: 16)
+                        TripButton(model: model)
                     }
+                    .padding(16)
                 }
-                Spacer(minLength: 0)
-                TripButton(model: model)
             }
-            .padding(14)
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
         }
     }

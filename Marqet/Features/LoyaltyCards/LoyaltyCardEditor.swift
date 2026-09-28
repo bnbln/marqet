@@ -179,7 +179,7 @@ struct LoyaltyCardEditor: View {
                 }
             }
         }
-        .tint(.primary)
+        .tint(Color(uiColor: .label))
     }
 
     private func toggle(_ store: Store) {

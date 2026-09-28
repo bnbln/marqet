@@ -183,7 +183,47 @@ public enum VoiceRuleParser {
             index += 1
         }
         close(nextContinues: false)
-        return raw.map { clause(from: $0.tokens, continues: $0.continues, lexicon: lexicon) }
+        return raw.flatMap { raw in
+            splitAtStores(raw.tokens, lexicon: lexicon).enumerated().map { index, tokens in
+                clause(from: tokens, continues: raw.continues && index == 0, lexicon: lexicon, language: language)
+            }
+        }
+    }
+
+    /// Store mentions with their prepositions and suffixes ("auf dem Markt", "beim Rewe-Markt").
+    private static func storeMentions(in tokens: [Token], lexicon: SpokenStoreLexicon) -> [(range: Range<Int>, name: String)] {
+        let folded = tokens.map(\.folded)
+        var mentions: [(range: Range<Int>, name: String)] = []
+        var start = 0
+        while let match = lexicon.firstMatch(in: folded, from: start) {
+            var lower = match.range.lowerBound
+            while lower > start, storePrepositions.contains(folded[lower - 1]) { lower -= 1 }
+            var upper = match.range.upperBound
+            while upper < folded.count, storeSuffixes.contains(folded[upper]) { upper += 1 }
+            mentions.append((lower..<upper, match.name))
+            start = upper
+        }
+        return mentions
+    }
+
+    /// "Brot auf dem Markt kaufen Klopapier bei Rewe": the transcriber often leaves out the comma,
+    /// so a clause naming two stores is split between them. Where depends on the first mention:
+    /// after an item ("Brot auf dem Markt") every store closes its part; before one
+    /// ("Bei Rewe Milch bei Aldi Butter") every store opens it.
+    private static func splitAtStores(_ tokens: [Token], lexicon: SpokenStoreLexicon) -> [[Token]] {
+        let mentions = storeMentions(in: tokens, lexicon: lexicon)
+        guard mentions.count > 1 else { return [tokens] }
+        let storeFirst = tokens[..<mentions[0].range.lowerBound].allSatisfy { fillerWords.contains($0.folded) || $0.isNumber }
+        let cuts = storeFirst
+            ? mentions.dropFirst().map(\.range.lowerBound)
+            : mentions.dropLast().map(\.range.upperBound)
+        var parts: [[Token]] = []
+        var lower = 0
+        for cut in cuts + [tokens.count] where cut > lower {
+            parts.append(Array(tokens[lower..<cut]))
+            lower = cut
+        }
+        return parts
     }
 
     /// Length of a multi-word continuation marker ("genau wie", "as well as") at the start of `words`.
@@ -193,28 +233,39 @@ public enum VoiceRuleParser {
         }?.count
     }
 
-    private static func clause(from tokens: [Token], continues: Bool, lexicon: SpokenStoreLexicon) -> Clause {
-        var remaining = tokens
-        var store: String?
+    private static func clause(from tokens: [Token], continues: Bool, lexicon: SpokenStoreLexicon, language: VoiceLanguage) -> Clause {
         // Remove every store mention with its preposition ("auf dem Markt", "at the market")
         // and a trailing "Markt"/"store" of the chain ("Rewe-Markt", "Aldi store", "Lidl's").
-        while let match = lexicon.firstMatch(in: remaining.map(\.folded)) {
-            store = store ?? match.name
-            var lower = match.range.lowerBound
-            while lower > 0, storePrepositions.contains(remaining[lower - 1].folded) { lower -= 1 }
-            var upper = match.range.upperBound
-            while upper < remaining.count, storeSuffixes.contains(remaining[upper].folded) { upper += 1 }
-            remaining.removeSubrange(lower..<upper)
-        }
+        let mentions = storeMentions(in: tokens, lexicon: lexicon)
+        var remaining = tokens
+        for mention in mentions.reversed() { remaining.removeSubrange(mention.range) }
         let words = remaining.filter { !fillerWords.contains($0.folded) }
         let fillerCount = remaining.filter { fillerWords.contains($0.folded) && !interjections.contains($0.folded) }.count
-        guard let item = item(from: words) else {
-            return Clause(store: store, items: [], continues: continues, fillerCount: fillerCount)
-        }
-        return Clause(store: store, items: [item], continues: continues, fillerCount: fillerCount)
+        return Clause(store: mentions.first?.name, items: items(from: words, language: language), continues: continues, fillerCount: fillerCount)
     }
 
     // MARK: Items & quantities
+
+    /// Usually one item per clause. "Butter Zwiebeln" – an enumeration without commas – becomes
+    /// two when every word is a grocery the dictionary knows on its own (German nouns only, so
+    /// "frische Milch" or "Kinder Riegel" stay one item).
+    private static func items(from words: [Token], language: VoiceLanguage) -> [(name: String, quantity: String?, isAttribute: Bool)] {
+        guard let item = item(from: words) else { return [] }
+        let names = item.name.split(separator: " ").map(String.init)
+        guard language == .german, names.count > 1, let groceries,
+              names.allSatisfy({ $0.first?.isUppercase == true && $0.count >= 3 })
+        else { return [item] }
+        let keys = names.map(ItemKeyNormalizer.fold)
+        // A known phrase ("Rote Bete", "Saure Sahne") stays together.
+        let isPhrase = groceries.dictionary.words[keys.joined(separator: " ")] != nil
+            || zip(keys, keys.dropFirst()).contains { groceries.dictionary.words["\($0) \($1)"] != nil }
+        guard !isPhrase, keys.allSatisfy({ groceries.dictionaryCategory(for: $0) != nil }) else { return [item] }
+        // The quantity was said with the first item ("500 g Butter Zwiebeln").
+        return names.enumerated().map { index, name in (name, index == 0 ? item.quantity : nil, false) }
+    }
+
+    /// The bundled grocery dictionary, for splitting enumerations.
+    private static let groceries: CategoryClassifier? = (try? CategoryDictionary.bundled()).map { CategoryClassifier(dictionary: $0) }
 
     private static func item(from words: [Token]) -> (name: String, quantity: String?, isAttribute: Bool)? {
         var words = words

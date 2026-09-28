@@ -31,6 +31,9 @@ final class AppModel {
     var stores: [Store] = []
     private(set) var recentlyCompleted: [ShoppingItem] = []
     private(set) var lastUndoAction: UndoAction?
+    /// Last deleted item, for the undo toast right after swipe-to-delete. Separate from
+    /// `lastUndoAction` so a later, unrelated action doesn't make the toast undo the wrong thing.
+    var recentDeletion: ShoppingItem?
     @ObservationIgnored private var isUndoing = false
     var showsCompleted = false
     var hasLoadedItems = false
@@ -540,8 +543,22 @@ final class AppModel {
 
     func delete(_ item: ShoppingItem) async {
         if !isUndoing { lastUndoAction = .deletion(item) }
+        recentDeletion = item
         items.removeAll { $0.id == item.id }
         await perform { try await $0.deleteReminder(id: item.id) }
+    }
+
+    /// Recreates a deleted item. Used by the undo toast directly (not `undoLastAction`), so a
+    /// toast tap always undoes the delete it belongs to, even if the user did something else since.
+    func undoDeletion(_ item: ShoppingItem) async {
+        guard let listID = selectedListID else { return }
+        if recentDeletion?.id == item.id { recentDeletion = nil }
+        if case .deletion(let pending)? = lastUndoAction, pending.id == item.id { lastUndoAction = nil }
+        isUndoing = true
+        defer { isUndoing = false }
+        let notes = StoreMarker.write(storeName: item.storeID.flatMap(store(_:))?.name, into: item.userNotes)
+        await perform { _ = try await $0.createReminder(title: item.title, notes: notes, in: listID) }
+        await reload()
     }
 
     func undoLastAction() async {
@@ -565,10 +582,7 @@ final class AppModel {
                 await rename(current, to: before.title)
             }
         case .deletion(let before):
-            guard let listID = selectedListID else { return }
-            let notes = StoreMarker.write(storeName: before.storeID.flatMap(store(_:))?.name, into: before.userNotes)
-            await perform { _ = try await $0.createReminder(title: before.title, notes: notes, in: listID) }
-            await reload()
+            await undoDeletion(before)
         case .creation(let created):
             if let current = items.first(where: { $0.id == created.id }) {
                 await delete(current)

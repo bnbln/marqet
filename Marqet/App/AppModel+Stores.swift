@@ -121,8 +121,14 @@ extension AppModel {
     }
 
     /// Applies a drag-and-drop reorder from the store settings.
+    /// Reordering by hand means "my order": distance or smart sorting would otherwise keep the
+    /// cards where they were, and the move would not show on Home.
     func moveStores(from source: IndexSet, to destination: Int) {
         recordStoresUndo()
+        if storeSortMode != .manual {
+            storeSortMode = .manual
+            storeOrderSnapshot = nil
+        }
         var ordered = sortedStores
         ordered.move(fromOffsets: source, toOffset: destination)
         for (index, store) in ordered.enumerated() {

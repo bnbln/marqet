@@ -62,6 +62,7 @@ struct ShoppingScreen: View {
                     }
                     .sheet(isPresented: $showsLoyaltyCards) {
                         NavigationStack { LoyaltyCardsSettingsView() }
+                            .tint(Color(uiColor: .label))
                     }
                     .sheet(isPresented: $showsStoreOrder) {
                         StoreOrderSheet().leadingSheetPlacement()
@@ -83,9 +84,13 @@ struct ShoppingScreen: View {
                     }
                     .overlay(alignment: .top) { briefingBlock }
                     .overlay(alignment: .top) {
-                        if model.autoAssignReport != nil { AutoAssignToast() }
+                        VStack(spacing: 8) {
+                            if model.autoAssignReport != nil { AutoAssignToast() }
+                            if let deleted = model.recentDeletion { DeletionUndoToast(item: deleted) }
+                        }
                     }
                     .animation(.snappy, value: model.autoAssignReport)
+                    .animation(.snappy, value: model.recentDeletion)
                     .onChange(of: model.activePage) { _, page in
                         // The open composer follows the page reached by swiping the cards behind it.
                         if model.composerTarget != nil,
@@ -386,6 +391,38 @@ private struct AutoAssignToast: View {
         .task(id: count) {
             try? await Task.sleep(for: .seconds(6))
             model.autoAssignReport = nil
+        }
+    }
+}
+
+/// "„Milch“ gelöscht · Rückgängig", right after swipe-to-delete. Disappears after a few seconds
+/// (bekannte Lücke: vorher gab es keine sichtbare Rückgängig-Option direkt nach dem Löschen).
+private struct DeletionUndoToast: View {
+    let item: ShoppingItem
+    @Environment(AppModel.self) private var model
+    @State private var undoFeedback = 0
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "trash")
+            Text("„\(item.title)“ gelöscht")
+                .font(.subheadline.weight(.medium))
+                .lineLimit(1)
+            Button("Rückgängig") {
+                undoFeedback += 1
+                Task { await model.undoDeletion(item) }
+            }
+            .font(.subheadline.weight(.semibold))
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .glassEffect(.regular, in: .capsule)
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .sensoryFeedback(.impact(weight: .light), trigger: undoFeedback)
+        .task(id: item.id) {
+            try? await Task.sleep(for: .seconds(5))
+            if model.recentDeletion?.id == item.id { model.recentDeletion = nil }
         }
     }
 }

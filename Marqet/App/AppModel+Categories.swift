@@ -13,9 +13,12 @@ extension AppModel {
         _ = orderRevision
         let store = page.storeID.flatMap(store(_:))
         let usesLearning = isPro && routeLearningEnabled
+        // A manual drag (Free or Pro) always counts, even without route learning; without either,
+        // items stay alphabetical.
+        let loadedItemPositions = store.map { itemPositionsLoaded(for: $0.id) } ?? [:]
         let ordering = SectionBuilder.Ordering(
             categoryPositions: store.map { categoryPositionsLoaded(for: $0.id) } ?? [:],
-            itemPositions: usesLearning ? store.map { itemPositionsLoaded(for: $0.id) } : nil
+            itemPositions: (usesLearning || !loadedItemPositions.isEmpty) ? loadedItemPositions : nil
         )
         // Unsorted and non-grocery cards stay flat and keep insertion order (newest last).
         return SectionBuilder.sections(
@@ -42,6 +45,32 @@ extension AppModel {
         } catch {
             present(error)
         }
+    }
+
+    /// Manual order of items inside one category (Free and Pro). Route learning (Pro) keeps
+    /// refining it afterwards; a manual position moves half as fast under new learning data.
+    func setItemOrder(_ items: [ShoppingItem], for storeID: Store.ID) {
+        let keys = items.map { ItemKeyNormalizer.matchingKey(for: $0.title) }
+        let positions = RouteLearner.manualItemPositions(for: keys, mergingInto: itemPositionsLoaded(for: storeID))
+        itemPositions[storeID] = positions
+        orderRevision += 1
+        do {
+            try learning.saveItemPositions(positions, storeID: storeID)
+        } catch {
+            present(error)
+        }
+    }
+
+    /// Drag-to-reorder within a category section (§6.3/§6.4 known gap): moves `moved` to just
+    /// before `target` in the section's current order, then saves the result as a manual position.
+    /// Category itself never changes here – that stays a menu action ("Kategorie ändern").
+    func reorderItem(_ moved: ShoppingItem, before target: ShoppingItem, in sectionItems: [ShoppingItem]) {
+        guard let storeID = target.storeID, moved.id != target.id else { return }
+        var order = sectionItems
+        order.removeAll { $0.id == moved.id }
+        guard let targetIndex = order.firstIndex(where: { $0.id == target.id }) else { return }
+        order.insert(moved, at: targetIndex)
+        setItemOrder(order, for: storeID)
     }
 
     /// "Kategorie ändern": a correction that wins over dictionary and AI from now on.

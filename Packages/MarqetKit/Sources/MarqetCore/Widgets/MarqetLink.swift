@@ -3,6 +3,8 @@ import Foundation
 /// Deep links from widgets, the Live Activity and controls into the app (`marqet://…`,
 /// KONZEPT-WIDGETS §8).
 public enum MarqetLink: Hashable, Sendable {
+    /// Home with the card pager, nothing opened – for widgets that show several cards.
+    case home
     /// A card full screen – store or inbox.
     case page(PageID)
     /// The composer on a card.
@@ -26,6 +28,8 @@ public enum MarqetLink: Hashable, Sendable {
         var components = URLComponents()
         components.scheme = Self.scheme
         switch self {
+        case .home:
+            components.host = "home"
         case .page(let page):
             components.host = "page"
             components.path = "/" + page.rawValue
@@ -58,6 +62,7 @@ public enum MarqetLink: Hashable, Sendable {
         guard url.scheme?.lowercased() == Self.scheme, let host = url.host()?.lowercased() else { return nil }
         let parts = url.path().split(separator: "/").map(String.init)
         switch (host, parts.count) {
+        case ("home", 0): self = .home
         case ("page", 1):
             guard let page = PageID(rawValue: parts[0]) else { return nil }
             self = .page(page)

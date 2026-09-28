@@ -41,6 +41,12 @@ struct LoyaltyCardWidgetView: View {
         card.storeIDs.compactMap(snapshot.store)
     }
 
+    /// "Kundenkarte" – the store logos above already say whose. Without a store the card's own
+    /// name is the only hint.
+    private func title(of card: LoyaltyCard) -> String {
+        stores(of: card).isEmpty ? card.name : String(localized: "Kundenkarte")
+    }
+
     private func small(_ card: LoyaltyCard) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
@@ -51,14 +57,11 @@ struct LoyaltyCardWidgetView: View {
                 StoreStack(stores: stores(of: card), size: 24)
             }
             Spacer(minLength: 0)
-            Text(card.name)
+            Text(title(of: card))
                 .font(.system(size: 19, weight: .bold))
                 .lineLimit(2)
                 .minimumScaleFactor(0.8)
                 .widgetAccentable()
-            Text("An der Kasse zeigen")
-                .font(.system(size: 12, weight: .medium))
-                .opacity(0.8)
             HStack(spacing: 4) {
                 Image(systemName: "barcode")
                 Text(maskedNumber(card))
@@ -75,17 +78,20 @@ struct LoyaltyCardWidgetView: View {
     private func medium(_ card: LoyaltyCard) -> some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 0) {
-                Image(systemName: "wallet.pass.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .widgetAccentable()
+                // Logos on top, as in the small widget: they name the brand.
+                HStack(alignment: .top) {
+                    Image(systemName: "wallet.pass.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .widgetAccentable()
+                    Spacer(minLength: 4)
+                    StoreStack(stores: stores(of: card), size: 22)
+                }
                 Spacer(minLength: 0)
-                Text(card.name)
+                Text(title(of: card))
                     .font(.system(size: 18, weight: .bold))
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                     .widgetAccentable()
-                StoreStack(stores: stores(of: card), size: 22)
-                    .padding(.top, 6)
             }
             .foregroundStyle(foreground)
             .frame(width: 110, alignment: .leading)

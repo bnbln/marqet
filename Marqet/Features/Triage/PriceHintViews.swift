@@ -22,6 +22,42 @@ extension PriceIndex.ChainPrice {
         case .piece: String(localized: "\(amount)/Stk.")
         }
     }
+
+    /// Compact estimate for an assigned item, using its requested quantity when recognizable.
+    func estimateText(for title: String) -> String {
+        guard let quantity = Self.quantity(in: title, for: unit) else {
+            return String(localized: "ca. \(shortText)")
+        }
+        let amount = (typical * quantity).formatted(.currency(code: StoreCatalog.Region.current.currencyCode))
+        return String(localized: "ca. \(amount)")
+    }
+
+    private static func quantity(in title: String, for unit: PriceIndex.Unit) -> Double? {
+        let pattern = #"(?i)(\d+(?:[.,]\d+)?)\s*(kg|kilo|g|gr|l|liter|ml|cl|stück|stk\.?|x|×)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: title, range: NSRange(title.startIndex..., in: title)),
+              let valueRange = Range(match.range(at: 1), in: title),
+              let unitRange = Range(match.range(at: 2), in: title),
+              let value = Double(title[valueRange].replacingOccurrences(of: ",", with: ".")) else { return nil }
+        let measure = title[unitRange].lowercased()
+        switch unit {
+        case .kilogram:
+            switch measure {
+            case "kg", "kilo": return value
+            case "g", "gr": return value / 1_000
+            default: return nil
+            }
+        case .liter:
+            switch measure {
+            case "l", "liter": return value
+            case "ml": return value / 1_000
+            case "cl": return value / 100
+            default: return nil
+            }
+        case .piece:
+            return ["stück", "stk", "stk.", "x", "×"].contains(measure) ? value : nil
+        }
+    }
 }
 
 extension StoreCatalog.Region {

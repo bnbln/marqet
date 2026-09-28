@@ -61,7 +61,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Marqet meldet sich, wenn du an einem deiner Läden ankommst, und zeigt dann dessen Einkaufsliste. Dein Standort bleibt auf deinem Gerät."
+            "value" : "Marqet meldet sich bei deinen Läden und zeigt deren Einkaufsliste. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices."
           }
         }
       }

@@ -737,6 +737,15 @@ struct ItemRow: View {
                 }
             }
             Spacer(minLength: 0)
+            if let storeID = item.storeID,
+               let price = model.priceHint(for: item)?.price(of: storeID) {
+                Text(price.estimateText(for: item.title))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .accessibilityLabel("Geschätzter Richtwert: \(price.estimateText(for: item.title))")
+            }
         }
         .padding(.vertical, 2)
         .animation(.snappy, value: item.isCompleted)
@@ -753,13 +762,6 @@ struct ItemRow: View {
             #else
             ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
             #endif
-        }
-        .swipeActions(edge: .trailing) {
-            Button(role: .destructive) {
-                Task { await model.delete(item) }
-            } label: {
-                Label("Löschen", systemImage: "trash")
-            }
         }
         .sheet(isPresented: $isEditingNote) {
             ItemNoteSheet(item: item)

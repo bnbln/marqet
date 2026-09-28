@@ -28,164 +28,130 @@ private struct MiniCard<Content: View>: View {
     }
 }
 
-private struct ItemChip: View {
-    let title: LocalizedStringKey
+// MARK: - Welcome and access
 
-    var body: some View {
-        HStack(spacing: 5) {
-            Circle()
-                .strokeBorder(Color.secondary, lineWidth: 1.2)
-                .frame(width: 10, height: 10)
-            Text(title)
-                .font(.caption.weight(.medium))
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .padding(.horizontal, 8)
-        .frame(width: 84, height: 28)
-        .background(Color(.tertiarySystemGroupedBackground), in: .capsule)
-    }
-}
-
-// MARK: - Welcome: one list becomes store cards
-
-/// The whole idea in two seconds: a mixed shopping list, and each item flies into its store.
+/// A list points to three stores; small glass map pins appear once around them.
 struct SortingIllustration: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isSorted = false
-    /// Chips fade out before they go back to the list, so they never fly backwards.
-    @State private var isVisible = true
-
-    /// List position → store card; crossing paths make the sorting visible.
-    private let items: [(title: LocalizedStringKey, shop: Int)] = [
-        ("Zahnpasta", 1), ("Tomaten", 2), ("Milch", 0),
-    ]
+    @State private var revealedPins = 0
     private let shops = [Stage.supermarket, Stage.drugstore, Stage.market]
+    private let storePositions: [CGPoint] = [
+        CGPoint(x: 46, y: 52), CGPoint(x: 132, y: 65), CGPoint(x: 86, y: 122),
+    ]
 
     var body: some View {
-        scene
-            .task(id: reduceMotion) {
-                guard !reduceMotion else {
-                    isSorted = true
-                    return
-                }
-                while !Task.isCancelled {
-                    try? await Task.sleep(for: .seconds(1.3))
-                    isSorted = true
-                    try? await Task.sleep(for: .seconds(2.8))
-                    withAnimation(.easeIn(duration: 0.3)) { isVisible = false }
-                    try? await Task.sleep(for: .seconds(0.35))
-                    isSorted = false
-                    withAnimation(.easeOut(duration: 0.35)) { isVisible = true }
-                }
-            }
-    }
+        VStack(spacing: 4) {
+            Color.clear.frame(height: 34)
 
-    private var scene: some View {
-        ZStack(alignment: .topLeading) {
-            // The shopping list from Reminders.
-            MiniCard {
-                Label("Einkaufen", systemImage: "checklist")
-                    .font(.caption2.weight(.bold))
+            HStack(spacing: 12) {
+                Image(systemName: "checklist")
+                    .frame(width: 60)
+                Image(systemName: "arrow.right")
+                    .font(.title3.weight(.medium))
                     .foregroundStyle(.secondary)
-                    .labelStyle(.iconOnly)
-                    .padding(.horizontal, 10)
-                    .padding(.top, 6)
-                    .frame(width: Stage.size.width, height: 56, alignment: .topLeading)
-            }
-
-            // The store cards.
-            ForEach(shops.indices, id: \.self) { index in
-                MiniCard(cornerRadius: 16) {
-                    VStack(spacing: 0) {
+                    .frame(width: 28)
+                ZStack {
+                    ForEach(shops.indices, id: \.self) { index in
                         Image(systemName: shops[index].symbol)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 26)
-                            .background(shops[index].color)
-                        Spacer()
-                    }
-                    .clipShape(.rect(cornerRadius: 16, style: .continuous))
-                    .frame(width: cardWidth, height: 100)
-                }
-                .offset(x: CGFloat(index) * (cardWidth + 12), y: 84)
-            }
+                            .font(.system(size: 23, weight: .semibold))
+                            .foregroundStyle(shops[index].color)
+                            .frame(width: 54, height: 54)
+                            .background(shops[index].color.opacity(0.12), in: .circle)
+                            .position(storePositions[index])
 
-            ForEach(items.indices, id: \.self) { index in
-                ItemChip(title: items[index].title)
-                    .position(isSorted ? cardSlot(items[index].shop) : listSlot(index))
-                    // Staggered flight into the cards; the way back happens invisibly, without animation.
-                    .animation(isSorted ? .spring(duration: 0.75, bounce: 0.28).delay(Double(index) * 0.18) : nil, value: isSorted)
-                    .opacity(isVisible ? 1 : 0)
+                        FloatingPinBubble(
+                            color: shops[index].color,
+                            index: index,
+                            isVisible: index < revealedPins
+                        )
+                            .position(x: storePositions[index].x + 18, y: storePositions[index].y - 23)
+                    }
+                }
+                .frame(width: 160, height: 154)
+            }
+            .font(.system(size: 42, weight: .regular))
+            .foregroundStyle(.tint)
+            .frame(width: Stage.size.width, height: 154)
+        }
+        .frame(width: Stage.size.width, height: Stage.size.height)
+        .sensoryFeedback(trigger: revealedPins) { previous, current in
+            !reduceMotion && current > previous ? .impact(weight: .light, intensity: 0.7) : nil
+        }
+        .task(id: reduceMotion) {
+            if reduceMotion {
+                revealedPins = shops.count
+            } else {
+                revealedPins = 0
+                try? await Task.sleep(for: .milliseconds(320))
+                for count in 1...shops.count {
+                    guard !Task.isCancelled else { return }
+                    withAnimation(.spring(response: 0.42, dampingFraction: 0.54)) {
+                        revealedPins = count
+                    }
+                    try? await Task.sleep(for: .milliseconds(240))
+                }
             }
         }
-        .frame(width: Stage.size.width, height: Stage.size.height, alignment: .topLeading)
-    }
-
-    private var cardWidth: CGFloat { (Stage.size.width - 24) / 3 }
-
-    private func listSlot(_ index: Int) -> CGPoint {
-        CGPoint(x: 10 + 42 + CGFloat(index) * 94 + 4, y: 34)
-    }
-
-    private func cardSlot(_ shop: Int) -> CGPoint {
-        CGPoint(x: CGFloat(shop) * (cardWidth + 12) + cardWidth / 2, y: 84 + 26 + 26)
     }
 }
 
-// MARK: - Access: the marker in the notes
+/// A small continuous drift starts after the spring settles, with a different rhythm per pin.
+private struct FloatingPinBubble: View {
+    let color: Color
+    let index: Int
+    let isVisible: Bool
 
-/// Shows what Marqet writes: a reminder whose note gets the line "🛒 Markt".
-struct MarkerIllustration: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var burst = false
+    @State private var isFloating = false
 
     var body: some View {
-        if reduceMotion {
-            card(showsMarker: true)
-        } else {
-            PhaseAnimator([false, true]) { shows in
-                card(showsMarker: shows)
-            } animation: { shows in
-                shows ? .spring(duration: 0.5, bounce: 0.3).delay(0.2) : .easeInOut(duration: 0.3).delay(2.2)
-            }
-        }
-    }
-
-    private func card(showsMarker: Bool) -> some View {
-        MiniCard(cornerRadius: 18) {
-            VStack(alignment: .leading, spacing: 12) {
-                row(title: "Tomaten", note: "reif", marker: showsMarker ? "🛒 Markt" : nil, color: Stage.market.color)
-                Divider()
-                row(title: "Milch", note: nil, marker: "🛒 Supermarkt", color: Stage.supermarket.color)
-            }
-            .padding(16)
-            .frame(width: 260, alignment: .leading)
-        }
-        .frame(width: Stage.size.width, height: Stage.size.height)
-    }
-
-    private func row(title: LocalizedStringKey, note: LocalizedStringKey?, marker: LocalizedStringKey?, color: Color) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        ZStack {
             Circle()
-                .strokeBorder(Color.secondary, lineWidth: 1.5)
-                .frame(width: 18, height: 18)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.subheadline.weight(.medium))
-                if let note {
-                    Text(note).font(.caption).foregroundStyle(.secondary)
-                }
-                if let marker {
-                    Text(marker)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(color)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(color.opacity(0.12), in: .capsule)
-                        .transition(.scale(scale: 0.6, anchor: .leading).combined(with: .opacity))
-                }
-            }
+                .strokeBorder(color.opacity(0.45), lineWidth: 1.2)
+                .frame(width: 28, height: 28)
+                .scaleEffect(burst ? 1.55 : 0.7)
+                .opacity(isVisible && !reduceMotion && !burst ? 0.7 : 0)
+
+            Image(systemName: "mappin")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(color)
+                .frame(width: 28, height: 28)
+                .glassEffect(.regular, in: .circle)
+                .overlay(Circle().strokeBorder(color.opacity(0.18)))
+                .offset(y: isFloating ? -3 : 2)
+                .rotationEffect(.degrees(isFloating ? 2.5 : -2.5))
+                .animation(
+                    .easeInOut(duration: 1.35 + Double(index) * 0.23).repeatForever(autoreverses: true),
+                    value: isFloating
+                )
         }
+        .scaleEffect(isVisible ? 1 : 0.12)
+        .opacity(isVisible ? 1 : 0)
+        .task(id: isVisible && !reduceMotion) {
+            guard isVisible && !reduceMotion else {
+                burst = false
+                isFloating = false
+                return
+            }
+            burst = false
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.6)) { burst = true }
+            try? await Task.sleep(for: .milliseconds(520))
+            guard !Task.isCancelled else { return }
+            isFloating = true
+        }
+    }
+}
+
+/// A plain Reminders symbol keeps the permission step visually quiet.
+struct MarkerIllustration: View {
+    var body: some View {
+        Image(systemName: "checklist")
+            .font(.system(size: 64, weight: .light))
+            .foregroundStyle(.tint)
+            .frame(width: Stage.size.width, height: Stage.size.height)
     }
 }
 
@@ -270,55 +236,17 @@ struct StoresIllustration: View {
     }
 }
 
-// MARK: - Siri: said, landed in the inbox
+// MARK: - Siri
 
 struct SiriIllustration: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        if reduceMotion {
-            scene(landed: true)
-        } else {
-            PhaseAnimator([false, true]) { landed in
-                scene(landed: landed)
-            } animation: { landed in
-                landed ? .spring(duration: 0.7, bounce: 0.25).delay(1.0) : .easeInOut(duration: 0.3).delay(2.2)
-            }
-        }
-    }
-
-    private func scene(landed: Bool) -> some View {
-        ZStack(alignment: .top) {
-            Image(systemName: "waveform")
-                .font(.system(size: 40, weight: .semibold))
-                .foregroundStyle(.tint)
-                .symbolEffect(.variableColor.iterative, options: .repeating, isActive: !landed)
-                .frame(height: 50)
-
-            MiniCard(cornerRadius: 18) {
-                VStack(spacing: 0) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "tray.fill")
-                        Text("Inbox")
-                    }
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 28)
-                    .background(Color.gray)
-                    Spacer()
-                }
-                .clipShape(.rect(cornerRadius: 18, style: .continuous))
-                .frame(width: 200, height: 80)
-            }
-            .offset(y: 78)
-
-            ItemChip(title: "Milch")
-                .offset(y: landed ? 78 + 28 + 12 : 52)
-                .scaleEffect(landed ? 1 : 0.85)
-                .opacity(landed ? 1 : 0.9)
-        }
-        .frame(width: Stage.size.width, height: Stage.size.height)
+        Image(systemName: "waveform")
+            .font(.system(size: 64, weight: .light))
+            .foregroundStyle(.tint)
+            .symbolEffect(.pulse, options: .repeating, isActive: !reduceMotion)
+            .frame(width: Stage.size.width, height: Stage.size.height)
     }
 }
 

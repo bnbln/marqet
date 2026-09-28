@@ -28,9 +28,11 @@ struct ShoppingTripLiveActivity: Widget {
                         Text(status.store.name)
                             .font(.system(size: 16, weight: .bold))
                             .lineLimit(1)
-                        Text(TripStatusText.short(status))
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundStyle(.secondary)
+                        if status.isOnTheWay {
+                            Text(TripStatusText.short(status))
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {

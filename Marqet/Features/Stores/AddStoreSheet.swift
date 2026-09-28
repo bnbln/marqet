@@ -66,27 +66,14 @@ struct AddStoreSheet: View {
                     Text("Schweiz").tag(StoreCatalog.Region.switzerland)
                 }
             }
+            Section("Online-Shops") {
+                ForEach(filteredEntries.filter { $0.type == .online }) { entry in
+                    catalogRow(entry)
+                }
+            }
             Section {
-                ForEach(filteredEntries) { entry in
-                    let added = model.stores.contains { $0.catalogKey == entry.key }
-                    Button {
-                        toggle(entry)
-                    } label: {
-                        HStack(spacing: 14) {
-                            StoreBadge(store: entry.makeStore(sortIndex: 0), size: 36)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.name).foregroundStyle(Color.primary)
-                                Text(entry.type.displayName)
-                                    .font(.caption)
-                                    .foregroundStyle(Color.secondary)
-                            }
-                            Spacer()
-                            Image(systemName: added ? "checkmark.circle.fill" : "plus.circle")
-                                .font(.title3)
-                                .foregroundStyle(added ? Color.accentColor : Color.secondary)
-                        }
-                    }
-                    .accessibilityValue(added ? "Hinzugefügt" : "")
+                ForEach(filteredEntries.filter { $0.type != .online }) { entry in
+                    catalogRow(entry)
                 }
                 if !search.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                    filteredEntries.isEmpty {
@@ -97,11 +84,35 @@ struct AddStoreSheet: View {
                         Label("Eigenen Laden anlegen", systemImage: "plus.circle")
                     }
                 }
+            } header: {
+                Text("Läden")
             } footer: {
                 Text("Jeder Laden kann als eigener Laden angelegt werden. Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern.")
             }
         }
         .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Kette suchen")
+    }
+
+    private func catalogRow(_ entry: StoreCatalog.Entry) -> some View {
+        let added = model.stores.contains { $0.catalogKey == entry.key }
+        return Button {
+            toggle(entry)
+        } label: {
+            HStack(spacing: 14) {
+                StoreBadge(store: entry.makeStore(sortIndex: 0), size: 36)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.name).foregroundStyle(Color.primary)
+                    Text(entry.type.displayName)
+                        .font(.caption)
+                        .foregroundStyle(Color.secondary)
+                }
+                Spacer()
+                Image(systemName: added ? "checkmark.circle.fill" : "plus.circle")
+                    .font(.title3)
+                    .foregroundStyle(added ? Color.accentColor : Color.secondary)
+            }
+        }
+        .accessibilityValue(added ? "Hinzugefügt" : "")
     }
 
     private func toggle(_ entry: StoreCatalog.Entry) {

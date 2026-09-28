@@ -869,7 +869,7 @@ extension AppModel {
             if let entry = model.catalog?.entry(forKey: key) { model.addStore(from: entry) }
         }
         Task {
-            let list = await gateway.seed(listTitle: "Einkaufen", reminders: items)
+            let list = await gateway.seed(listTitle: listTitle, reminders: items)
             await model.selectList(list.id)
         }
         return model

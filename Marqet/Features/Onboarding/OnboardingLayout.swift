@@ -6,17 +6,27 @@ import SwiftUI
 /// same height on every step, however long the headline or text is.
 struct OnboardingLayout<Illustration: View, Content: View, Action: View>: View {
     let title: LocalizedStringKey
-    var subtitle: LocalizedStringKey?
+    var brandName: LocalizedStringKey? = nil
     @ViewBuilder var illustration: Illustration
     @ViewBuilder var content: Content
     @ViewBuilder var action: Action
 
     var body: some View {
         GeometryReader { proxy in
-            if let fold = FoldGeometry.verticalFold(in: proxy) {
-                book(fold: fold.frame, size: proxy.size)
-            } else {
-                single(height: proxy.size.height)
+            ZStack(alignment: .top) {
+                if let fold = FoldGeometry.verticalFold(in: proxy) {
+                    book(fold: fold.frame, size: proxy.size)
+                } else {
+                    single(height: proxy.size.height)
+                }
+                if let brandName {
+                    Text(brandName)
+                        .font(.system(size: 29, weight: .bold, design: .default))
+                        .foregroundStyle(.tint)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 4)
+                        .accessibilityAddTraits(.isHeader)
+                }
             }
         }
     }
@@ -31,7 +41,7 @@ struct OnboardingLayout<Illustration: View, Content: View, Action: View>: View {
                 headline
                     .multilineTextAlignment(.center)
                     .padding(.top, OnboardingMetrics.titleSpacing)
-                text(alignment: .center)
+                contentBlock
                     .padding(.top, OnboardingMetrics.textSpacing)
             }
             .frame(maxWidth: OnboardingMetrics.maxWidth)
@@ -62,7 +72,7 @@ struct OnboardingLayout<Illustration: View, Content: View, Action: View>: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     headline
-                    text(alignment: .leading)
+                    contentBlock
                         .padding(.top, OnboardingMetrics.textSpacing)
                 }
                 .padding(.horizontal, 28)
@@ -88,14 +98,8 @@ struct OnboardingLayout<Illustration: View, Content: View, Action: View>: View {
             .accessibilityAddTraits(.isHeader)
     }
 
-    private func text(alignment: TextAlignment) -> some View {
+    private var contentBlock: some View {
         VStack(alignment: .leading, spacing: 18) {
-            if let subtitle {
-                Text(subtitle)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(alignment)
-                    .frame(maxWidth: .infinity, alignment: alignment == .center ? .center : .leading)
-            }
             content
         }
     }
@@ -115,6 +119,7 @@ enum OnboardingMetrics {
     static func topInset(for height: CGFloat) -> CGFloat {
         max(12, (height - anchorBlockHeight) * 0.3)
     }
+
 }
 
 /// Symbol + text rows below the headline.

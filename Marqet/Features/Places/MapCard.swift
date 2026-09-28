@@ -8,6 +8,10 @@ import SwiftUI
 struct MapCard: View {
     @Environment(AppModel.self) private var model
     @Environment(\.cardZoomNamespace) private var zoomNamespace
+    @State private var position: MapCameraPosition = .region(
+        MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 51.16, longitude: 10.45),
+                           latitudinalMeters: 850_000, longitudinalMeters: 850_000)
+    )
 
     var body: some View {
         let pins = model.mapPins(found: []).filter { pin in
@@ -16,21 +20,26 @@ struct MapCard: View {
         Button { model.focus(.map) } label: {
             VStack(spacing: 0) {
                 header(pins: pins)
-                Map(initialPosition: pins.isEmpty ? .userLocation(fallback: .automatic) : .automatic, interactionModes: []) {
-                    UserAnnotation()
-                    ForEach(pins) { pin in
-                        if let store = pin.store {
-                            Annotation(store.name, coordinate: pin.coordinate.clCoordinate) {
-                                StoreBadge(store: store, size: 30)
-                                    .padding(2)
-                                    .background(.white, in: .circle)
-                                    .shadow(radius: 2, y: 1)
+                if model.userLocation != nil {
+                    Map(position: $position, interactionModes: []) {
+                        UserAnnotation()
+                        ForEach(pins) { pin in
+                            if let store = pin.store {
+                                Annotation(store.name, coordinate: pin.coordinate.clCoordinate) {
+                                    StoreBadge(store: store, size: 30)
+                                        .padding(2)
+                                        .background(.white, in: .circle)
+                                        .shadow(radius: 2, y: 1)
+                                }
+                                .annotationTitles(.hidden)
                             }
-                            .annotationTitles(.hidden)
                         }
                     }
+                    .allowsHitTesting(false)
+                } else {
+                    ContentUnavailableView("Standort für Läden in deiner Nähe", systemImage: "location")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .allowsHitTesting(false)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .cardSurface()
@@ -39,6 +48,16 @@ struct MapCard: View {
         .buttonStyle(.plain)
         .modifier(CardZoomSource(page: .map, namespace: zoomNamespace))
         .accessibilityLabel("In der Nähe öffnen")
+        .task(id: model.visiblePages.contains(.map)) {
+            guard model.visiblePages.contains(.map) else { return }
+            if let location = await model.updateUserLocation() {
+                position = .region(MKCoordinateRegion(
+                    center: location.clCoordinate,
+                    latitudinalMeters: 3_000,
+                    longitudinalMeters: 3_000
+                ))
+            }
+        }
     }
 
     /// White, unlike the store cards' colored gradient: this card has no store tint of its own.

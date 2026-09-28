@@ -110,17 +110,14 @@ struct OnboardingFlow: View {
     // MARK: Steps
 
     private var welcome: some View {
-        OnboardingLayout(title: "Deine Einkaufsliste, nach Läden sortiert") {
+        OnboardingLayout(title: "Deine Einkaufsliste, nach Läden sortiert", brandName: "Marqet") {
             SortingIllustration()
         } content: {
             OnboardingPoints(points: [
-                ("mic.fill", "Trag Einkäufe wie gewohnt ein: mit Siri, in Erinnerungen oder in Marqet."),
-                ("square.stack.fill", "Marqet verteilt sie auf Cards für jeden Laden."),
-                ("figure.walk", "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser."),
+                ("mic.fill", "Trag Einkäufe mit Siri, in Erinnerungen oder in Marqet ein."),
+                ("square.stack.fill", "Marqet sortiert sie nach Läden."),
+                ("mappin", "Finde Läden in deiner Nähe und hake Einkäufe ab."),
             ])
-            Text("Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         } action: {
             OnboardingPrimaryButton(title: "Los geht’s") {
                 advance(to: hasAccess(model.phase) ? .list : .access)
@@ -147,12 +144,9 @@ struct OnboardingFlow: View {
                 MarkerIllustration()
             } content: {
                 OnboardingPoints(points: [
-                    ("list.bullet", "Marqet liest die Liste, die du gleich auswählst."),
-                    ("note.text", "Den Laden merkt sich Marqet als Zeile „🛒 Laden“ in den Notizen, sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst."),
+                    ("list.bullet", "Wähle gleich die Einkaufsliste aus, die Marqet sortieren soll."),
+                    ("note.text", "Der Laden steht sichtbar in den Notizen des Eintrags – auch für alle, mit denen du die Liste teilst."),
                 ])
-                Text("Alles bleibt auf deinem Gerät und in deinem iCloud.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             } action: {
                 OnboardingPrimaryButton(title: "Zugriff erlauben") {
                     Task { await model.requestAccess() }
@@ -167,8 +161,8 @@ struct OnboardingFlow: View {
         } content: {
             OnboardingPoints(points: [
                 ("quote.bubble.fill", "Sag: „Hey Siri, setz Milch auf die Liste \(model.selectedList?.title ?? "Einkaufen")“."),
-                ("tray.and.arrow.down.fill", "Neue Einträge landen in der Inbox. Von dort ordnest du sie mit einem Tipp einem Laden zu."),
-                ("hand.draw.fill", "Wische zwischen den Läden, tippe + für neue Einträge."),
+                ("tray.fill", "Neue Einträge findest du in der Inbox."),
+                ("square.stack.3d.up.fill", "Live Activity und Widgets zeigen dir, was noch offen ist."),
             ])
         } action: {
             OnboardingPrimaryButton(title: "Fertig") { model.completeOnboarding() }
@@ -204,10 +198,7 @@ private struct OnboardingListStep: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        OnboardingLayout(
-            title: "Welche Liste ist deine Einkaufsliste?",
-            subtitle: "Marqet sortiert nur diese eine Liste. Du kannst sie später in den Einstellungen wechseln."
-        ) {
+        OnboardingLayout(title: "Welche Liste ist deine Einkaufsliste?") {
             ListIllustration()
         } content: {
             VStack(spacing: 0) {
@@ -279,22 +270,11 @@ private struct OnboardingStoresStep: View {
     @State private var showsCustomStore = false
 
     var body: some View {
-        @Bindable var model = model
-        OnboardingLayout(
-            title: "Wo kaufst du ein?",
-            subtitle: "Tippe deine Läden in der Reihenfolge an, in der du sie am häufigsten besuchst."
-        ) {
+        OnboardingLayout(title: "Wo kaufst du ein?") {
             StoresIllustration()
         } content: {
-            Picker("Region", selection: $model.region) {
-                Text("Deutschland").tag(StoreCatalog.Region.germany)
-                Text("Österreich").tag(StoreCatalog.Region.austria)
-                Text("Schweiz").tag(StoreCatalog.Region.switzerland)
-            }
-            .pickerStyle(.segmented)
-
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 92), spacing: 12)], spacing: 16) {
-                ForEach(model.catalog?.entries(for: model.region) ?? []) { entry in
+                ForEach(catalogEntries) { entry in
                     tile(entry)
                 }
             }
@@ -314,6 +294,19 @@ private struct OnboardingStoresStep: View {
         case 1: "Weiter mit 1 Laden"
         default: "Weiter mit \(selection.count) Läden"
         }
+    }
+
+    private var catalogEntries: [StoreCatalog.Entry] {
+        let entries = model.catalog?.entries(for: model.region) ?? []
+        let priorities = [
+            "amazon", "aldi-sued", "aldi-nord", "lidl", "rewe", "edeka", "kaufland",
+            "netto", "penny", "picnic", "otto", "dm", "rossmann", "sephora",
+        ]
+        let rank = Dictionary(uniqueKeysWithValues: priorities.enumerated().map { ($0.element, $0.offset) })
+        return entries.enumerated().sorted { lhs, rhs in
+            (rank[lhs.element.key] ?? priorities.count + lhs.offset) <
+            (rank[rhs.element.key] ?? priorities.count + rhs.offset)
+        }.map(\.element)
     }
 
     private func tile(_ entry: StoreCatalog.Entry) -> some View {

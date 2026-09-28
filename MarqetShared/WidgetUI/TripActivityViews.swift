@@ -22,18 +22,30 @@ struct TripLockScreenView: View {
             HStack(spacing: 10) {
                 ZStack {
                     ProgressRing(progress: status.progress, color: foreground)
-                    WidgetBadge(store: store, size: 30)
+                    if status.isStoreDone {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 17, weight: .bold))
+                    } else {
+                        VStack(spacing: -2) {
+                            Text(status.openCount, format: .number)
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                            Text("offen")
+                                .font(.system(size: 8, weight: .medium))
+                        }
+                    }
                 }
-                .frame(width: 38, height: 38)
+                .frame(width: 42, height: 42)
+                .accessibilityLabel("Noch \(status.openCount) offen")
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(.system(size: 16, weight: .bold))
                         .lineLimit(1)
-                    Text(progressText)
-                        .font(.system(size: 13, weight: .medium))
-                        .opacity(0.85)
-                        .lineLimit(1)
-                        .contentTransition(.numericText())
+                    if status.isOnTheWay, let distance = status.distanceMeters {
+                        Text(WidgetFormat.distance(distance))
+                            .font(.system(size: 13, weight: .medium))
+                            .opacity(0.85)
+                    }
                 }
                 Spacer(minLength: 4)
                 if status.hasLoyaltyCard {
@@ -45,14 +57,6 @@ struct TripLockScreenView: View {
                     }
                     .accessibilityLabel("Kundenkarte zeigen")
                 }
-                Button(intent: EndTripIntent()) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 13, weight: .bold))
-                        .frame(width: 34, height: 34)
-                        .background(.white.opacity(0.22), in: .circle)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Einkauf beenden")
             }
 
             if status.isStoreDone {
@@ -81,11 +85,6 @@ struct TripLockScreenView: View {
     private var title: String {
         if status.isFinished { return String(localized: "Einkauf fertig") }
         return status.isOnTheWay ? String(localized: "Unterwegs zu \(store.name)") : String(localized: "Einkauf bei \(store.name)")
-    }
-
-    private var progressText: String {
-        if status.isStoreDone { return String(localized: "Alles erledigt bei \(store.name)") }
-        return TripStatusText.progress(status)
     }
 
     @ViewBuilder
@@ -120,21 +119,12 @@ struct TripLockScreenView: View {
 
 /// Shared wording for the Lock Screen and the Dynamic Island.
 enum TripStatusText {
-    /// "650 m · 9 Einträge" on the way, "2 von 11 erledigt · noch 9" at the store.
-    static func progress(_ status: TripStatus) -> String {
-        if status.isOnTheWay {
-            let items = status.openCount == 1 ? String(localized: "1 Eintrag") : String(localized: "\(status.openCount) Einträge")
-            return [status.distanceMeters.map(WidgetFormat.distance), items].compactMap { $0 }.joined(separator: " · ")
-        }
-        return String(localized: "\(status.doneCount) von \(status.totalCount) erledigt · noch \(status.openCount)")
-    }
-
     /// The short line under the store name in the expanded Dynamic Island.
     static func short(_ status: TripStatus) -> String {
         if status.isOnTheWay {
             return status.distanceMeters.map { String(localized: "Unterwegs · \(WidgetFormat.distance($0))") } ?? String(localized: "Unterwegs")
         }
-        return String(localized: "\(status.doneCount) von \(status.totalCount) erledigt")
+        return String(localized: "\(status.openCount) offen")
     }
 }
 
@@ -176,22 +166,6 @@ struct ProgressRing: View {
                 .rotationEffect(.degrees(-90))
         }
         .padding(1.5)
-        .accessibilityHidden(true)
-    }
-}
-
-struct ProgressBar: View {
-    let progress: Double
-    let color: Color
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(color.opacity(0.25))
-                Capsule().fill(color)
-                    .frame(width: max(proxy.size.width * progress, progress > 0 ? 5 : 0))
-            }
-        }
         .accessibilityHidden(true)
     }
 }
@@ -262,8 +236,6 @@ struct TripExpandedBottom: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            ProgressBar(progress: status.progress, color: status.store.colorOnDark)
-                .frame(height: 4)
             if status.isStoreDone {
                 Text(status.isFinished ? "Alles erledigt – gut eingekauft!" : "Alles erledigt bei \(status.store.name)")
                     .font(.system(size: 14, weight: .semibold))
@@ -274,41 +246,33 @@ struct TripExpandedBottom: View {
                     }
                 }
             }
-            HStack(spacing: 8) {
-                if status.hasLoyaltyCard {
-                    Link(destination: MarqetLink.storeLoyaltyCards(status.store.id).url) {
-                        Label("Kundenkarte", systemImage: "wallet.pass.fill")
-                            .font(.system(size: 13, weight: .semibold))
-                            .padding(.horizontal, 12)
-                            .frame(height: 30)
-                            .background(.white.opacity(0.16), in: .capsule)
+            if status.hasLoyaltyCard || (status.isStoreDone && !status.stops.isEmpty) {
+                HStack(spacing: 8) {
+                    if status.hasLoyaltyCard {
+                        Link(destination: MarqetLink.storeLoyaltyCards(status.store.id).url) {
+                            Label("Kundenkarte", systemImage: "wallet.pass.fill")
+                                .font(.system(size: 13, weight: .semibold))
+                                .padding(.horizontal, 12)
+                                .frame(height: 30)
+                                .background(.white.opacity(0.16), in: .capsule)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    if status.isStoreDone, let next = status.stops.first {
+                        Button(intent: NextStoreIntent(storeID: next.storeID)) {
+                            Label("Weiter zu \(next.name)", systemImage: "arrow.right")
+                                .font(.system(size: 13, weight: .semibold))
+                                .lineLimit(1)
+                                .padding(.horizontal, 12)
+                                .frame(height: 28)
+                                .background(status.store.colorOnDark.opacity(0.35), in: .capsule)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                Spacer(minLength: 0)
-                if status.isStoreDone, let next = status.stops.first {
-                    // Label shortened to the store: the capsule sits close to the corner.
-                    Button(intent: NextStoreIntent(storeID: next.storeID)) {
-                        Label("Weiter zu \(next.name)", systemImage: "arrow.right")
-                            .font(.system(size: 13, weight: .semibold))
-                            .lineLimit(1)
-                            .padding(.horizontal, 12)
-                            .frame(height: 28)
-                            .background(status.store.colorOnDark.opacity(0.35), in: .capsule)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Button(intent: EndTripIntent()) {
-                        Label("Beenden", systemImage: "xmark")
-                            .font(.system(size: 13, weight: .semibold))
-                            .padding(.horizontal, 12)
-                            .frame(height: 28)
-                            .background(.white.opacity(0.16), in: .capsule)
-                    }
-                    .buttonStyle(.plain)
-                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 6)
             }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 6)
         }
         .foregroundStyle(.white)
     }
@@ -319,22 +283,11 @@ struct TripExpandedTrailing: View {
     let status: TripStatus
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 0) {
-            if status.isStoreDone {
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(status.store.colorOnDark)
-                Text("erledigt")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
-            } else {
-                Text(status.openCount, format: .number)
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .foregroundStyle(status.store.colorOnDark)
-                    .contentTransition(.numericText())
+        VStack(spacing: 1) {
+            TripRing(status: status, size: 42)
+            if !status.isStoreDone {
                 Text("offen")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.secondary)
             }
         }

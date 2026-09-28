@@ -55,7 +55,6 @@ struct BrochuresCard: View {
                     BrochureShelf(entries: entries, priceFinds: model.offerPriceFinds) { entry in
                         if let url = entry.leafletURL { selectedLeaflet = LeafletDestination(url: url) }
                     }
-                    .padding(.bottom, 4)
                 }
                 if model.isRefreshingPrices {
                     ProgressView("Preise werden geladen")
@@ -103,7 +102,8 @@ struct BrochuresCard: View {
                 if pulledUp, isDraggingShelf, !isExpanded { model.focus(.brochures) }
             }
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.top, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .modifier(BrochuresCardChrome(isExpanded: isExpanded))
         .modifier(CardZoomSource(page: .brochures, namespace: isExpanded ? nil : zoomNamespace))

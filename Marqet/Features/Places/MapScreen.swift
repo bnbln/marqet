@@ -126,7 +126,7 @@ struct MapScreen: View {
             .searchable(text: $query, prompt: "Laden oder Adresse suchen")
             .onSubmit(of: .search) { Task { await search() } }
             .onChange(of: query) { _, text in if text.isEmpty { searchResults = [] } }
-            .navigationTitle("Karte")
+            .navigationTitle("In der Nähe")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

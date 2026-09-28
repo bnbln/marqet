@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "In deiner Umgebung gibt es noch keine belegten Preisfunde." : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "There are no supported price finds nearby yet." } } }
+    },
+    "Community-Meldung · Preis vor Ort prüfen" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Community report · check the price in store" } } }
+    },
     "" : {
       "localizations" : {
         "en" : {
@@ -26,6 +32,16 @@
     },
     "%@" : {
 
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
     },
     "%@ → %@" : {
       "localizations" : {
@@ -178,6 +194,9 @@
           }
         }
       }
+    },
+    "%@/Stk." : {
+
     },
     "%lld" : {
       "localizations" : {
@@ -414,26 +433,6 @@
         }
       }
     },
-    "%lld von %lld erledigt" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld von %2$lld erledigt"
-          }
-        }
-      }
-    },
-    "%lld von %lld erledigt · noch %lld" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld von %2$lld erledigt · noch %3$lld"
-          }
-        }
-      }
-    },
     "%lld Vorschläge übernehmen" : {
       "localizations" : {
         "en" : {
@@ -469,6 +468,9 @@
     "+%lld" : {
 
     },
+    "−%lld %%" : {
+
+    },
     "○ %@" : {
 
     },
@@ -476,6 +478,7 @@
 
     },
     "🛒 Markt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -486,6 +489,7 @@
       }
     },
     "🛒 Supermarkt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -716,6 +720,7 @@
 
     },
     "Alles bleibt auf deinem Gerät und in deinem iCloud." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -795,6 +800,19 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Next: %@"
+          }
+        }
+      }
+    },
+    "Am günstigsten" : {
+
+    },
+    "Am günstigsten: %@, %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Am günstigsten: %1$@, %2$@"
           }
         }
       }
@@ -1149,6 +1167,16 @@
         }
       }
     },
+    "Beleg" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
     "Beobachtet" : {
 
     },
@@ -1201,6 +1229,18 @@
     "Bücher" : {
 
     },
+    "ca. %@" : {
+
+    },
+    "ca. %@/kg" : {
+
+    },
+    "ca. %@/l" : {
+
+    },
+    "ca. %@/Stk." : {
+
+    },
     "Code 128 erlaubt keine Umlaute oder Sonderzeichen." : {
       "localizations" : {
         "en" : {
@@ -1230,6 +1270,12 @@
           }
         }
       }
+    },
+    "Datenbank unter der Open Database License (ODbL 1.0), Inhalte unter der Database Contents License (DbCL 1.0)." : {
+
+    },
+    "Datenquellen" : {
+
     },
     "Datenschutz" : {
       "localizations" : {
@@ -1262,6 +1308,7 @@
       }
     },
     "Deine Einträge bleiben in Apple Erinnerungen. Kein Konto, keine Werbung." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1300,7 +1347,18 @@
         }
       }
     },
+    "Deinen Standort nutzt Marqet nur mit deiner Erlaubnis. Für lokale Preissuchen sendet es eine auf etwa 10 km gerundete Position und einen Umkreis von 30 km an Open Prices. Ohne Standort nutzt es regionale Preise." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet uses your location only with permission. For nearby prices, it sends a position rounded to roughly 10 km and a 30 km search radius to Open Prices. Without location, it uses regional prices."
+          }
+        }
+      }
+    },
     "Deinen Standort nutzt Marqet nur, wenn du es erlaubst: für Filialen in der Nähe und die Sortierung nach Entfernung. Er wird weder gespeichert noch übertragen." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1321,6 +1379,7 @@
       }
     },
     "Den Laden merkt sich Marqet als Zeile „🛒 Laden“ in den Notizen, sichtbar auch in Erinnerungen und für alle, mit denen du die Liste teilst." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1342,6 +1401,9 @@
           }
         }
       }
+    },
+    "Der Laden steht sichtbar in den Notizen des Eintrags – auch für alle, mit denen du die Liste teilst." : {
+
     },
     "Der nächste Laden steht vorn. Läden ohne Filiale folgen in deiner Reihenfolge." : {
       "localizations" : {
@@ -1402,6 +1464,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The card appears in the full-screen view of these stores. You can assign a Payback card to several stores."
+          }
+        }
+      }
+    },
+    "Die mitgelieferten Preise liegen in der App. Wenn du sie aktualisierst oder tägliche Updates einschaltest, fragt Marqet die passenden Produktkategorien bei Open Prices ab. Deine Eintragstexte und Läden werden dabei nicht gesendet." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The included prices are stored in the app. When you update them or enable daily updates, Marqet queries the relevant product categories from Open Prices. Your item names and stores are not sent."
           }
         }
       }
@@ -1591,6 +1664,16 @@
     },
     "Eingabe schließen" : {
 
+    },
+    "Einige Preise konnten nicht aktualisiert werden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some prices could not be updated."
+          }
+        }
+      }
     },
     "Einkauf an- oder ausschalten" : {
 
@@ -1805,9 +1888,6 @@
         }
       }
     },
-    "erledigt" : {
-
-    },
     "Erledigt" : {
       "localizations" : {
         "en" : {
@@ -1960,6 +2040,9 @@
     "Filter" : {
 
     },
+    "Finde Läden in deiner Nähe und hake Einkäufe ab." : {
+
+    },
     "Fisch" : {
       "localizations" : {
         "en" : {
@@ -2073,6 +2156,16 @@
         }
       }
     },
+    "Gemeldeter Angebotspreis" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reported discount"
+          }
+        }
+      }
+    },
     "geplant" : {
       "localizations" : {
         "en" : {
@@ -2087,6 +2180,9 @@
 
     },
     "Geschäfte" : {
+
+    },
+    "Geschätzter Richtwert: %@" : {
 
     },
     "Getränke" : {
@@ -2226,6 +2322,7 @@
 
     },
     "Im Laden in der Reihenfolge deines Wegs, mit jedem Einkauf besser." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2247,6 +2344,12 @@
           }
         }
       }
+    },
+    "In der Nähe" : {
+
+    },
+    "In der Nähe öffnen" : {
+
     },
     "Inbox" : {
       "localizations" : {
@@ -2309,9 +2412,6 @@
           }
         }
       }
-    },
-    "Karte öffnen" : {
-
     },
     "Karte scannen" : {
       "localizations" : {
@@ -2730,6 +2830,26 @@
         }
       }
     },
+    "Letzte Preisabfrage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last price check"
+          }
+        }
+      }
+    },
+    "Letzte Preisabfrage: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last price check: %@"
+          }
+        }
+      }
+    },
     "Liste" : {
 
     },
@@ -2759,8 +2879,21 @@
         }
       }
     },
+    "Live Activity und Widgets zeigen dir, was noch offen ist." : {
+
+    },
     "Live-Aktivität „Einkauf“" : {
 
+    },
+    "Lokale Preisfunde anzeigen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show nearby price finds"
+          }
+        }
+      }
     },
     "Los geht’s" : {
       "localizations" : {
@@ -2842,6 +2975,16 @@
         }
       }
     },
+    "Marqet lädt Preise erst, wenn du Angebote oder Preisvergleiche öffnest. Danach nutzt es die lokal gespeicherten Werte bis zur nächsten benötigten Aktualisierung." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet loads prices when you open offers or price comparisons. It then uses locally saved results until the next needed update."
+          }
+        }
+      }
+    },
     "Marqet lernt beim Abhaken, in welcher Reihenfolge du durch jeden Laden gehst." : {
       "localizations" : {
         "en" : {
@@ -2863,6 +3006,7 @@
       }
     },
     "Marqet liest die Liste, die du gleich auswählst." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2924,6 +3068,7 @@
       }
     },
     "Marqet sortiert nur diese eine Liste. Du kannst sie später in den Einstellungen wechseln." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2932,6 +3077,9 @@
           }
         }
       }
+    },
+    "Marqet sortiert sie nach Läden." : {
+
     },
     "Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern." : {
       "localizations" : {
@@ -2954,6 +3102,7 @@
       }
     },
     "Marqet verteilt sie auf Cards für jeden Laden." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3017,6 +3166,7 @@
       }
     },
     "Milch" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3158,7 +3308,11 @@
         }
       }
     },
+    "Neue Einträge findest du in der Inbox." : {
+
+    },
     "Neue Einträge landen in der Inbox. Von dort ordnest du sie mit einem Tipp einem Laden zu." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3442,6 +3596,35 @@
         }
       }
     },
+    "Online-Shops" : {
+
+    },
+    "Open Database License" : {
+
+    },
+    "Open Prices" : {
+
+    },
+    "Open Prices · Daten bis %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Prices · data through %@"
+          }
+        }
+      }
+    },
+    "Open Prices · gesehen am %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Prices · observed on %@"
+          }
+        }
+      }
+    },
     "Ort" : {
 
     },
@@ -3485,6 +3668,79 @@
         }
       }
     },
+    "Preise aus Kassenbons und Preisschildern, gesammelt von der Community von Open Food Facts. Marqet zeigt Kategoriepreise und besonders günstige Beobachtungen mit Datum." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices from receipts and shelf labels collected by the Open Food Facts community. Marqet shows category prices and notably low observations with dates."
+          }
+        }
+      }
+    },
+    "Preise beim Zuordnen" : {
+
+    },
+    "Preise jetzt aktualisieren" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update prices now"
+          }
+        }
+      }
+    },
+    "Preise täglich aktualisieren" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update prices daily"
+          }
+        }
+      }
+    },
+    "Preise von Open Prices" : {
+
+    },
+    "Preise werden bei Bedarf von Open Prices geladen und auf dem Gerät gespeichert. Die Anfrage enthält Produktkategorien, aber keine Eintragstexte oder angelegten Läden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prices are loaded from Open Prices when needed and saved on the device. Requests include product categories, but not your item names or saved stores."
+          }
+        }
+      }
+    },
+    "Preise werden geladen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading prices"
+          }
+        }
+      }
+    },
+    "Preise: Open Prices (ODbL), Einstiegspreise der Kategorie, ohne Angebote" : {
+
+    },
+    "Preisführer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Price leader"
+          }
+        }
+      }
+    },
+    "prices.openfoodfacts.org" : {
+
+    },
     "Profil" : {
       "localizations" : {
         "en" : {
@@ -3518,6 +3774,16 @@
         }
       }
     },
+    "Prospekte und gemeldete Preisfunde" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brochures and reported price finds"
+          }
+        }
+      }
+    },
     "QR-Code" : {
       "localizations" : {
         "en" : {
@@ -3539,6 +3805,7 @@
       }
     },
     "reif" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3806,6 +4073,20 @@
         }
       }
     },
+    "Stand der App-Daten: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Included data as of: %@"
+          }
+        }
+      }
+    },
+    "Standort für Läden in deiner Nähe" : {
+
+    },
     "Stehst du in einem deiner Läden, zeigen App und Widgets dessen Liste. Mit „Bei Ankunft melden“ beobachtet Marqet die nächsten Filialen deiner Läden mit offenen Einträgen: Läuft ein Einkauf, meldet sich die Live-Aktivität, sonst eine Mitteilung. Dein Standort bleibt auf dem Gerät." : {
 
     },
@@ -3882,6 +4163,7 @@
       }
     },
     "Tippe deine Läden in der Reihenfolge an, in der du sie am häufigsten besuchst." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3912,6 +4194,7 @@
       }
     },
     "Tomaten" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3921,7 +4204,11 @@
         }
       }
     },
+    "Trag Einkäufe mit Siri, in Erinnerungen oder in Marqet ein." : {
+
+    },
     "Trag Einkäufe wie gewohnt ein: mit Siri, in Erinnerungen oder in Marqet." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3978,6 +4265,20 @@
 
     },
     "Unterwegs zu %@" : {
+
+    },
+    "Vergleicht Preise aus Open Prices für Artikel ohne Laden. Bei der Aktualisierung fragt Marqet Produktkategorien ab. Ohne aktuelle Vergleichsdaten zeigt es die Preise aus der App." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compares Open Prices for items without a store. When updating, Marqet queries product categories. If recent comparison data is unavailable, it shows the prices included in the app."
+          }
+        }
+      }
+    },
+    "Verschieben nach" : {
 
     },
     "Version" : {
@@ -4079,6 +4380,9 @@
           }
         }
       }
+    },
+    "Wähle gleich die Einkaufsliste aus, die Marqet sortieren soll." : {
+
     },
     "Was du schon zweimal im selben Laden gekauft hast, landet von selbst dort." : {
       "localizations" : {
@@ -4249,6 +4553,7 @@
       }
     },
     "Wische zwischen den Läden, tippe + für neue Einträge." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4285,6 +4590,7 @@
 
     },
     "Zahnpasta" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

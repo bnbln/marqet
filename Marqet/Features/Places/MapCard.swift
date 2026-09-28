@@ -38,37 +38,38 @@ struct MapCard: View {
         }
         .buttonStyle(.plain)
         .modifier(CardZoomSource(page: .map, namespace: zoomNamespace))
-        .accessibilityLabel("Karte öffnen")
+        .accessibilityLabel("In der Nähe öffnen")
     }
 
-    /// Gray like the inbox header; the open button looks like the lists' "…" button.
+    /// White, unlike the store cards' colored gradient: this card has no store tint of its own.
     private func header(pins: [MapPin]) -> some View {
         let storeCount = Set(pins.compactMap(\.store?.id)).count
         return HStack(spacing: 14) {
             Image(systemName: "map.fill")
                 .font(.system(size: 20, weight: .semibold))
                 .frame(width: 44, height: 44)
-                .background(.white.opacity(0.2), in: .circle)
+                .background(Color(.tertiarySystemFill), in: .circle)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Karte")
+                Text("In der Nähe")
                     .font(.title2.bold())
                     .lineLimit(1)
                 Text(subtitle(storeCount: storeCount))
                     .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
             Image(systemName: "arrow.up.left.and.arrow.down.right")
                 .font(.body.weight(.semibold))
                 .frame(width: 36, height: 36)
-                .background(.white.opacity(0.22), in: .circle)
+                .background(Color(.tertiarySystemFill), in: .circle)
                 .accessibilityHidden(true)
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(.primary)
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [.gray, .gray.opacity(0.82)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        .background(Color(.secondarySystemGroupedBackground))
     }
 
     private func subtitle(storeCount: Int) -> LocalizedStringKey {

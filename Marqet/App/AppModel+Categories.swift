@@ -13,12 +13,13 @@ extension AppModel {
         _ = orderRevision
         let store = page.storeID.flatMap(store(_:))
         let usesLearning = isPro && routeLearningEnabled
-        // A manual drag (Free or Pro) always counts, even without route learning; without either,
-        // items stay alphabetical.
-        let loadedItemPositions = store.map { itemPositionsLoaded(for: $0.id) } ?? [:]
+        // A manual drag (Free or Pro) always counts. Learned positions only with route learning –
+        // without it, items nobody dragged stay alphabetical.
+        let loaded = store.map { itemPositionsLoaded(for: $0.id) } ?? [:]
+        let itemPositions = usesLearning ? loaded : loaded.filter(\.value.isManual)
         let ordering = SectionBuilder.Ordering(
             categoryPositions: store.map { categoryPositionsLoaded(for: $0.id) } ?? [:],
-            itemPositions: (usesLearning || !loadedItemPositions.isEmpty) ? loadedItemPositions : nil
+            itemPositions: itemPositions.isEmpty && !usesLearning ? nil : itemPositions
         )
         // Unsorted and non-grocery cards stay flat and keep insertion order (newest last).
         return SectionBuilder.sections(
@@ -61,15 +62,14 @@ extension AppModel {
         }
     }
 
-    /// Drag-to-reorder within a category section (§6.3/§6.4 known gap): moves `moved` to just
-    /// before `target` in the section's current order, then saves the result as a manual position.
-    /// Category itself never changes here – that stays a menu action ("Kategorie ändern").
-    func reorderItem(_ moved: ShoppingItem, before target: ShoppingItem, in sectionItems: [ShoppingItem]) {
-        guard let storeID = target.storeID, moved.id != target.id else { return }
-        var order = sectionItems
-        order.removeAll { $0.id == moved.id }
-        guard let targetIndex = order.firstIndex(where: { $0.id == target.id }) else { return }
-        order.insert(moved, at: targetIndex)
+    /// Drag inside a store card (KONZEPT #55): `moved` now belongs to the section of `category`
+    /// in `order`. Landing in another category section is a correction, like "Kategorie ändern".
+    /// Items of other stores are ignored – they come over through the card's own drop target.
+    func arrangeItem(_ moved: ShoppingItem, into category: ItemCategory?, order: [ShoppingItem], in storeID: Store.ID) {
+        guard moved.storeID == storeID, !moved.isCompleted else { return }
+        if let category, self.category(of: moved) != category {
+            setCategory(category, for: moved)
+        }
         setItemOrder(order, for: storeID)
     }
 

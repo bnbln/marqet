@@ -10,6 +10,7 @@ struct SettingsView: View {
     @State private var showsPaywall = false
     @State private var showsNewListPrompt = false
     @State private var newListName = ""
+    @AppStorage(AppModel.openPricesKey) private var openPricesEnabled = true
 
     var body: some View {
         @Bindable var model = model
@@ -85,8 +86,27 @@ struct SettingsView: View {
                         Text("Nacheinander").tag(TriageSession.Mode.single)
                         Text("Übersicht").tag(TriageSession.Mode.board)
                     }
+                    Toggle("Preise beim Zuordnen", isOn: $openPricesEnabled)
+                    Button {
+                        Task { await model.refreshPrices(for: model.items, force: true, includeOffers: true) }
+                    } label: {
+                        HStack {
+                            Label("Preise jetzt aktualisieren", systemImage: "arrow.clockwise")
+                            Spacer()
+                            if model.isRefreshingPrices { ProgressView() }
+                        }
+                    }
+                    .disabled(!openPricesEnabled || model.isRefreshingPrices)
+                    if let lastCheck = model.lastPriceCheck {
+                        LabeledContent("Letzte Preisabfrage", value: lastCheck.formatted(date: .abbreviated, time: .shortened))
+                    }
+                    if let error = model.priceRefreshError {
+                        Text(error).foregroundStyle(.secondary)
+                    }
                 } header: {
                     Text("Läden")
+                } footer: {
+                    Text("Marqet lädt Preise erst, wenn du Angebote oder Preisvergleiche öffnest. Danach nutzt es die lokal gespeicherten Werte bis zur nächsten benötigten Aktualisierung.")
                 }
 
                 Section {
@@ -131,6 +151,7 @@ struct SettingsView: View {
                 Section("Über Marqet") {
                     LabeledContent("Version", value: Bundle.main.versionString)
                     NavigationLink("Datenschutz") { PrivacyView() }
+                    NavigationLink("Datenquellen") { DataSourcesView() }
                     Text("Marqet steht in keiner Verbindung zu den genannten Handelsketten. Alle Marken gehören ihren jeweiligen Inhabern.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -235,11 +256,42 @@ private struct PrivacyView: View {
             Text("Marqet hat kein Konto, keinen Server und keine Werbung. Deine Einträge liegen in Apple Erinnerungen, deine Läden und alles Gelernte auf deinem Gerät.")
             Text("Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch.")
             Text("Apple Intelligence läuft auf deinem Gerät. Marqet erfasst keine Nutzungsdaten.")
-            Text("Deinen Standort nutzt Marqet nur, wenn du es erlaubst: für Filialen in der Nähe und die Sortierung nach Entfernung. Er wird weder gespeichert noch übertragen.")
+            Text("Deinen Standort nutzt Marqet nur mit deiner Erlaubnis. Für lokale Preissuchen sendet es eine auf etwa 10 km gerundete Position und einen Umkreis von 30 km an Open Prices. Ohne Standort nutzt es regionale Preise.")
             Text("Kundenkarten bleiben auf deinem Gerät. Beim Scannen liest Marqet nur den Barcode aus, Kamerabilder werden weder gespeichert noch übertragen.")
+            Text("Preise werden bei Bedarf von Open Prices geladen und auf dem Gerät gespeichert. Die Anfrage enthält Produktkategorien, aber keine Eintragstexte oder angelegten Läden.")
             Text("Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten.")
         }
         .navigationTitle("Datenschutz")
+    }
+}
+
+/// Attribution for the open data in the app (docs/OFFENE-DATEN.md §2).
+private struct DataSourcesView: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        List {
+            Section {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Open Prices").font(.headline)
+                    Text("Preise aus Kassenbons und Preisschildern, gesammelt von der Community von Open Food Facts. Marqet zeigt Kategoriepreise und besonders günstige Beobachtungen mit Datum.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    if let lastCheck = model.lastPriceCheck {
+                        Text("Letzte Preisabfrage: \(lastCheck.formatted(date: .abbreviated, time: .shortened))")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Link("prices.openfoodfacts.org", destination: URL(string: "https://prices.openfoodfacts.org")!)
+            } footer: {
+                Text("Datenbank unter der Open Database License (ODbL 1.0), Inhalte unter der Database Contents License (DbCL 1.0).")
+            }
+            Section {
+                Link("Open Database License", destination: URL(string: "https://opendatacommons.org/licenses/odbl/1-0/")!)
+            }
+        }
+        .navigationTitle("Datenquellen")
     }
 }
 

@@ -43,7 +43,7 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 28 | Spread-Modell | **v1.0:** Pager zeigt je nach Container-Breite 1–4 Cards. Duo innen: 2 Cards, Lücke exakt auf dem Falz |
 | 29 | Anker | **v1.0:** Duo Home-Pager: aktive Card rechts, links die echte Vorgänger-Card. iPad Home-Pager: aktive Card links. Der Laden-Zoom zeigt auf breiten Displays Kontext links und Liste rechts |
 | 30 | Plus-Button | **v1.0:** System-Toolbar-Item statt eigenem FAB (wird auf dem Duo senkrecht). Long Press = „Hinzufügen zu …“ |
-| 31 | Große Displays | **v1.0:** Drag zwischen Cards, zweiseitiges Zuordnen, Sheets links, iPad-Kurzbefehle. **v1.1:** Küchenmodus (Tischhaltung), linke Seite anheften, Drag aus anderen Apps |
+| 31 | Große Displays | **v1.0:** Drag zwischen Cards (nur im Spread, #55), zweiseitiges Zuordnen, Sheets links, iPad-Kurzbefehle. **v1.1:** Küchenmodus (Tischhaltung), linke Seite anheften, Drag aus anderen Apps |
 | 27 | Angebote | **v2.0**, nur über eine Publisher-Partnerschaft (ShopFully/Offerista oder Bonial). v1.1: Prospekt-Link pro Kette |
 | 32 | Händler-Logos | *Rev. 4 (26.09.):* **Echte Logos bleiben**, das Risiko wird getragen (ersetzt #3 „ohne Logos“). Rückfall auf Monogramme per Schalter, Quellen in `ASSET_SOURCES.md` |
 | 33 | Umfang v1.0 | *Rev. 4:* **„Orte“ (Filialen, Karte, Sortierung nach Entfernung/Smart) in v1.0** (ersetzt #24/#25), Routen bleiben v1.3 |
@@ -69,6 +69,7 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 52 | Steuerelemente | *Rev. 9:* Kontrollzentrum, Sperrbildschirm, Aktionstaste: „Eintrag hinzufügen“ (öffnet die Eingabe), „Kundenkarte“, Schalter „Einkauf“ |
 | 53 | Deep Links | *Rev. 9:* `marqet://` mit `page`, `compose`, `triage`, `completed`, `card`, `offers`, `trip`. Kommen sie vor dem Laden der Liste, warten sie |
 | 54 | Widget-Galerie in der App | *Rev. 9:* Einstellungen › „Widgets & Live-Aktivität“ zeigt alle Widgets mit den eigenen Listen (dieselben Ansichten wie auf dem Home-Bildschirm) und den Schalter für den automatischen Start |
+| 55 | Einträge ziehen | *Rev. 8 (28.09.):* Halten und ziehen in der Laden-Card: die anderen Einträge weichen aus, beim Loslassen steht der Eintrag an der neuen Stelle. Über einen Kategorie-Titel hinweg gezogen, übernimmt er diese Kategorie (wie „Kategorie ändern“). Die Titel bleiben oben angeheftet. Die Reihenfolge wird als manuelle Position gespeichert (Free und Pro; Pro lernt danach weiter), auch in flachen Listen. Auf dem iPhone bleibt der Drag im Laden (der Pager steht still, iOS 27); auf iPad und offenem Duo darf er auf eine andere Card. In einen anderen Laden sonst: Long Press → „Verschieben nach“. „Läden sortieren“: Griffe immer sichtbar, wirkt sofort, schaltet Entfernung/Smart auf Manuell |
 
 ---
 

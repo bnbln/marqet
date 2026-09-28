@@ -4,7 +4,10 @@ import SwiftUI
 /// Newsstand-style shelf: brochure covers stand in rows of two to four in soft shelf trays.
 struct BrochureShelf: View {
     let entries: [StoreCatalog.Entry]
+    var priceFinds: [PriceUpdateService.PriceFind] = []
     let open: (StoreCatalog.Entry) -> Void
+
+    @Environment(AppModel.self) private var model
 
     @State private var width: CGFloat = 0
 
@@ -33,12 +36,79 @@ struct BrochureShelf: View {
 
     var body: some View {
         LazyVStack(spacing: 22) {
-            ForEach(rows, id: \.first?.id) { row in
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
                 ShelfRow(entries: row, coverWidth: coverWidth, spacing: Self.spacing, open: open)
+                if index < priceFinds.count {
+                    PriceFindCard(find: priceFinds[index], storeName: model.catalog?.entry(forKey: priceFinds[index].store)?.name ?? priceFinds[index].store,
+                                  currencyCode: model.region.currencyCode)
+                }
+            }
+            ForEach(Array(priceFinds.dropFirst(rows.count))) { find in
+                PriceFindCard(find: find, storeName: model.catalog?.entry(forKey: find.store)?.name ?? find.store,
+                              currencyCode: model.region.currencyCode)
             }
         }
         .frame(maxWidth: .infinity)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+    }
+}
+
+private struct PriceFindCard: View {
+    let find: PriceUpdateService.PriceFind
+    let storeName: String
+    let currencyCode: String
+
+    private var amount: String {
+        let price = find.amount.formatted(.currency(code: currencyCode))
+        return switch find.unit {
+        case .kilogram: "\(price)/kg"
+        case .liter: "\(price)/l"
+        case .piece: "\(price)/Stk."
+        case nil: price
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            HStack {
+                Label(find.kind == .observedDiscount ? "Gemeldeter Angebotspreis" : "Preisführer", systemImage: "tag.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.green)
+                Spacer()
+                if let discount = find.discountPercent {
+                    Text("−\(discount) %")
+                        .font(.caption.bold())
+                        .foregroundStyle(.green)
+                }
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(find.title).font(.headline).lineLimit(2)
+                    Text(storeName).font(.subheadline).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 4)
+                Text(amount).font(.headline.monospacedDigit())
+            }
+            HStack {
+                Group {
+                    if find.kind == .observedDiscount {
+                        Text("Open Prices · gesehen am \(find.date)")
+                    } else {
+                        Text("Open Prices · Daten bis \(find.date)")
+                    }
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                Spacer()
+                if let url = find.sourceURL { Link("Beleg", destination: url).font(.caption) }
+            }
+            Text("Community-Meldung · Preis vor Ort prüfen")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+        }
+        .padding(15)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 18))
+        .accessibilityElement(children: .combine)
     }
 }
 

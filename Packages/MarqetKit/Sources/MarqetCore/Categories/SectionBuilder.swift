@@ -43,9 +43,10 @@ public enum SectionBuilder {
         ordering: Ordering = Ordering()
     ) -> [CardSection] {
         guard !items.isEmpty else { return [] }
-        // Unsorted card and non-grocery stores (drugstore, hardware …): one flat list, oldest first.
+        // Unsorted card and non-grocery stores (drugstore, hardware …): one flat list, oldest first –
+        // unless the user dragged items into an order.
         guard let storeType, storeType.showsCategorySections else {
-            return [CardSection(category: nil, items: items)]
+            return [CardSection(category: nil, items: flatItems(items, ordering.itemPositions))]
         }
 
         var grouped: [ItemCategory: [ShoppingItem]] = [:]
@@ -71,6 +72,23 @@ public enum SectionBuilder {
                 return l == r ? lhs.offset < rhs.offset : l < r
             }
             .map(\.element)
+    }
+
+    /// Flat lists follow only manual positions (a drag); learned walking order is for category
+    /// sections. Items without one keep insertion order after the dragged ones (newest last).
+    static func flatItems(_ items: [ShoppingItem], _ positions: [String: OrderPosition]?) -> [ShoppingItem] {
+        guard let positions, positions.values.contains(where: \.isManual) else { return items }
+        let indexed = items.enumerated().map { offset, item in
+            (offset: offset, item: item, position: positions[ItemKeyNormalizer.matchingKey(for: item.title)].flatMap { $0.isManual ? $0.value : nil })
+        }
+        return indexed.sorted { lhs, rhs in
+            switch (lhs.position, rhs.position) {
+            case let (l?, r?) where l != r: l < r
+            case (_?, nil): true
+            case (nil, _?): false
+            default: lhs.offset < rhs.offset
+            }
+        }.map(\.item)
     }
 
     /// With positions: unknown items first (so their place gets learned), then by position.

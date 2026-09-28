@@ -1,4 +1,14 @@
 {
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
   "identifier" : "8F1C2A4B",
   "nonRenewingSubscriptions" : [
 
@@ -26,19 +36,31 @@
     }
   ],
   "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingGracePeriodEnabled" : false,
+    "_billingIssuesEnabled" : false,
     "_developerTeamID" : "C4VHG63LL9",
+    "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
     "_locale" : "de",
+    "_renewalBillingIssuesEnabled" : false,
     "_storefront" : "DEU",
     "_storeKitErrors" : [
 
-    ]
+    ],
+    "_timeRate" : 0
   },
+  "subscriptionBundleGroups" : [
+
+  ],
   "subscriptionGroups" : [
 
   ],
+  "subscriptionSuiteGroups" : [
+
+  ],
   "version" : {
-    "major" : 4,
-    "minor" : 0
+    "major" : 6,
+    "minor" : 3
   }
 }

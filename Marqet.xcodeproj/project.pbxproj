@@ -21,6 +21,7 @@
 		0C4B737D639C78F40B12A00C /* HingeObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40A378B97FDB657C2F6FDAF /* HingeObserver.swift */; };
 		0F02B258C95A18D427FE79E7 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B372A2D0943D18B723FDD2F /* PaywallView.swift */; };
 		0FFDCC78B7EBBA1E52D5E44E /* ListPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4B2E6DC8B0FA9574E65C3A4 /* ListPickerView.swift */; };
+		116E38203F203243457E69DA /* PriceHintViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DFB7B0E52C353A77BC15ADC /* PriceHintViews.swift */; };
 		11A89A6712D7807E809F0C20 /* StorePager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8662B64170332932ED37FE06 /* StorePager.swift */; };
 		1894910664A05EB40EFBD368 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E7161CE333347F853CDAB6 /* OnboardingFlow.swift */; };
 		19B647351CF7F900C9AD680D /* StoreBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23B92F2AB1F42A1299049632 /* StoreBadge.swift */; };
@@ -39,6 +40,7 @@
 		34BC3E34CA657B3B9360D0A4 /* LoyaltyCardsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D319615B6B47ECB5A1C3135 /* LoyaltyCardsSection.swift */; };
 		35A81383490972E451FF5ADD /* Marqet.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F618F2863408E4DA34E045C7 /* Marqet.storekit */; };
 		38B193C69F2E7033A3EA453F /* TriageScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C36556FC45F2FFF3189F223 /* TriageScreen.swift */; };
+		3D1F18A32FF486FDB9FF37C1 /* PriceUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29EA4F090DB87D01EF8254FD /* PriceUpdateService.swift */; };
 		403ECFB3302A546326B500BF /* BarcodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B1750AD8E04F3D150D2585 /* BarcodeScanner.swift */; };
 		422DEA2467FDF2B9463BD0D5 /* OnboardingIllustrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DB228848F927EA9D433E5CB /* OnboardingIllustrations.swift */; };
 		43852650623644900D5CAD58 /* StoreLogos.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF1BD0E52D1F0B9FAEAE9050 /* StoreLogos.xcassets */; };
@@ -187,6 +189,7 @@
 		272464385F86F4053729F36E /* AppModel+Categories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Categories.swift"; sourceTree = "<group>"; };
 		27499D7335CBDA7C48845546 /* MapCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCard.swift; sourceTree = "<group>"; };
 		29E85784FD14BC5F264AC43A /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		29EA4F090DB87D01EF8254FD /* PriceUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceUpdateService.swift; sourceTree = "<group>"; };
 		2CD3044CC8DBA6E48095569D /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		2E8FE7EDAB15B74F7A7EB6D6 /* LoyaltyCardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyCardScreen.swift; sourceTree = "<group>"; };
 		3232F1F1E443A03B56471E70 /* IntentActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentActions.swift; sourceTree = "<group>"; };
@@ -230,6 +233,7 @@
 		83304CA2FC74B1B5938C18CC /* MarqetWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqetWidgetsBundle.swift; sourceTree = "<group>"; };
 		8662B64170332932ED37FE06 /* StorePager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorePager.swift; sourceTree = "<group>"; };
 		8C87F96738EA1D930F698375 /* LoyaltyCardEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoyaltyCardEditor.swift; sourceTree = "<group>"; };
+		8DFB7B0E52C353A77BC15ADC /* PriceHintViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceHintViews.swift; sourceTree = "<group>"; };
 		91E00936ACABDB675C75DD98 /* WidgetRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetRenderTests.swift; sourceTree = "<group>"; };
 		91F82A82FCE2B27EA7F8AB97 /* ShoppingTripLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingTripLiveActivity.swift; sourceTree = "<group>"; };
 		926CFED7B1EE0E0F3637C5C4 /* BrochureShelf.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrochureShelf.swift; sourceTree = "<group>"; };
@@ -353,6 +357,7 @@
 		3605656B5F37830E10631533 /* Triage */ = {
 			isa = PBXGroup;
 			children = (
+				8DFB7B0E52C353A77BC15ADC /* PriceHintViews.swift */,
 				6C36556FC45F2FFF3189F223 /* TriageScreen.swift */,
 			);
 			path = Triage;
@@ -440,6 +445,14 @@
 				D855A0E770123156BA8F7DEF /* PurchaseManager.swift */,
 			);
 			path = Purchases;
+			sourceTree = "<group>";
+		};
+		7DD84F7325C6331104BE6C56 /* Prices */ = {
+			isa = PBXGroup;
+			children = (
+				29EA4F090DB87D01EF8254FD /* PriceUpdateService.swift */,
+			);
+			path = Prices;
 			sourceTree = "<group>";
 		};
 		899114B40C8AC50F09399B43 /* Intelligence */ = {
@@ -627,6 +640,7 @@
 			children = (
 				899114B40C8AC50F09399B43 /* Intelligence */,
 				B30D5FE1F38644EFCB3CFE01 /* Places */,
+				7DD84F7325C6331104BE6C56 /* Prices */,
 				71E8C15ADF443F2ACDC4C5BB /* Purchases */,
 				057717E3482B745313391D48 /* Voice */,
 				E1307A62E7A8438BBB670A5B /* Widgets */,
@@ -892,6 +906,8 @@
 				A9D51BC9D4221685CADD44F0 /* PlaceSearch.swift in Sources */,
 				43DE49B84637E2AEB86484AB /* PlacesStrings.swift in Sources */,
 				EF0DE1012AD37339EB0509DF /* PresenceMonitor.swift in Sources */,
+				116E38203F203243457E69DA /* PriceHintViews.swift in Sources */,
+				3D1F18A32FF486FDB9FF37C1 /* PriceUpdateService.swift in Sources */,
 				C594E2C33B9AE802CC6F55FD /* ProfileView.swift in Sources */,
 				ADE2EE53C34E3F9D2493582C /* PurchaseManager.swift in Sources */,
 				88167E848566A767ED3889AC /* RootView.swift in Sources */,

@@ -50,6 +50,7 @@ struct TriageScreen: View {
                 AddStoreSheet(opensComposer: false).leadingSheetPlacement()
             }
         }
+        .task { Task { await model.refreshPrices() } }
     }
 
     @ToolbarContentBuilder
@@ -141,6 +142,11 @@ private struct ItemCardView: View {
             Label(model.category(of: item).displayName, systemImage: model.category(of: item).symbol)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+            if let hint = model.priceHint(for: item) {
+                PriceHintLine(hint: hint)
+                    .font(.footnote.weight(.medium))
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 140)
         .padding(20)
@@ -157,24 +163,30 @@ private struct StoreTileGrid: View {
     var body: some View {
         let item = model.triageQueue.first
         let highlighted = item.flatMap(model.suggestion(for:))
+        let prices = item.flatMap(model.priceHint(for:))
         VStack(spacing: 10) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 84, maximum: 140), spacing: 10)], spacing: 10) {
                 ForEach(model.sortedStores) { store in
                     let suggestion = highlighted?.storeID == store.id ? highlighted : nil
+                    let price = prices?.price(of: store.id)
+                    let isCheapest = prices?.isCheapest(store.id) == true
                     Button {
                         guard let item else { return }
                         Task { await model.triageAssign(item, to: store) }
                     } label: {
+                        // A habit keeps its label; otherwise the tile shows the price (tag on the cheapest).
+                        let showsLabel = suggestion != nil && (suggestion?.source != .price || price == nil)
                         StoreTile(
                             store: store,
-                            caption: suggestion?.label,
-                            captionSymbol: suggestion?.symbol,
+                            caption: showsLabel ? suggestion?.label : price?.shortText,
+                            captionSymbol: showsLabel ? suggestion?.symbol : (isCheapest ? "tag.fill" : nil),
                             highlight: suggestion == nil ? nil : store.readableColor,
                             fill: Color(.secondarySystemGroupedBackground)
                         )
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint(suggestion == nil ? "" : String(localized: "Vorschlag"))
+                    .accessibilityValue(price?.displayText ?? "")
                 }
             }
 
@@ -186,6 +198,9 @@ private struct StoreTileGrid: View {
                 SecondaryTriageButton(title: "Laden hinzufügen", symbol: "plus") {
                     showsAddStore = true
                 }
+            }
+            if prices != nil {
+                OpenPricesAttribution()
             }
         }
     }
@@ -214,6 +229,7 @@ extension StoreSuggestion {
         switch source {
         case .learned, .similar: String(localized: "Wie zuletzt")
         case .intelligence, .storeType: String(localized: "Vorschlag")
+        case .price: String(localized: "Am günstigsten")
         }
     }
 
@@ -221,6 +237,7 @@ extension StoreSuggestion {
         switch source {
         case .learned, .similar: "arrow.counterclockwise"
         case .intelligence, .storeType: "sparkles"
+        case .price: "tag.fill"
         }
     }
 }
@@ -268,6 +285,9 @@ private struct TriageOverview: View {
 
                 SecondaryTriageButton(title: "Laden hinzufügen", symbol: "plus") {
                     showsAddStore = true
+                }
+                if model.triageQueue.contains(where: { model.priceHint(for: $0) != nil }) {
+                    OpenPricesAttribution()
                 }
             }
             .padding(16)
@@ -318,9 +338,20 @@ private struct OverviewRow: View {
                 Text(item.title)
                     .foregroundStyle(.primary)
                 if let suggestion, let store = model.store(suggestion.storeID) {
-                    Label("\(suggestion.label): \(store.name)", systemImage: suggestion.symbol)
+                    // A price suggestion names store and price: "🏷 Lidl · 0,95 €/l".
+                    let price = suggestion.source == .price ? model.priceHint(for: item)?.price(of: store.id) : nil
+                    Label(price.map { "\(store.name) · \($0.shortText)" } ?? "\(suggestion.label): \(store.name)",
+                          systemImage: suggestion.symbol)
                         .font(.caption)
                         .foregroundStyle(store.readableColor)
+                        .lineLimit(1)
+                }
+                // A habit or Apple Intelligence stays; the cheapest store is named below it.
+                if suggestion?.source != .price, let cheapest = model.priceHint(for: item)?.cheapest,
+                   let store = model.store(cheapest.storeID) {
+                    Label("\(store.name) · \(cheapest.price.shortText)", systemImage: "tag")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
             }

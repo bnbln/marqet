@@ -13,7 +13,10 @@ struct MarqetApp: App {
         #if DEBUG
         // `-demo`: in-memory data for screenshots and simulator checks without Reminders access.
         if ProcessInfo.processInfo.arguments.contains("-demo") {
-            let model = AppModel.demo(isPro: ProcessInfo.processInfo.arguments.contains("-pro"))
+            // `-demo-prices`: an unsorted grocery list across chains with Open Prices (docs/OFFENE-DATEN.md).
+            let model = ProcessInfo.processInfo.arguments.contains("-demo-prices")
+                ? AppModel.pricesDemo()
+                : AppModel.demo(isPro: ProcessInfo.processInfo.arguments.contains("-pro"))
             model.sharesWithWidgets = true
             // `-demo-arrival`: arrival alerts on, for geofence checks with `simctl location`.
             if ProcessInfo.processInfo.arguments.contains("-demo-arrival") { model.arrivalAlertsEnabled = true }

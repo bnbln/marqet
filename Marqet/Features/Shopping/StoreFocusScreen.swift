@@ -59,10 +59,12 @@ struct StoreFocusScreen: View {
                 .toolbar { if showsSystemBar { systemToolbar } }
                 .toolbar(showsSystemBar ? .automatic : .hidden, for: .navigationBar)
                 .toolbarBackground(headerColor, for: .navigationBar)
-                .toolbarBackground(showsSystemBar ? .visible : .hidden, for: .navigationBar)
+                // Split: the header gradient already runs under the bar (Duo). A solid bar on top
+                // of it left a darker strip with a visible edge where the gradient lightens.
+                .toolbarBackground(showsSystemBar && !isSplit ? .visible : .hidden, for: .navigationBar)
                 // Bar buttons and status bar sit on the brand color: take their light or dark
                 // variant from it, like the header text (white on Aldi, black on yellow chains).
-                .toolbarColorScheme(isSplit ? nil : headerColorScheme, for: .navigationBar)
+                .toolbarColorScheme(isSplit && !hinge.hasHinge ? nil : headerColorScheme, for: .navigationBar)
                 .toolbarVerticalCompressionPreferringItems()
         }
         // As on Home: the stack would otherwise reset the tint to the app accent.
@@ -111,6 +113,19 @@ struct StoreFocusScreen: View {
                 }
             }
             .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
+            .overlay(alignment: .top) {
+                // Duo outer display: no status bar, and the bar sits 24 pt below the top edge with
+                // its background starting 10 pt above it. The strip above stayed white. Fill from
+                // the top edge to the bar's bottom, over list rows scrolling under the bar.
+                if !usesSplit, showsSystemBar {
+                    headerColor
+                        .frame(height: proxy.safeAreaInsets.top)
+                        .offset(y: -proxy.safeAreaInsets.top)
+                        .ignoresSafeArea(edges: .horizontal)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+            }
             .overlay(alignment: .bottom) {
                 if model.editingItemID != nil {
                     editingCloseButton

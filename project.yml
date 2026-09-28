@@ -61,9 +61,9 @@ targets:
         NSCameraUsageDescription: Marqet scannt mit der Kamera den Barcode deiner Kundenkarten. Die Bilder verlassen dein Gerät nicht.
         NSMicrophoneUsageDescription: Marqet hört zu, wenn du deine Einkäufe einsprichst. Die Aufnahme wird auf deinem Gerät in Text umgewandelt und nicht gespeichert.
         NSSpeechRecognitionUsageDescription: Marqet wandelt deine eingesprochenen Einkäufe auf deinem Gerät in Einträge für deine Listen um.
-        NSLocationWhenInUseUsageDescription: Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.
+        NSLocationWhenInUseUsageDescription: Marqet zeigt Filialen in deiner Nähe und sortiert Läden nach Entfernung. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices.
         # Arrival alerts (KONZEPT-WIDGETS §13): geofences around branches, only after opting in.
-        NSLocationAlwaysAndWhenInUseUsageDescription: Marqet meldet sich, wenn du an einem deiner Läden ankommst, und zeigt dann dessen Einkaufsliste. Dein Standort bleibt auf deinem Gerät.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Marqet meldet sich bei deinen Läden und zeigt deren Einkaufsliste. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices.
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false

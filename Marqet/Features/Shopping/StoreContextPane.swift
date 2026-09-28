@@ -48,7 +48,7 @@ struct StoreContextPane: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(store.readableColor)
                     Spacer()
-                    Button("Karte") { showsMap = true }
+                    Button("In der Nähe") { showsMap = true }
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.primary)
                 }

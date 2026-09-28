@@ -11,6 +11,8 @@ public struct StoreSuggestion: Hashable, Sendable {
         case intelligence
         /// Category → store type heuristic (Pro fallback without Apple Intelligence).
         case storeType
+        /// Cheapest of the user's stores by Open Prices (docs/OFFENE-DATEN.md §4).
+        case price
     }
 
     public enum Confidence: Int, Comparable, Sendable {

@@ -70,6 +70,13 @@
     { "key": "aldi-suisse", "name": "Aldi Suisse", "aliases": ["ALDI SUISSE"], "regions": ["CH"], "type": "discounter", "color": "#243C8C", "monogram": "A", "mapSearchTerms": ["ALDI SUISSE"] },
     { "key": "volg", "name": "Volg", "aliases": ["VOLG"], "regions": ["CH"], "type": "supermarket", "color": "#D8232A", "monogram": "V", "mapSearchTerms": ["Volg"] },
     { "key": "manor", "name": "Manor", "aliases": ["MANOR"], "regions": ["CH"], "type": "department", "color": "#B51F2E", "monogram": "M", "mapSearchTerms": ["Manor"] },
+    { "key": "amazon", "name": "Amazon", "aliases": ["amazon.de", "Amazon Prime", "Amazon Fresh"], "regions": ["DE", "AT", "CH"], "type": "online", "color": "#232F3E", "monogram": "a" },
+    { "key": "zalando", "name": "Zalando", "aliases": ["zalando.de"], "regions": ["DE", "AT", "CH"], "type": "online", "color": "#E4570F", "monogram": "Z" },
+    { "key": "otto", "name": "Otto", "aliases": ["OTTO", "otto.de"], "regions": ["DE", "AT"], "type": "online", "color": "#D52B1E", "monogram": "O" },
+    { "key": "ebay", "name": "eBay", "aliases": ["ebay.de"], "regions": ["DE", "AT", "CH"], "type": "online", "color": "#2F5FC7", "monogram": "e" },
+    { "key": "about-you", "name": "About You", "aliases": ["ABOUT YOU", "aboutyou"], "regions": ["DE", "AT", "CH"], "type": "online", "color": "#1C1C1C", "monogram": "AY" },
+    { "key": "galaxus", "name": "Galaxus", "aliases": ["Digitec", "Digitec Galaxus"], "regions": ["DE", "AT", "CH"], "type": "online", "color": "#1F4E9E", "monogram": "G" },
+    { "key": "picnic", "name": "Picnic", "aliases": ["PICNIC"], "regions": ["DE"], "type": "online", "color": "#D81E3F", "monogram": "P" },
 
     { "key": "generic-market", "name": "Markt", "aliases": ["Wochenmarkt", "Bauernmarkt", "Market", "Farmers market", "Farmer's market"], "regions": ["DE", "AT", "CH"], "type": "market", "color": "#3B7A2C", "symbol": "carrot.fill" },
     { "key": "generic-bakery", "name": "Bäcker", "aliases": ["Bäckerei", "Baecker", "Baeckerei", "Beck", "Bakery", "Baker"], "regions": ["DE", "AT", "CH"], "type": "bakery", "color": "#A8733A", "symbol": "birthday.cake.fill" },

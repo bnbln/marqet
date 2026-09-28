@@ -76,6 +76,8 @@ struct ShoppingScreen: View {
                         Group {
                             if focused.page == .map {
                                 MapScreen()
+                            } else if focused.page == .brochures {
+                                BrochuresScreen()
                             } else {
                                 StoreFocusScreen(page: focused.page, hinge: hinge)
                             }

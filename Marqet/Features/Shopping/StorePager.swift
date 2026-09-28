@@ -58,6 +58,10 @@ struct StorePager: View {
                 if isUserScrolling { swipeFeedback += 1 }
                 let visible = Set(SpreadLayout.visiblePages(leadingIndex: clamped(index, in: content), content: content, slots: metrics.slots))
                 if model.visiblePages != visible { model.visiblePages = visible }
+                // Known gap: the page indicator's active dot used to move only once the swipe
+                // ended, visibly lagging the finger. Follow the drag (and fling) live; the phase
+                // end below still fires once more so programmatic/layout scrolls settle too.
+                if isUserScrolling { adoptScrolledPage(content: content, metrics: metrics) }
             }
             // How far the pager is from the inbox toward the next card – the briefing follows it.
             .onScrollGeometryChange(for: Double.self) { geometry in
@@ -68,6 +72,8 @@ struct StorePager: View {
                 if model.briefing != nil { model.briefingProgress = progress }
             }
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+            // The card under a dragged item holds still – items only move inside their store.
+            .scrollDisabled(model.isDraggingItem)
             .scrollIndicators(.hidden)
             .scrollClipDisabled()
             // The scroll view is narrower than the screen; its edge effect would draw a box under the bar.
@@ -267,7 +273,7 @@ struct PageIndicator: View {
 
     private func label(for page: PageID) -> String {
         switch page {
-        case .map: String(localized: "Karte")
+        case .map: String(localized: "In der Nähe")
         case .brochures: String(localized: "Angebote")
         case .unsorted: String(localized: "Inbox")
         case .more: String(localized: "Weitere Läden")

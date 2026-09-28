@@ -43,9 +43,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Marqet scannt mit der Kamera den Barcode deiner Kundenkarten. Die Bilder verlassen dein Gerät nicht.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Marqet meldet sich, wenn du an einem deiner Läden ankommst, und zeigt dann dessen Einkaufsliste. Dein Standort bleibt auf deinem Gerät.</string>
+	<string>Marqet meldet sich bei deinen Läden und zeigt deren Einkaufsliste. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.</string>
+	<string>Marqet zeigt Filialen in deiner Nähe und sortiert Läden nach Entfernung. Für lokale Preisfunde sendet Marqet nur eine grob gerundete Position an Open Prices.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Marqet hört zu, wenn du deine Einkäufe einsprichst. Die Aufnahme wird auf deinem Gerät in Text umgewandelt und nicht gespeichert.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>

@@ -34,6 +34,8 @@ final class AppModel {
     /// Last deleted item, for the undo toast right after swipe-to-delete. Separate from
     /// `lastUndoAction` so a later, unrelated action doesn't make the toast undo the wrong thing.
     var recentDeletion: ShoppingItem?
+    /// An item is being dragged inside its card: the pager holds still (iOS 27 reports the drag).
+    var isDraggingItem = false
     @ObservationIgnored private var isUndoing = false
     var showsCompleted = false
     var hasLoadedItems = false
@@ -87,6 +89,15 @@ final class AppModel {
     @ObservationIgnored var sessionTracker = ShoppingSessionTracker()
     /// Apple Intelligence store suggestions per item key (Pro), filled before triage.
     var intelligentSuggestions: [String: Store.ID] = [:]
+
+    // MARK: Open Prices
+
+    @ObservationIgnored var priceUpdates = PriceUpdateService.Cache.load()
+    @ObservationIgnored var queuedPriceTags: Set<String> = []
+    @ObservationIgnored var failedPriceChecks: [String: Date] = [:]
+    var priceRevision = 0
+    var isRefreshingPrices = false
+    var priceRefreshError: String?
 
     // MARK: Voice (KONZEPT §3)
 

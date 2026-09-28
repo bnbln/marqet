@@ -137,6 +137,44 @@ struct AppModelTests {
         #expect(model.sections(for: page, items: model.deck.items(on: page)).map(\.category) == [.beverages, .dairyEggs, .produce])
     }
 
+    @Test func reorderingStoresByHandSwitchesToManualOrder() async throws {
+        let model = try await makeModel()
+        _ = try catalogStore(model, "aldi-sued")
+        _ = try catalogStore(model, "dm")
+        model.storeSortMode = .smart
+        model.moveStores(from: IndexSet(integer: 1), to: 0)
+        #expect(model.storeSortMode == .manual)
+        #expect(model.storeOrderSnapshot == nil)
+    }
+
+    @Test func draggingItemsReordersAndChangesCategory() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Aldi Süd"), ("Joghurt", "🛒 Aldi Süd"), ("Bananen", "🛒 Aldi Süd")])
+        let aldi = try #require(model.stores.first)
+        let page = PageID.store(aldi.id)
+        func sections() -> [CardSection] { model.sections(for: page, items: model.deck.items(on: page)) }
+        func item(_ title: String) throws -> ShoppingItem { try #require(model.items.first { $0.title == title }) }
+        #expect(sections().map { $0.items.map(\.title) } == [["Bananen"], ["Joghurt", "Milch"]])
+
+        // Within a section: Milch before Joghurt – also for Free, without route learning.
+        model.arrangeItem(try item("Milch"), into: .dairyEggs, order: [try item("Milch"), try item("Joghurt")], in: aldi.id)
+        #expect(sections().map { $0.items.map(\.title) } == [["Bananen"], ["Milch", "Joghurt"]])
+
+        // Into another section: Joghurt lands behind Bananen and takes the category.
+        model.arrangeItem(try item("Joghurt"), into: .produce, order: [try item("Bananen"), try item("Joghurt")], in: aldi.id)
+        #expect(sections().map { $0.items.map(\.title) } == [["Bananen", "Joghurt"], ["Milch"]])
+        #expect(model.category(of: try item("Joghurt")) == .produce)
+    }
+
+    @Test func draggingIgnoresItemsOfOtherStores() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Aldi Süd"), ("Zahnpasta", "🛒 dm")])
+        let aldi = try #require(model.stores.first { $0.catalogKey == "aldi-sued" })
+        let toothpaste = try #require(model.items.first { $0.title == "Zahnpasta" })
+        let before = model.category(of: toothpaste)
+        model.arrangeItem(toothpaste, into: .dairyEggs, order: [toothpaste], in: aldi.id)
+        #expect(model.items.first { $0.title == "Zahnpasta" }?.storeID != aldi.id)
+        #expect(model.category(of: toothpaste) == before)
+    }
+
     // MARK: M4 – triage
 
     @Test func triageAssignUndoAndSummary() async throws {

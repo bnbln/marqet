@@ -24,7 +24,10 @@ struct StoreCard: View {
     @State private var revealLoadedContent = false
     @State private var hasShownSkeleton = false
     @State private var skeletonPulse = false
+    /// Top edge of each category title row in the list, for the pinned title.
+    @State private var titleOffsets: [ItemCategory: CGFloat] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.horizontalSizeClass) private var sizeClass
     private var showsTriageFooter: Bool { store == nil && !items.isEmpty && !isExpanded }
 
     private var tint: Color { store?.color ?? .gray }
@@ -65,8 +68,10 @@ struct StoreCard: View {
             }
         }
         .modifier(CardZoomSource(page: page, namespace: isExpanded ? nil : zoomNamespace))
-        // Items dragged from another card move to this store (KONZEPT-DUO-IPAD §4.2).
+        // iPad and the open Duo: items dragged from another card move to this store
+        // (KONZEPT-DUO-IPAD §4.2). On the iPhone a drag stays inside its store.
         .dropDestination(for: String.self) { ids, _ in
+            guard sizeClass == .regular else { return false }
             let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store?.id }
             guard !moved.isEmpty else { return false }
             Task { for item in moved { await model.assign(item, to: store) } }
@@ -83,6 +88,11 @@ struct StoreCard: View {
                 }
             } else {
                 revealLoadedContent = true
+            }
+        }
+        .task(id: model.activePage == page || isExpanded) {
+            if store != nil && (model.activePage == page || isExpanded) {
+                Task { await model.refreshPrices(for: items) }
             }
         }
     }
@@ -166,56 +176,59 @@ struct StoreCard: View {
                             .listRowSeparator(.hidden)
                     }
                 } else {
-                    // Category sections in walking order for grocery stores, one flat list otherwise (KONZEPT §6.3).
-                    ForEach(model.sections(for: page, items: items)) { section in
-                        Section {
-                            ForEach(Array(section.items.enumerated()), id: \.element.id) { index, item in
-                                ItemRow(item: item, tint: readableTint)
-                                    .opacity(revealLoadedContent ? 1 : 0)
-                                    .offset(y: revealLoadedContent ? 0 : 8)
-                                    .animation(reduceMotion ? nil : .smooth(duration: 0.42).delay(Double(min(index, 8)) * 0.045), value: revealLoadedContent)
-                                    .listRowBackground(Color(.secondarySystemGroupedBackground))
-                                    .listRowSeparator(.visible, edges: .bottom)
-                                    .listRowSeparatorTint(Color(.separator).opacity(0.4))
-                                    .id(item.id)
-                                    // Known-gap fix: drag to reorder within a section (Free:
-                                    // alphabetical, Pro: walking order – both now start from a
-                                    // manual drag). Dropping on another store's card still moves
-                                    // it there; the category itself only changes via the menu.
-                                    .dropDestination(for: String.self) { ids, _ in
-                                        guard let store, let draggedID = ids.first, draggedID != item.id,
-                                              let dragged = model.items.first(where: { $0.id == draggedID }),
-                                              dragged.storeID == store.id,
-                                              model.category(of: dragged) == model.category(of: item)
-                                        else { return false }
-                                        model.reorderItem(dragged, before: item, in: section.items)
-                                        return true
-                                    }
-                            }
-                        } header: {
-                            if let category = section.category {
-                                Label(category.displayName, systemImage: category.symbol)
-                                    .font(.subheadline.weight(.semibold))
-                                    .textCase(nil)
-                                    .foregroundStyle(readableTint)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    // Pinned while scrolling: an opaque band, so rows never
-                                    // show through the section title.
-                                    .background {
-                                        Color(.secondarySystemGroupedBackground)
-                                            .padding(.horizontal, -40)
-                                            // UIKit leaves a fractional top inset around pinned
-                                            // plain-list headers. Cover it before a row can peek through.
-                                            .padding(.top, -12)
-                                            .padding(.bottom, -8)
-                                    }
-                            }
+                    // Category sections in walking order for grocery stores, one flat list otherwise
+                    // (KONZEPT §6.3). One run of rows with the titles as rows: the list's own
+                    // reordering then carries an item past a title into another category, and
+                    // the other rows make room while the finger moves (KONZEPT #55). The current
+                    // title is pinned on top by `pinnedTitle`.
+                    let lines = CardLine.lines(of: model.sections(for: page, items: items))
+                    ForEach(lines) { line in
+                        switch line {
+                        case .header(let category):
+                            titleLabel(category)
+                                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .bottomLeading)
+                                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                                .listRowBackground(Color(.secondarySystemGroupedBackground))
+                                .listRowSeparator(.hidden)
+                                .moveDisabled(true)
+                                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.listSpace)).minY } action: { minY in
+                                    titleOffsets[category] = minY
+                                }
+                                .onDisappear { titleOffsets[category] = nil }
+                        case .item(let item, let index):
+                            ItemRow(item: item, tint: readableTint)
+                                .opacity(revealLoadedContent ? 1 : 0)
+                                .offset(y: revealLoadedContent ? 0 : 8)
+                                .animation(reduceMotion ? nil : .smooth(duration: 0.42).delay(Double(min(index, 8)) * 0.045), value: revealLoadedContent)
+                                .listRowBackground(Color(.secondarySystemGroupedBackground))
+                                .listRowSeparator(.visible, edges: .bottom)
+                                // No line between a title and its first item.
+                                .listRowSeparator(.hidden, edges: .top)
+                                .listRowSeparatorTint(Color(.separator).opacity(0.4))
+                                // The drag of the list's reordering; side by side it can also
+                                // leave the list for another card.
+                                .itemProvider { NSItemProvider(object: item.id as NSString) }
                         }
+                    }
+                    // Hold and drag: the other rows make room, the item takes its place on drop;
+                    // below another title it takes that category. Not in the inbox.
+                    .onMove(perform: store == nil ? nil : { source, destination in
+                        guard let store, let placement = CardLine.placement(afterMoving: source, to: destination, in: lines) else { return }
+                        model.arrangeItem(placement.item, into: placement.category, order: placement.order, in: store.id)
+                    })
+                    // An item from another card (iPad, open Duo, KONZEPT-DUO-IPAD §4.2).
+                    .dropDestination(for: String.self) { ids, _ in
+                        guard sizeClass == .regular, let store else { return }
+                        let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store.id }
+                        Task { for item in moved { await model.assign(item, to: store) } }
                     }
                 }
                 completedSection
             }
             .listStyle(.plain)
+            .coordinateSpace(.named(Self.listSpace))
+            .overlay(alignment: .top) { pinnedTitle.clipped() }
+            .modifier(DragSessionTracker())
             .scrollContentBackground(.hidden)
             // The pinned section titles carry their own opaque band. The top edge effect would
             // tint them with the bar's color scheme (black under a dark brand color).
@@ -261,6 +274,42 @@ struct StoreCard: View {
                     withAnimation(.smooth) { proxy.scrollTo(id) }
                 }
             }
+        }
+    }
+
+    // MARK: Category titles
+
+    static let titleHeight: CGFloat = 40
+    static let listSpace = "cardList"
+
+    /// Icon and title close together, like a section header – a `Label` in a list row would get
+    /// the row's wide icon column.
+    private func titleLabel(_ category: ItemCategory) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: category.symbol)
+            Text(category.displayName)
+        }
+        .font(.subheadline.weight(.semibold))
+        .foregroundStyle(readableTint)
+        .padding(.bottom, 6)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    /// The title of the section under the top edge, pinned like a list section header – pushed
+    /// up by the next title as it arrives. The titles themselves are rows (see `itemList`).
+    @ViewBuilder
+    private var pinnedTitle: some View {
+        if let current = titleOffsets.filter({ $0.value <= 0.5 }).max(by: { $0.value < $1.value }) {
+            let next = titleOffsets.values.filter { $0 > 0.5 }.min() ?? .infinity
+            titleLabel(current.key)
+                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .bottomLeading)
+                .padding(.horizontal, 20)
+                // An opaque band, so rows never show through the title.
+                .background(Color(.secondarySystemGroupedBackground))
+                .offset(y: min(0, next - Self.titleHeight))
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
     }
 
@@ -547,7 +596,7 @@ struct StoreActionsMenu<MenuLabel: View>: View {
                 } else if !items.isEmpty {
                     Button("Einkauf starten", systemImage: "cart") { Task { await model.startTrip(at: store.id) } }
                 }
-                Button("Karte", systemImage: "map") { showsMap = true }
+                Button("In der Nähe", systemImage: "map") { showsMap = true }
                 Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
                 if store.type.showsCategorySections {
                     Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
@@ -695,9 +744,15 @@ struct ItemRow: View {
         .sensoryFeedback(trigger: item.isCompleted) { old, new in
             !old && new ? .impact(weight: .heavy, intensity: 0.9) : nil
         }
-        .draggable(item.id)
         .contextMenu {
+            #if DEBUG
+            // `-no-item-menu`: synthesized simulator touches cannot turn the menu into a drag.
+            if !ProcessInfo.processInfo.arguments.contains("-no-item-menu") {
+                ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+            }
+            #else
             ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+            #endif
         }
         .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
@@ -783,6 +838,27 @@ private struct ItemTitleParts {
 }
 
 /// Card look in the pager, edge-to-edge surface full screen.
+/// Reports an item drag to the model, so the pager does not page while the finger moves an item
+/// (iOS 27: drag sessions are observable; before, the pager stays as it is).
+private struct DragSessionTracker: ViewModifier {
+    @Environment(AppModel.self) private var model
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27.0, *) {
+            content.onDragSessionUpdated { session in
+                switch session.phase {
+                case .initial, .active:
+                    if !model.isDraggingItem { model.isDraggingItem = true }
+                default:
+                    if model.isDraggingItem { model.isDraggingItem = false }
+                }
+            }
+        } else {
+            content
+        }
+    }
+}
+
 private struct CardChrome: ViewModifier {
     let isExpanded: Bool
     let glowColor: Color?

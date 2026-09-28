@@ -28,6 +28,22 @@ struct RouteLearnerTests {
         #expect(abs(position.value - (1.0 / 3 * 0.7 + 0.3)) < 0.0001)
     }
 
+    @Test func flatListsFollowOnlyManualPositionsAndKeepNewItemsLast() {
+        let items = ["Zahnpasta", "Duschgel", "Shampoo", "Watte"].map { ShoppingItem(id: $0, title: $0) }
+        let positions: [String: OrderPosition] = [
+            ItemKeyNormalizer.matchingKey(for: "Shampoo"): OrderPosition(value: 0, samples: 1, isManual: true),
+            ItemKeyNormalizer.matchingKey(for: "Zahnpasta"): OrderPosition(value: 1, samples: 1, isManual: true),
+            // Learned, not dragged: a flat list ignores it.
+            ItemKeyNormalizer.matchingKey(for: "Watte"): OrderPosition(value: 0.5, samples: 3),
+        ]
+        let sections = SectionBuilder.sections(items: items, storeType: .drugstore, category: { _ in .other },
+                                               ordering: .init(itemPositions: positions))
+        #expect(sections.first?.items.map(\.title) == ["Shampoo", "Zahnpasta", "Duschgel", "Watte"])
+        // No manual position at all: insertion order as before.
+        let untouched = SectionBuilder.sections(items: items, storeType: .drugstore, category: { _ in .other })
+        #expect(untouched.first?.items.map(\.title) == ["Zahnpasta", "Duschgel", "Shampoo", "Watte"])
+    }
+
     @Test func manualPositionsMoveHalfAsFast() {
         let manual = OrderPosition(value: 0, samples: 5, isManual: true)
         #expect(abs(RouteLearner.updated(manual, observed: 1).value - 0.15) < 0.0001)

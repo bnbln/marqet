@@ -37,7 +37,118 @@ extension AppModel {
     // MARK: Suggestions (KONZEPT §6.1)
 
     /// Memory first (Free and Pro); Apple Intelligence and the store-type heuristic only with Pro.
+    /// Open Prices then may move a weaker suggestion to the cheapest store (Free, docs/OFFENE-DATEN.md §4).
     func suggestion(for item: ShoppingItem) -> StoreSuggestion? {
+        SuggestionEngine.applyingPrice(habitOrIntelligenceSuggestion(for: item), hint: priceHint(for: item))
+    }
+
+    // MARK: Prices (docs/OFFENE-DATEN.md)
+
+    static let openPricesKey = "openPricesEnabled"
+
+    /// Price fetching is tied to a visible price surface, never to app launch.
+    var openPricesEnabled: Bool {
+        defaults.object(forKey: Self.openPricesKey) as? Bool ?? true
+    }
+
+    var priceArea: PriceUpdateService.Area {
+        PriceUpdateService.Area(location: locationAuthorization == .authorized ? userLocation : nil)
+    }
+
+    var lastPriceCheck: Date? {
+        let prefix = "\(region.rawValue):\(priceArea.key):"
+        return priceUpdates.entries.filter { $0.key.hasPrefix(prefix) }.values.map(\.checkedAt).max()
+    }
+
+    var offerPriceFinds: [PriceUpdateService.PriceFind] {
+        _ = priceRevision
+        guard openPricesEnabled, priceArea.center != nil else { return [] }
+        let prefix = "\(region.rawValue):\(priceArea.key):"
+        let recent = priceUpdates.entries.filter {
+            $0.key.hasPrefix(prefix) && $0.value.checkedAt > Date().addingTimeInterval(-2 * 24 * 60 * 60)
+        }
+        var seen = Set<String>()
+        return recent.values.flatMap { $0.finds ?? [] }
+            .sorted {
+                if $0.kind != $1.kind { return $0.kind == .observedDiscount }
+                return $0.date > $1.date
+            }
+            .filter { seen.insert("\($0.title.lowercased()):\($0.store)").inserted }
+            .prefix(6)
+            .map { $0 }
+    }
+
+    /// Only downloaded observations can produce a hint.
+    func priceHint(for item: ShoppingItem) -> StorePriceHint? {
+        guard openPricesEnabled else { return nil }
+        _ = priceRevision
+        guard let category = PriceIndex.bundled?.category(for: item.title) else { return nil }
+        let key = PriceUpdateService.Cache.key(region: region, area: priceArea, tag: category.tag)
+        guard let update = priceUpdates.entries[key],
+              update.checkedAt > Date().addingTimeInterval(-7 * 24 * 60 * 60),
+              let match = PriceIndex.bundled?.match(categoryTag: category.tag, rows: update.prices) else { return nil }
+        return StorePriceHint(match: match, stores: stores)
+    }
+
+    /// Load categories needed by visible list prices and, when requested, the offers card.
+    /// Reopening the surface reuses the local cache for a day.
+    func refreshPrices(for visibleItems: [ShoppingItem]? = nil, force: Bool = false,
+                       includeOffers: Bool = false) async {
+        guard openPricesEnabled,
+              let catalog, let index = PriceIndex.bundled else { return }
+        if locationAuthorization == .authorized, userLocation == nil {
+            userLocation = await locationProvider.currentLocation()
+        }
+        let area = priceArea
+        var tags = Set((visibleItems ?? unsortedItems).filter { !$0.isCompleted }
+            .compactMap { index.category(for: $0.title)?.tag })
+        if includeOffers {
+            tags.formUnion(["en:bananas", "en:butters", "en:breads", "en:whole-milks",
+                            "en:chicken-eggs", "en:apples", "en:pastas"].filter { index.categories[$0] != nil })
+        }
+        guard !tags.isEmpty else { return }
+        if isRefreshingPrices {
+            queuedPriceTags.formUnion(tags)
+            return
+        }
+        isRefreshingPrices = true
+        priceRefreshError = nil
+        defer { isRefreshingPrices = false }
+        var failed = false
+        while !tags.isEmpty {
+            guard let tag = tags.popFirst() else { break }
+            guard openPricesEnabled else { break }
+            let key = PriceUpdateService.Cache.key(region: region, area: area, tag: tag)
+            if !force, let checked = priceUpdates.entries[key]?.checkedAt,
+               checked > Date().addingTimeInterval(-24 * 60 * 60) {
+                if tags.isEmpty { tags.formUnion(queuedPriceTags); queuedPriceTags.removeAll() }
+                continue
+            }
+            if !force, let failedAt = failedPriceChecks[key],
+               failedAt > Date().addingTimeInterval(-60 * 60) {
+                if tags.isEmpty { tags.formUnion(queuedPriceTags); queuedPriceTags.removeAll() }
+                continue
+            }
+            do {
+                let name = index.categories[tag]?.name(for: Locale.current.language.languageCode?.identifier) ?? tag
+                let result = try await PriceUpdateService.fetch(
+                    tag: tag, categoryName: name, region: region, area: area, catalog: catalog
+                )
+                priceUpdates.entries[key] = .init(checkedAt: Date(), prices: result.prices, finds: result.finds)
+                try priceUpdates.save()
+                failedPriceChecks.removeValue(forKey: key)
+                priceRevision += 1
+            } catch {
+                if error is CancellationError { break }
+                failedPriceChecks[key] = Date()
+                failed = true
+            }
+            if tags.isEmpty { tags.formUnion(queuedPriceTags); queuedPriceTags.removeAll() }
+        }
+        if failed { priceRefreshError = String(localized: "Einige Preise konnten nicht aktualisiert werden.") }
+    }
+
+    private func habitOrIntelligenceSuggestion(for item: ShoppingItem) -> StoreSuggestion? {
         let valid = Set(stores.map(\.id))
         if let memory = SuggestionEngine.suggestion(for: item.title, memory: assignmentMemory, validStores: valid) {
             return memory

@@ -201,7 +201,7 @@ Identisch zum iPhone-Layout, nur dass die Toolbar senkrecht steht. Kein eigener 
        linke Hälfte             Falz        rechte Hälfte = Anker (aktiv)
 ```
 
-- **Items zwischen Läden ziehen:** Ein Item per Drag von einer Card auf die andere verschieben. Der Marker wird umgeschrieben, bei Pro wird die Zuordnung gelernt. Das geht nur im Spread und ist *der* Vorteil des großen Displays.
+- **Items zwischen Läden ziehen:** Ein Item per Drag von einer Card auf die andere verschieben. Der Marker wird umgeschrieben, bei Pro wird die Zuordnung gelernt. Das geht nur im Spread und ist *der* Vorteil des großen Displays. *Rev. (28.09.2026):* Auf dem iPhone bleibt der Drag im Laden (Reihenfolge und Kategorie, KONZEPT #55), dort verschiebt der Long Press („Verschieben nach“).
 - **Sheets** (Laden hinzufügen, Einstellungen, Abschnitte sortieren) mit `presentationPlacement(.leading)`: Sie öffnen **auf der linken Hälfte**, die aktive Card rechts bleibt sichtbar. Grundsatz: *Die rechte Seite gehört dem Einkauf.*
 - **„Linke Seite anheften“** (Card-Menü, v1.1): Die linke Card bleibt stehen, gewischt wird nur rechts. Beispiel: Unsortiert links anheften und rechts durch die Läden blättern, dann jedes Item per Drag in den passenden Laden ziehen.
 

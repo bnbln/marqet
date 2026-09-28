@@ -7,13 +7,8 @@ import MarqetCore
 @MainActor
 enum IntentActions {
     private static func readyModel() async -> AppModel? {
-        guard let model = AppModel.active else { return nil }
-        model.startWidgetSync()
-        if !model.hasLoadedItems || model.phase != .ready {
-            if model.trip == nil, model.sharesWithWidgets { model.trip = SharedStore.trip }
-            await model.refreshPhase()
-        }
-        return model.phase == .ready ? model : nil
+        guard let model = AppModel.active, await model.prepareInBackground() else { return nil }
+        return model
     }
 
     static func checkOff(itemID: String) async {

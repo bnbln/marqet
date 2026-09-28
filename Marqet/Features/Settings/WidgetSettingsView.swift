@@ -6,7 +6,10 @@ import WidgetKit
 /// gallery of every widget with the user's own lists – the same views as on the Home Screen.
 struct WidgetSettingsView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openURL) private var openURL
     @State private var snapshot = WidgetSnapshot.sampleWithoutTrip
+    /// Arrival alerts were switched on, but "Immer" or notifications are missing.
+    @State private var arrivalNeedsSettings = false
 
     var body: some View {
         @Bindable var model = model
@@ -18,6 +21,39 @@ struct WidgetSettingsView: View {
                 Text("Live-Aktivität „Einkauf“")
             } footer: {
                 Text("Zeigt auf dem Sperrbildschirm und in der Dynamic Island die nächsten Einträge im Laufweg, den Fortschritt und deine Kundenkarte. Sie wandert mit, wenn du im nächsten Laden abhakst, und endet von selbst, wenn alles erledigt ist oder 30 Minuten nichts passiert.")
+            }
+
+            Section {
+                Toggle("Liste des Ladens zeigen, an dem ich bin", isOn: $model.followsPresence)
+                Toggle("Bei Ankunft melden", isOn: Binding(
+                    get: { model.arrivalAlertsEnabled },
+                    set: { enabled in
+                        Task { arrivalNeedsSettings = !(await model.setArrivalAlerts(enabled)) && enabled }
+                    }
+                ))
+                if model.arrivalAlertsEnabled, !model.geofences.isEmpty {
+                    LabeledContent("Beobachtet", value: watchedSummary)
+                }
+                if arrivalNeedsSettings {
+                    Button("In den Einstellungen erlauben", systemImage: "gear") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                    }
+                }
+            } header: {
+                Text("Am Laden")
+            } footer: {
+                Text(arrivalNeedsSettings
+                     ? "Für Ankunftsmeldungen braucht Marqet den Standort „Immer“ und Mitteilungen. Ohne sie zeigt die App die Liste des Ladens trotzdem, sobald du sie öffnest."
+                     : "Stehst du in einem deiner Läden, zeigen App und Widgets dessen Liste. Mit „Bei Ankunft melden“ beobachtet Marqet die nächsten Filialen deiner Läden mit offenen Einträgen: Läuft ein Einkauf, meldet sich die Live-Aktivität, sonst eine Mitteilung. Dein Standort bleibt auf dem Gerät.")
+            }
+            .onChange(of: model.followsPresence) { _, follows in
+                guard follows else { return }
+                Task {
+                    if model.locationProvider.authorization == .notDetermined {
+                        _ = await model.locationProvider.requestAuthorization()
+                    }
+                    await model.updatePresence()
+                }
             }
 
             if let status = tripPreview {
@@ -130,6 +166,17 @@ struct WidgetSettingsView: View {
             }
             .disabled(!model.stores.contains { model.openItemCount(of: $0.id) > 0 })
         }
+    }
+
+    /// "7 Filialen von Aldi Süd, dm und Rewe"
+    private var watchedSummary: String {
+        var names: [String] = []
+        for fence in model.geofences {
+            if let name = model.store(fence.storeID)?.name, !names.contains(name) { names.append(name) }
+        }
+        let count = model.geofences.count
+        let branches = count == 1 ? String(localized: "1 Filiale") : String(localized: "\(count) Filialen")
+        return "\(branches) · \(names.formatted(.list(type: .and)))"
     }
 
     /// The running trip, or what one would look like at the next store.

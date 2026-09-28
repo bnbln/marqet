@@ -387,6 +387,8 @@ struct StoreCardHeader: View {
             return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
         }
         let distance = model.distanceText(to: store.id)
+        // At this store right now (KONZEPT-WIDGETS §13).
+        if model.presence?.storeID == store.id, open > 0 { return String(localized: "Du bist hier · \(open) offen") }
         if let address = store.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
         if let detail = store.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
         if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }

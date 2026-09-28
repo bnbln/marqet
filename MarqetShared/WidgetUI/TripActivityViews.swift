@@ -71,12 +71,13 @@ struct TripLockScreenView: View {
     }
 
     private var title: String {
-        status.isFinished ? String(localized: "Einkauf fertig") : String(localized: "Einkauf bei \(store.name)")
+        if status.isFinished { return String(localized: "Einkauf fertig") }
+        return status.isOnTheWay ? String(localized: "Unterwegs zu \(store.name)") : String(localized: "Einkauf bei \(store.name)")
     }
 
     private var progressText: String {
         if status.isStoreDone { return String(localized: "Alles erledigt bei \(store.name)") }
-        return String(localized: "\(status.doneCount) von \(status.totalCount) erledigt · noch \(status.openCount)")
+        return TripStatusText.progress(status)
     }
 
     @ViewBuilder
@@ -106,6 +107,26 @@ struct TripLockScreenView: View {
             Label("Alles erledigt – gut eingekauft!", systemImage: "checkmark.seal.fill")
                 .font(.system(size: 14, weight: .semibold))
         }
+    }
+}
+
+/// Shared wording for the Lock Screen and the Dynamic Island.
+enum TripStatusText {
+    /// "650 m · 9 Einträge" on the way, "2 von 11 erledigt · noch 9" at the store.
+    static func progress(_ status: TripStatus) -> String {
+        if status.isOnTheWay {
+            let items = status.openCount == 1 ? String(localized: "1 Eintrag") : String(localized: "\(status.openCount) Einträge")
+            return [status.distanceMeters.map(WidgetFormat.distance), items].compactMap { $0 }.joined(separator: " · ")
+        }
+        return String(localized: "\(status.doneCount) von \(status.totalCount) erledigt · noch \(status.openCount)")
+    }
+
+    /// The short line under the store name in the expanded Dynamic Island.
+    static func short(_ status: TripStatus) -> String {
+        if status.isOnTheWay {
+            return status.distanceMeters.map { String(localized: "Unterwegs · \(WidgetFormat.distance($0))") } ?? String(localized: "Unterwegs")
+        }
+        return String(localized: "\(status.doneCount) von \(status.totalCount) erledigt")
     }
 }
 

@@ -44,6 +44,8 @@ public struct WidgetRegistry: Codable, Sendable, Equatable {
     /// Store ID → relevant branch.
     public var branchCoordinates: [String: GeoPoint]
     public var userLocation: GeoPoint?
+    /// The store the user is at, from the geofences or the last position fix.
+    public var presence: StorePresence?
     public var accentHex: String
 
     public init(
@@ -61,6 +63,7 @@ public struct WidgetRegistry: Codable, Sendable, Equatable {
         brochureSources: [BrochureSource] = [],
         branchCoordinates: [String: GeoPoint] = [:],
         userLocation: GeoPoint? = nil,
+        presence: StorePresence? = nil,
         accentHex: String = WidgetSnapshot.defaultAccentHex
     ) {
         self.status = status
@@ -77,6 +80,7 @@ public struct WidgetRegistry: Codable, Sendable, Equatable {
         self.brochureSources = brochureSources
         self.branchCoordinates = branchCoordinates
         self.userLocation = userLocation
+        self.presence = presence
         self.accentHex = accentHex
     }
 
@@ -218,6 +222,7 @@ public enum WidgetSnapshotBuilder {
             loyaltyCards: registry.loyaltyCards,
             brochures: brochures(registry: registry, pages: pages),
             trip: trip.flatMap { storesByID[$0.storeID] == nil ? nil : $0 },
+            presence: registry.presence.flatMap { storesByID[$0.storeID] != nil && $0.isValid(at: now) ? $0 : nil },
             accentHex: registry.accentHex
         )
     }

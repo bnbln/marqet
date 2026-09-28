@@ -76,8 +76,10 @@ struct OverviewModel {
     /// Mini cards: inbox first (as in the pager), then the stores.
     var cards: [WidgetSnapshot.Page] { (inbox.map { [$0] } ?? []) + stores }
 
-    /// The store the "Einkauf starten" button goes to: the running trip, else the first one.
+    /// The store the "Einkauf starten" button goes to: where the user is, else the running trip,
+    /// else the first one.
     var nextStore: WidgetSnapshot.Page? {
+        if let presence = snapshot.presence, let page = stores.first(where: { $0.store?.id == presence.storeID }) { return page }
         if let trip = snapshot.trip, let page = stores.first(where: { $0.store?.id == trip.storeID }) { return page }
         return stores.first
     }
@@ -85,6 +87,10 @@ struct OverviewModel {
     /// Fixed rules, never the language model – the numbers must be right (KONZEPT #40).
     var summary: String {
         var sentences: [String] = []
+        if let presence = snapshot.presence, let here = stores.first(where: { $0.store?.id == presence.storeID }),
+           let name = here.store?.name {
+            sentences.append(String(localized: "Du bist bei \(name)."))
+        }
         if stores.isEmpty {
             sentences.append(String(localized: "Für heute ist nichts offen."))
         } else if stores.count == 1, let name = stores[0].store?.name {

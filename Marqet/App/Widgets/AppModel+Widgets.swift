@@ -58,6 +58,7 @@ extension AppModel {
             brochureSources: brochures,
             branchCoordinates: branches,
             userLocation: userLocation,
+            presence: presence,
             accentHex: accent.hex
         )
     }
@@ -84,7 +85,7 @@ extension AppModel {
         withObservationTracking {
             _ = (items, stores, loyaltyCards, locations, trip, phase, lists, selectedListID, hasCompletedOnboarding)
             _ = (storeSortMode, storeOrderSnapshot, emptiedInSession, orderRevision, userLocation, recentlyCompleted)
-            _ = (hasProEntitlement, developerProOverride, routeLearningEnabled, nearbyCatalogDistances, region)
+            _ = (hasProEntitlement, developerProOverride, routeLearningEnabled, nearbyCatalogDistances, region, presence)
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
@@ -105,9 +106,11 @@ extension AppModel {
     }
 
     /// Writes registry and snapshot, reloads widgets if something changed and updates the
-    /// Live Activity. Intents call it directly before they return.
-    func syncWidgetsNow() async {
-        guard sharesWithWidgets, phase != .launching else { return }
+    /// Live Activity – with `alert` it lights up (arrival at a store). Intents call it directly
+    /// before they return.
+    @discardableResult
+    func syncWidgetsNow(alert: TripAlert? = nil) async -> TripActivitySync {
+        guard sharesWithWidgets, phase != .launching else { return TripActivitySync() }
         let registry = makeWidgetRegistry()
         let completed = await completedForWidgets()
         let snapshot = makeWidgetSnapshot(registry: registry, completed: completed)
@@ -122,10 +125,15 @@ extension AppModel {
             // Siri phrases with store names ("Einkauf bei Aldi starten").
             MarqetShortcuts.updateAppShortcutParameters()
         }
-        let finished = await TripActivityController.sync(snapshot: snapshot, trip: trip) { [weak self] tripID in
+        let result = await TripActivityController.sync(snapshot: snapshot, trip: trip, alert: alert) { [weak self] tripID in
             await self?.tripActivityDismissed(tripID: tripID)
         }
-        if finished { trip = nil }
+        if result.finished { trip = nil }
+        // A store got its first item or its last one checked off: watch other branches.
+        if arrivalAlertsEnabled, storesWorthAStop != watchedStores {
+            Task { await refreshGeofences() }
+        }
+        return result
     }
 
     /// Checked off in the last 7 days, from Reminders (also by others) plus this session.
@@ -151,11 +159,12 @@ extension AppModel {
             ?? trip?.storeID
             ?? deck.pages.compactMap(\.storeID).first { openItemCount(of: $0) > 0 }
         guard let target, let store = store(target) else { return nil }
+        let arrived = isAt(target)
         if var current = trip {
-            current.moveTo(target)
+            current.moveTo(target, arrived: arrived)
             trip = current
         } else {
-            trip = ShoppingTrip(storeID: target)
+            trip = ShoppingTrip(storeID: target, arrived: arrived)
         }
         await syncWidgetsNow()
         return store
@@ -163,8 +172,14 @@ extension AppModel {
 
     func moveTrip(to storeID: Store.ID) async {
         guard store(storeID) != nil else { return }
-        trip?.moveTo(storeID)
+        trip?.moveTo(storeID, arrived: isAt(storeID))
         await syncWidgetsNow()
+    }
+
+    /// Without arrival alerts Marqet cannot know – the trip then counts as being at the store.
+    /// With them, a trip started elsewhere is "Unterwegs" until the geofence reports the arrival.
+    private func isAt(_ storeID: Store.ID) -> Bool {
+        !arrivalAlertsEnabled || presence?.storeID == storeID
     }
 
     func endTrip() async {

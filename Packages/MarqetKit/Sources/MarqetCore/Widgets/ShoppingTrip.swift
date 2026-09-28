@@ -16,15 +16,22 @@ public struct ShoppingTrip: Codable, Sendable, Hashable, Identifiable {
     public var lastActivity: Date
     /// Items checked off at the current store during this trip.
     public var doneItemIDs: [String]
+    /// When the user got to the current store; `nil` while still on the way (KONZEPT-WIDGETS §13).
+    public var arrivedAt: Date?
 
-    public init(id: UUID = UUID(), storeID: Store.ID, startedAt: Date = .now) {
+    /// - Parameter arrived: `false` when the trip starts before the store is reached – the Live
+    ///   Activity then says "Unterwegs zu …" and reports the arrival.
+    public init(id: UUID = UUID(), storeID: Store.ID, startedAt: Date = .now, arrived: Bool = true) {
         self.id = id
         self.storeID = storeID
         self.startedAt = startedAt
         self.storeStartedAt = startedAt
         self.lastActivity = startedAt
         self.doneItemIDs = []
+        self.arrivedAt = arrived ? startedAt : nil
     }
+
+    public var isOnTheWay: Bool { arrivedAt == nil }
 
     public func isExpired(at date: Date) -> Bool {
         date.timeIntervalSince(lastActivity) > Self.timeout
@@ -38,6 +45,14 @@ public struct ShoppingTrip: Codable, Sendable, Hashable, Identifiable {
     public mutating func recordCompletion(of itemID: String, in storeID: Store.ID, at date: Date = .now) {
         if storeID != self.storeID { moveTo(storeID, at: date) }
         if !doneItemIDs.contains(itemID) { doneItemIDs.append(itemID) }
+        if arrivedAt == nil { arrivedAt = date }
+        lastActivity = date
+    }
+
+    /// The geofence reported the arrival: the trip is at this store now.
+    public mutating func arrive(at storeID: Store.ID, at date: Date = .now) {
+        if storeID != self.storeID { moveTo(storeID, at: date) }
+        if arrivedAt == nil { arrivedAt = date }
         lastActivity = date
     }
 
@@ -46,12 +61,14 @@ public struct ShoppingTrip: Codable, Sendable, Hashable, Identifiable {
         doneItemIDs.removeAll { $0 == itemID }
     }
 
-    public mutating func moveTo(_ storeID: Store.ID, at date: Date = .now) {
+    /// - Parameter arrived: `false` for "Weiter zu dm" – the user still has to get there.
+    public mutating func moveTo(_ storeID: Store.ID, at date: Date = .now, arrived: Bool = true) {
         guard storeID != self.storeID else { return }
         self.storeID = storeID
         storeStartedAt = date
         lastActivity = date
         doneItemIDs = []
+        arrivedAt = arrived ? date : nil
     }
 }
 
@@ -95,14 +112,21 @@ public struct TripStatus: Codable, Sendable, Hashable {
     public var doneCount: Int
     public var stops: [Stop]
     public var hasLoyaltyCard: Bool
+    /// "Unterwegs zu Aldi Süd": the trip started before the store was reached.
+    public var isOnTheWay: Bool
+    /// To the store's branch, if the position is known.
+    public var distanceMeters: Double?
 
-    public init(store: Store, next: [Line], openCount: Int, doneCount: Int, stops: [Stop], hasLoyaltyCard: Bool) {
+    public init(store: Store, next: [Line], openCount: Int, doneCount: Int, stops: [Stop], hasLoyaltyCard: Bool,
+                isOnTheWay: Bool = false, distanceMeters: Double? = nil) {
         self.store = store
         self.next = next
         self.openCount = openCount
         self.doneCount = doneCount
         self.stops = stops
         self.hasLoyaltyCard = hasLoyaltyCard
+        self.isOnTheWay = isOnTheWay
+        self.distanceMeters = distanceMeters
     }
 
     public var totalCount: Int { openCount + doneCount }
@@ -131,7 +155,9 @@ public struct TripStatus: Codable, Sendable, Hashable {
             openCount: page.openCount,
             doneCount: trip.doneItemIDs.count,
             stops: stops,
-            hasLoyaltyCard: !snapshot.loyaltyCards(for: store.id).isEmpty
+            hasLoyaltyCard: !snapshot.loyaltyCards(for: store.id).isEmpty,
+            isOnTheWay: trip.isOnTheWay && snapshot.presence?.storeID != store.id,
+            distanceMeters: page.distanceMeters
         )
     }
 }

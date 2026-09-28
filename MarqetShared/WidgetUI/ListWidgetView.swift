@@ -101,7 +101,7 @@ private struct StoreListView: View {
         case .systemSmall:
             WidgetCardHeader(page: page, badgeSize: 22, height: 40, trailing: .count)
         case .systemMedium:
-            WidgetCardHeader(page: page, subtitle: subtitle, badgeSize: 24, height: 44, trailing: .add)
+            WidgetCardHeader(page: page, subtitle: subtitle, badgeSize: 26, height: 50, trailing: .add)
         default:
             WidgetCardHeader(page: page, subtitle: subtitle, badgeSize: 30, height: 54, trailing: .add)
         }
@@ -109,7 +109,11 @@ private struct StoreListView: View {
 
     private var subtitle: String {
         var parts: [String] = []
-        if let tripHere {
+        if let store = page.store, snapshot.presence?.storeID == store.id {
+            // The list that matters right now (KONZEPT-WIDGETS §13).
+            parts.append(String(localized: "Du bist hier"))
+            parts.append(WidgetFormat.open(page.openCount))
+        } else if let tripHere {
             parts.append(String(localized: "Einkauf läuft · \(tripHere.doneItemIDs.count) erledigt"))
         } else if page.isInbox {
             parts.append(page.openCount == 0 ? String(localized: "Alles sortiert") : String(localized: "\(page.openCount) zum Zuordnen"))
@@ -154,15 +158,15 @@ private struct StoreListView: View {
         let items = page.items
         let shown = min(items.count, 3)
         return VStack(alignment: .leading, spacing: 0) {
-            ForEach(items.prefix(shown)) { item in row(item, fontSize: 14).frame(height: items.count > 3 ? 28 : 32) }
+            ForEach(items.prefix(shown)) { item in row(item, fontSize: 14).frame(height: items.count > 3 ? 32 : 36) }
             if items.count > shown {
                 MoreItemsLabel(count: items.count - shown)
-                    .frame(height: 18)
+                    .frame(height: 20)
                     .padding(.leading, 32)
             }
         }
-        .padding(.horizontal, 10)
-        .padding(.top, 10)
+        .padding(.horizontal, 14)
+        .padding(.top, 14)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
@@ -175,23 +179,23 @@ private struct StoreListView: View {
         return HStack(alignment: .top, spacing: 10) {
             column(left)
             VStack(alignment: .leading, spacing: 0) {
-                ForEach(right) { item in row(item, fontSize: 14).frame(height: 32) }
+                ForEach(right) { item in row(item, fontSize: 14).frame(height: 36) }
                 if items.count > shown {
                     MoreItemsLabel(count: items.count - shown)
-                        .frame(height: 32)
+                        .frame(height: 36)
                         .padding(.leading, 32)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 10)
-        .padding(.top, 10)
+        .padding(.horizontal, 14)
+        .padding(.top, 14)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private func column(_ items: [WidgetSnapshot.Item]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(items) { item in row(item, fontSize: 14).frame(height: 32) }
+            ForEach(items) { item in row(item, fontSize: 14).frame(height: 36) }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

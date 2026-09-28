@@ -14,12 +14,22 @@ protocol LocationProviding: AnyObject {
     func requestAuthorization() async -> LocationAuthorization
     /// One current position, `nil` without access or on failure.
     func currentLocation() async -> GeoPoint?
+    /// "Immer": needed to report arrivals at a store in the background (KONZEPT-WIDGETS §13).
+    var isAlwaysAuthorized: Bool { get }
+    /// Asks for "Immer" (first time: the system prompt, later only Settings can change it).
+    func requestAlwaysAuthorization() async -> Bool
+}
+
+extension LocationProviding {
+    var isAlwaysAuthorized: Bool { false }
+    func requestAlwaysAuthorization() async -> Bool { false }
 }
 
 @MainActor
 final class LocationService: NSObject, LocationProviding, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private var authorizationContinuations: [CheckedContinuation<LocationAuthorization, Never>] = []
+    private var alwaysContinuations: [CheckedContinuation<Bool, Never>] = []
     private var locationContinuations: [CheckedContinuation<GeoPoint?, Never>] = []
     private var lastLocation: (point: GeoPoint, date: Date)?
 
@@ -41,6 +51,31 @@ final class LocationService: NSObject, LocationProviding, CLLocationManagerDeleg
         }
     }
 
+    var isAlwaysAuthorized: Bool {
+        manager.authorizationStatus == .authorizedAlways
+    }
+
+    func requestAlwaysAuthorization() async -> Bool {
+        let status = manager.authorizationStatus
+        if status == .authorizedAlways { return true }
+        guard status == .notDetermined || status == .authorizedWhenInUse else { return false }
+        return await withCheckedContinuation { continuation in
+            alwaysContinuations.append(continuation)
+            manager.requestAlwaysAuthorization()
+            // iOS asks for the upgrade to "Immer" only once; afterwards no callback comes.
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(20))
+                self.resolveAlways()
+            }
+        }
+    }
+
+    private func resolveAlways() {
+        let waiting = alwaysContinuations
+        alwaysContinuations = []
+        waiting.forEach { $0.resume(returning: manager.authorizationStatus == .authorizedAlways) }
+    }
+
     func currentLocation() async -> GeoPoint? {
         guard authorization == .authorized else { return nil }
         // A fix from the last two minutes is good enough for distances between stores.
@@ -57,6 +92,7 @@ final class LocationService: NSObject, LocationProviding, CLLocationManagerDeleg
         let status = Self.map(manager.authorizationStatus)
         guard status != .notDetermined else { return }
         Task { @MainActor in
+            self.resolveAlways()
             let waiting = self.authorizationContinuations
             self.authorizationContinuations = []
             waiting.forEach { $0.resume(returning: status) }

@@ -138,7 +138,7 @@ struct WidgetCardHeader: View {
     }
 
     var body: some View {
-        HStack(spacing: 9) {
+        HStack(spacing: 10) {
             WidgetBadge(store: page.store, size: badgeSize, systemImage: systemImage)
             VStack(alignment: .leading, spacing: 0) {
                 Text(name)
@@ -170,7 +170,7 @@ struct WidgetCardHeader: View {
                     Link(destination: MarqetLink.compose(pageID).url) {
                         Image(systemName: "plus")
                             .font(.system(size: 14, weight: .bold))
-                            .frame(width: 28, height: 28)
+                            .frame(width: 30, height: 30)
                             .background(.white.opacity(renderingMode == .fullColor ? 0.22 : 0.14), in: .circle)
                     }
                     .accessibilityLabel("Eintrag hinzufügen")
@@ -178,7 +178,7 @@ struct WidgetCardHeader: View {
             }
         }
         .foregroundStyle(foreground)
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 16)
         .frame(height: height)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {

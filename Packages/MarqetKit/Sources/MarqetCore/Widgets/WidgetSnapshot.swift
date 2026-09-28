@@ -148,6 +148,8 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var loyaltyCards: [LoyaltyCard]
     public var brochures: [Brochure]
     public var trip: ShoppingTrip?
+    /// The store the user is at (KONZEPT-WIDGETS §13) – its list wins wherever Marqet picks one.
+    public var presence: StorePresence?
     /// The app's accent color (Einstellungen › Erscheinungsbild) for neutral elements.
     public var accentHex: String
 
@@ -163,6 +165,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         loyaltyCards: [LoyaltyCard] = [],
         brochures: [Brochure] = [],
         trip: ShoppingTrip? = nil,
+        presence: StorePresence? = nil,
         accentHex: String = WidgetSnapshot.defaultAccentHex
     ) {
         self.generatedAt = generatedAt
@@ -174,6 +177,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         self.loyaltyCards = loyaltyCards
         self.brochures = brochures
         self.trip = trip
+        self.presence = presence
         self.accentHex = accentHex
     }
 
@@ -210,10 +214,11 @@ extension WidgetSnapshot {
         }
     }
 
-    /// "Nächster Laden": the running trip's store while it has items, else the first store card
-    /// with items (card order already reflects distance or smart sorting), else the inbox with items,
-    /// else the first planned store, else the inbox.
+    /// "Nächster Laden": the store the user is at, else the running trip's store while it has
+    /// items, else the first store card with items (card order already reflects distance or smart
+    /// sorting), else the inbox with items, else the first planned store, else the inbox.
     public var automaticPage: Page? {
+        if let presence, let page = page(forStore: presence.storeID), page.openCount > 0 { return page }
         if let trip, let page = page(forStore: trip.storeID), page.openCount > 0 { return page }
         if let first = activeStorePages.first { return first }
         if let inbox, inbox.openCount > 0 { return inbox }
@@ -230,9 +235,10 @@ extension WidgetSnapshot {
         loyaltyCards.cards(for: storeID)
     }
 
-    /// "Automatisch": the card of the trip's store, else of the next store, else the first card.
+    /// "Automatisch": the card of the store the user is at, else of the trip's store, else of the
+    /// next store, else the first card.
     public var automaticLoyaltyCard: LoyaltyCard? {
-        let candidates = [trip?.storeID] + activeStorePages.map(\.store?.id) + storePages.map(\.store?.id)
+        let candidates = [presence?.storeID, trip?.storeID] + activeStorePages.map(\.store?.id) + storePages.map(\.store?.id)
         for id in candidates.compactMap({ $0 }) {
             if let card = loyaltyCards(for: id).first { return card }
         }

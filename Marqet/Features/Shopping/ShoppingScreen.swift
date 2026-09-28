@@ -304,6 +304,7 @@ struct ShoppingScreen: View {
             profileMenu
                 .opacity(1 - briefingAmount)
         }
+        .sharedBackgroundVisibility(.hidden)
         ToolbarItem(placement: .topBarLeading) {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Marqet")
@@ -319,16 +320,24 @@ struct ShoppingScreen: View {
             .opacity(1 - briefingAmount)
         }
         .sharedBackgroundVisibility(.hidden)
-        if model.lastUndoAction != nil {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Rückgängig", systemImage: "arrow.uturn.backward") {
-                    undoFeedback += 1
-                    Task { await model.undoLastAction() }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
+        // Always in the bar: inserting a toolbar item conditionally is not animated. The item fades
+        // and scales in place, and only shares the glass background with the filter while visible.
+        ToolbarItem(placement: .topBarTrailing) {
+            let hasUndo = model.lastUndoAction != nil
+            Button {
+                undoFeedback += 1
+                Task { await model.undoLastAction() }
+            } label: {
+                Image(systemName: "arrow.uturn.backward")
+                    .opacity(hasUndo ? 1 : 0)
+                    .scaleEffect(hasUndo ? 1 : 0.6)
             }
+            .disabled(!hasUndo)
+            .accessibilityLabel("Rückgängig")
+            .accessibilityHidden(!hasUndo)
+            .animation(.snappy, value: hasUndo)
         }
+        .sharedBackgroundVisibility(model.lastUndoAction != nil ? .automatic : .hidden)
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Button(model.showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen",
@@ -356,11 +365,17 @@ struct ShoppingScreen: View {
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 26)
-                .foregroundStyle(Color.accentColor)
+                .frame(width: 22, height: 22)
+                .foregroundStyle(.white)
+                // The cart's optical center sits right of its frame; nudge it to balance.
+                .offset(x: -1)
+                .frame(width: 44, height: 44)
+                .glassEffect(.regular.tint(.accentColor).interactive(), in: .circle)
+                .contentShape(.circle)
         }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
         .accessibilityLabel("Profil und mehr")
-        .tint(.accentColor)
     }
 }
 

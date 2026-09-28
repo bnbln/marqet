@@ -27,6 +27,14 @@ struct StoreCard: View {
     @State private var titleOffsets: [ItemCategory: CGFloat] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.horizontalSizeClass) private var sizeClass
+    private var isTyping: Bool { model.composerTarget != nil || model.editingItemID != nil }
+
+    private var keyboardInset: CGFloat {
+        if model.editingItemID != nil { return 220 }
+        if model.composerTarget != nil { return 120 }
+        return isExpanded ? 72 : 54
+    }
+
     private var showsTriageFooter: Bool { store == nil && !items.isEmpty && !isExpanded }
 
     private var tint: Color { store?.color ?? .gray }
@@ -239,11 +247,14 @@ struct StoreCard: View {
             // Every card blurs its list progressively above the bottom controls (mic, add, dots,
             // triage), which float unblurred on top. The bar reserves the space and drives the effect.
             .scrollEdgeEffectStyle(.soft, for: .bottom)
+            // With the keyboard up the card is short already; the blur would hide even more rows.
+            .scrollEdgeEffectHidden(model.composerTarget != nil, for: .bottom)
             .safeAreaBar(edge: .bottom, spacing: 0) {
                 if showsTriageFooter {
                     triageFooter
                 } else {
-                    Color.clear.frame(height: isExpanded ? 72 : 54)
+                    // While typing, extra room lets the last rows scroll clear of the keyboard.
+                    Color.clear.frame(height: keyboardInset)
                 }
             }
             // The pager already sizes the card above keyboard and composer. Without this the bar
@@ -257,6 +268,14 @@ struct StoreCard: View {
                 geometry.contentOffset.y + geometry.contentInsets.top > 36
             } action: { _, pulledUp in
                 if pulledUp, isDraggingList, !isExpanded { model.focus(page) }
+            }
+            // Bring the row being edited above the keyboard, once the inset has grown.
+            .onChange(of: model.editingItemID) { _, id in
+                guard let id, items.contains(where: { $0.id == id }) else { return }
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(350))
+                    withAnimation(.smooth) { proxy.scrollTo(id, anchor: .center) }
+                }
             }
             // No keyboard dismissal on scroll here: the scroll to a new item would close the composer.
             .onChange(of: model.recentlyAddedItemID) { _, id in
@@ -327,6 +346,11 @@ struct StoreCard: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 10)
             .padding(.bottom, 34)
+            // The card is sized above keyboard and composer, so the button would float over
+            // the composer. It stays out of sight while typing and returns with the keyboard down.
+            .opacity(isTyping ? 0 : 1)
+            .allowsHitTesting(!isTyping)
+            .animation(.snappy, value: isTyping)
     }
 
     @ViewBuilder

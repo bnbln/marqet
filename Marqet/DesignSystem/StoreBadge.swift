@@ -6,9 +6,21 @@ struct StoreBadge: View {
     let store: Store
     var size: CGFloat = 28
 
+    /// Fallback switch for trademark issues (PLAN E1): build setting `MARQET_BRAND_LOGOS = NO`
+    /// turns every brand mark – logo assets and the drawn Edeka/Netto marks – into monograms,
+    /// so a rejected build can be resubmitted within a day.
+    static let usesBrandLogos: Bool = {
+        // The build setting arrives as the string "YES"/"NO", a hand-edited plist may hold a Bool.
+        switch Bundle.main.object(forInfoDictionaryKey: "MarqetUsesBrandLogos") {
+        case let flag as Bool: flag
+        case let text as String: !["NO", "FALSE", "0"].contains(text.uppercased())
+        default: true
+        }
+    }()
+
     var body: some View {
         Group {
-            if store.catalogKey == "edeka" {
+            if Self.usesBrandLogos, store.catalogKey == "edeka" {
                 Image("edeka")
                     .resizable()
                     .scaledToFit()
@@ -17,7 +29,7 @@ struct StoreBadge: View {
                     .frame(width: size, height: size)
             } else {
                 ZStack {
-                    if store.catalogKey == "netto" {
+                    if Self.usesBrandLogos, store.catalogKey == "netto" {
                         Circle().fill(Color(red: 0.88, green: 0.02, blue: 0.08))
                         Text("N")
                             .font(.system(size: size * 0.67, weight: .black, design: .rounded).italic())
@@ -47,7 +59,7 @@ struct StoreBadge: View {
     ]
 
     private var logoAsset: String? {
-        guard let key = store.catalogKey, StoreBrandLogos.keys.contains(key) else { return nil }
+        guard Self.usesBrandLogos, let key = store.catalogKey, StoreBrandLogos.keys.contains(key) else { return nil }
         return key
     }
 

@@ -55,7 +55,7 @@ public enum CardBuilder {
         }
 
         // Keep the inbox mounted when its first item arrives, including on Duo.
-        var pages: [PageID] = [.brochures, .unsorted]
+        var pages: [PageID] = [.map, .brochures, .unsorted]
 
         var states: [Store.ID: StoreCardState] = [:]
         for store in ordered(stores, by: storeOrder) {

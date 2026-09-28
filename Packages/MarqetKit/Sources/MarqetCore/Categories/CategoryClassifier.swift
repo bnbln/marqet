@@ -106,6 +106,9 @@ public struct CategoryClassifier: Sendable {
             .map(String.init)
         guard !tokens.isEmpty else { return nil }
 
+        // "Spinat TK", "Erbsen tiefgekühlt": the freezer marker decides, not the first word.
+        if tokens.contains(where: Self.frozenMarkers.contains) { return .frozen }
+
         // Multi-word dictionary entries ("rote bete", "saure sahne").
         if tokens.count > 1 {
             for index in 0..<(tokens.count - 1) {
@@ -120,6 +123,9 @@ public struct CategoryClassifier: Sendable {
         }
         return nil
     }
+
+    /// Words that put an item into the freezer section whatever else it is (folded).
+    private static let frozenMarkers: Set<String> = ["tk", "tiefgekuehlt", "tiefgefroren", "gefroren", "frozen"]
 
     /// German plurals and inflections the dictionary does not list explicitly.
     private func stemMatch(_ token: String) -> ItemCategory? {

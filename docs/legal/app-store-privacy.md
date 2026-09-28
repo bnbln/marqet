@@ -1,8 +1,8 @@
-# App Store Connect – Datenschutzangaben („Nutrition Label“)
+# App Store Connect: Datenschutzangaben („Nutrition Label“)
 
 | Frage | Antwort | Begründung |
 |---|---|---|
-| Erfasst ihr oder Drittanbieter Daten dieser App? | **Nein – „Keine Daten erfasst“** | Kein Server, keine SDKs von Drittanbietern, keine Analyse. Erinnerungen, Standort und Apple Intelligence werden nur auf dem Gerät bzw. von Apple verarbeitet; Apple-Dienste zählen nicht als Erfassung durch den Entwickler. |
+| Erfasst ihr oder Drittanbieter Daten dieser App? | **Nein: „Keine Daten erfasst“** | Kein Server, keine SDKs von Drittanbietern, keine Analyse. Erinnerungen, Standort, Kamera-Scan, Kundenkarten und Apple Intelligence werden nur auf dem Gerät bzw. von Apple verarbeitet; Apple-Dienste zählen nicht als Erfassung durch den Entwickler. |
 | Tracking | Nein | Kein IDFA, kein ATT-Dialog. |
 | Privacy Manifest | `Marqet/Resources/PrivacyInfo.xcprivacy` | UserDefaults CA92.1, keine erfassten Datentypen. |
 | Datenschutz-URL | [URL zu datenschutz.md] | Pflichtfeld. |

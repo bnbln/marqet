@@ -59,6 +59,7 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 43 | Systemleiste auf Markenfarbe | *Rev. 8 (28.09.):* Im kompakten Laden-Vollbild übernehmen Toolbar-Buttons und Statusleiste die helle oder dunkle Variante passend zur Markenfarbe (`toolbarColorScheme`), wie die Header-Schrift: weiß auf Aldi-Blau oder Rewe-Rot, schwarz auf Edeka- oder Netto-Gelb. Die Inbox (grau) nutzt die dunkle Variante |
 | 44 | Onboarding-Raster | *Rev. 8:* Jeder Schritt nutzt dasselbe Raster: Bildbühne 300 × 184, Überschrift mit immer zwei reservierten Zeilen, darunter Text. Der Abstand nach oben hängt nur von der Bildschirmhöhe ab, deshalb stehen Bild, Überschrift und Textanfang auf allen Seiten gleich hoch. Duo aufgeklappt: Bild links, Text und Button rechts vom Falz. Die Willkommensseite zeigt in einer Schleife, wie drei Einträge aus einer Liste in ihre Laden-Cards fliegen; die anderen Schritte haben kleine erklärende Illustrationen. Reduce Motion zeigt den Endzustand |
 | 45 | Läden aus dem Onboarding | *Rev. 8:* Gewählte Läden werden **geplant** angelegt und erscheinen sofort als Cards (vorher unsichtbar bis zum ersten Eintrag). Eine offensichtliche Einkaufsliste wird vorausgewählt, „Neue Liste anlegen“ legt keine Dublette an |
+| 46 | Einsprechen | *Rev. 9 (28.09.), Rev. 10: iPhone links gegenüber vom Plus, Englisch:* **Mikrofon neben Plus**: Einkäufe samt Laden einsprechen („10 Eier vom Markt, bei Rewe Hackfleisch“). Die Listen bauen sich beim Sprechen animiert auf, danach „Zu deinen Listen hinzufügen?“. Transkription on-device für alle, Lesen mit Apple Intelligence ist Pro (#15). Details in §3 |
 
 ---
 
@@ -88,3 +89,74 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 
 - Kartennummern sind personenbezogen, bleiben aber auf dem Gerät bzw. in der eigenen iCloud. Das Privacy-Label bleibt „Keine Daten erfasst“.
 - **Free:** Kundenkarten sind keine Intelligenz (#15), sie machen die App im Laden unverzichtbar und gehören deshalb allen.
+
+---
+
+## 3. Einsprechen (v1.1)
+
+**Idee:** Wer vor dem Kühlschrank steht, denkt in Sätzen, nicht in Einträgen: *„Ich brauche 10 Eier und will sie auf dem Markt kaufen, genau wie Suppengrün und 500 g Kartoffeln mehligkochend. Bei Rewe will ich 500 g Hackfleisch kaufen. Ah, und ich brauche Zwiebeln vom Markt.“* Marqet macht daraus in einem Schritt fünf Einträge auf zwei Listen. Der Nutzer sieht dabei zu, wie die Listen entstehen.
+
+### 3.1 Einstiege
+
+| Ort | Verhalten |
+|---|---|
+| Home | Glas-Button **Mikrofon**. *Rev. 10:* auf dem iPhone **unten links, gegenüber vom Plus** (Daumen links, Seitenpunkte dazwischen). Auf dem iPad direkt links neben dem Plus (gemeinsamer `GlassEffectContainer`). Einträge ohne Laden: Gedächtnis, sonst Inbox |
+| Eingabeleiste | Bei leerem Textfeld wird der Senden-Button zum **Mikrofon** (wie in Nachrichten). Einträge ohne Laden gehen in den Laden der Zielkarte (#9) |
+| Laden-Vollbild | Über dieselbe Eingabeleiste. Der Diktat-Screen öffnet sich über dem Vollbild |
+| Duo | „Einsprechen“ als Item der Systemleiste neben „Hinzufügen“ |
+
+### 3.2 Ablauf aus Nutzersicht
+
+1. **Zuhören.** Vollbild, oben das Transkript in großer Schrift. Erkannte Läden leuchten in ihrer Markenfarbe, erkannte Artikel und Mengen stehen in voller Stärke, Füllwörter bleiben grau, der noch unsichere Rest ist hell. Unten der Stopp-Button, dessen Halo mit der Stimme atmet. Das Umgebungslicht nimmt die Farbe des zuletzt genannten Ladens an.
+2. **Listen entstehen.** Nennt der Nutzer „Rewe“, fliegt die Rewe-Karte ein (Header wie im Pager: Logo, Markenfarbe, Zähler). Jeder erkannte Artikel gleitet als Zeile hinein. Die Karte des gerade besprochenen Ladens ist hervorgehoben und wird in Sicht gescrollt. Korrigiert sich die Zuordnung, **wandert die Zeile** sichtbar in die andere Karte (`matchedGeometryEffect`). Mit Apple Intelligence sind noch unbestätigte Zeilen leicht blass und werden kräftig, sobald das Modell sie bestätigt.
+3. **Nachfragen.** Nach „Fertig“ bleibt alles stehen, der Titel wird zu **„Zu deinen Listen hinzufügen?“** mit „5 Einträge für 2 Listen“. Tippen wählt ab (durchgestrichen), Kontextmenü: „Laden ändern“ (Zeile fliegt um) und „Entfernen“. Unten „Weitersprechen“ (Mikrofon, hängt an) und „5 Einträge hinzufügen“.
+4. **Hinzufügen.** Ein Schritt, **ein Rückgängig** für alles. Neue Katalog-Ketten („Neuer Laden – wird angelegt“) werden geplant angelegt. Der Pager springt zur ersten betroffenen Karte, Haptik „Erfolg“.
+
+Abbrechen mit ✕: Sind Einträge erkannt, fragt Marqet „Diktat verwerfen?“. Wird nichts erkannt, zeigt die Nachfrage einen Leerzustand mit „Nochmal“ über das Mikrofon.
+
+### 3.3 Technik
+
+```
+Mikrofon ─ AVAudioEngine ─▶ SpeechAnalyzer (on-device)
+                               SpeechTranscriber (.progressiveTranscription)
+                               ↳ Rückfall DictationTranscriber
+                               AnalysisContext: Ladennamen als Vokabular
+          ─ Pegel ─▶ Halo / Umgebungslicht
+Transkript (final + volatil)
+   ├─ sofort, bei jeder Änderung ─▶ VoiceRuleParser (MarqetCore) ──┐
+   └─ nach Satzende (150 ms) / Pause (1,1 s), Pro ─▶               ├─▶ VoiceDraft.merge ─▶ Gruppen ─▶ UI
+      FoundationModels streamResponse, Guided Generation ─────────┘
+Stopp ─▶ finalizeAndFinish ─▶ letzter Modell-Durchlauf ─▶ Nachfrage ─▶ AppModel.addItems (ein Undo)
+```
+
+- **Transkription** (`LiveTranscriber`): `SpeechAnalyzer` mit `SpeechTranscriber`, wo verfügbar, sonst `DictationTranscriber`. Das Sprachmodell wird bei Bedarf über `AssetInventory` geladen (Fortschritt im Screen). Die Audioaufnahme wird per `AVAudioConverter` ins Analyseformat gewandelt, der Tap läuft außerhalb des Main Actors. Die Namen der eigenen Läden und der Katalog-Ketten gehen als `contextualStrings` an den Erkenner.
+- **Regeln** (`VoiceRuleParser`, getestet): Sätze an `.!?;`, Teilsätze an Kommas, Doppelpunkten und Bindewörtern („und“, „sowie“, „genau wie“, „as well as“). *Rev. 10:* Woher der Laden eines Artikels kommt, in dieser Reihenfolge:
+  1. aus dem eigenen Teilsatz („Zwiebeln vom Markt“),
+  2. aus einem anderen Teilsatz desselben Satzes, zuerst dem davor („10 Eier, die will ich auf dem Markt kaufen“),
+  3. aus dem **nächsten Satz, wenn der nur einen Laden nennt** („Ich brauche Milch. Die hole ich bei Rewe.“). Das deckt auch Punkte ab, die der Transkribierer bei Sprechpausen mitten in einen Gedanken setzt,
+  4. aus dem **Satz davor**, wenn dieser Satz ihn fortsetzt („Und Butter.“, „Außerdem Käse.“, „Genau wie Suppengrün.“) oder eine reine Aufzählung ohne Verb ist („Bei Rewe Milch. Butter. Käse.“). „Ich brauche noch Zahnpasta.“ ist ein neuer Gedanke und übernimmt keinen Laden,
+  5. aus einem **vorab angekündigten Laden** („Bei Rewe brauche ich einiges. Milch, Butter.“), bis ein anderer genannt wird.
+
+  Weitere Regeln: Präpositionen („auf dem“, „vom“, „bei“) und Füllwörter fallen weg. Mengen: Ziffern, Zahlwörter, Einheiten („500 g“, „ein Kilo“, „2 Packungen“), auch nachgestellt. Ein kleingeschriebener Teilsatz („…, mehligkochend“) beschreibt den Artikel davor.
+- **Sprachmodell** (`DictationInterpreter`, Pro): `DynamicGenerationSchema`, `laden` nur aus den angebotenen Läden oder „keiner“, `greedy`. Gestreamt: Ein Eintrag zählt, sobald sein Laden vollständig ist. Das Modell versteht, was Regeln nicht können: Korrekturen („doch keine Milch“), freie Satzstellung, Namen („Kartoffeln, mehligkochend“). Die Anweisungen gibt es auf Deutsch und Englisch, mit denselben Regeln für Nachbarsätze. *Schutz gegen Erfundenes (Rev. 10):* Im Test hat das Modell Details aus dem Prompt-Beispiel übernommen („Potatoes, floury“, „2 lb“ → „2 kg“). Deshalb sind die Beispiele jetzt neutral, und der Prompt verbietet Umrechnen und erfundene Eigenschaften. Im Code gilt zusätzlich: Ein Eintrag ohne gesprochenes Wort fällt weg, ein Zusatz nach dem Komma bleibt nur, wenn er gesagt wurde.
+- **Zusammenführen** (`VoiceDraft`, getestet): Die Identität eines Eintrags ist sein Name aus Buchstaben und Ziffern. So bleiben Zeilen stehen, wenn das Modell die Schreibweise verfeinert. Das Modell entfernt nur, was es in *seinem* Transkript-Stand nicht mehr findet. Regeln entfernen nie, was das Modell bestätigt hat. **Ein im eigenen Satz ausdrücklich genannter Laden schlägt die Vermutung des Modells**: Im Test hat das On-Device-Modell „Kartoffeln“ vereinzelt dem Rewe des Folgesatzes zugeschlagen. Nutzer-Entscheidungen (Abwählen, Laden ändern) schlägt kein Durchlauf.
+- **Ziel pro Eintrag** (`AppModel.placement`): gewählt → gesprochen (eigener Laden oder Katalog-Kette) → Zielkarte der Eingabeleiste → Gedächtnis (`SuggestionEngine`, Symbol ↺) → Inbox.
+- **Titel** in Erinnerungen: Menge zuerst („500 g Kartoffeln, mehligkochend“). `ItemKeyNormalizer` entfernt die Menge fürs Lernen wieder.
+
+### 3.4 Sprachen
+
+*Rev. 10:* **Deutsch und Englisch.** Maßgeblich ist die App-Sprache, also die der Oberfläche. Die Region des Nutzers bleibt erhalten („en-GB“, „de-AT“). Sie steuert den Erkenner (`SpeechTranscriber`-Locale), die Anweisungen des Modells und zwei Grammatik-Regeln: Kleingeschriebene Zusätze hängen nur im Deutschen am Artikel davor (dort sind Nomen großgeschrieben), und „also“ leitet nur im Englischen eine Fortsetzung ein. Der Wortschatz der Regeln ist gemeinsam, weil viele gemischt sprechen: Füllwörter, Zahlwörter („zehn“, „a dozen“), Einheiten („Pfund“, „lb“, „oz“, „2 cans of“). Die allgemeinen Läden im Katalog kennen englische Namen als Alias („Market“, „Bakery“, „Butcher“, „Drugstore“ …). Angezeigt werden sie weiter unter dem deutschen Namen.
+
+### 3.5 Free, Pro, Datenschutz
+
+- **Free:** Einsprechen mit Regeln. Das deckt die üblichen Formulierungen ab und ist sofort da.
+- **Pro:** zusätzlich Apple Intelligence (#15): Korrekturen, freie Sätze, schönere Namen. Das Funkeln oben rechts pulsiert, solange das Modell mitliest.
+- Audio und Text bleiben auf dem Gerät, nichts wird gespeichert. Das Privacy-Label bleibt „Keine Daten erfasst“ (#20). Berechtigungen: Mikrofon (`NSMicrophoneUsageDescription`), Spracherkennung (`NSSpeechRecognitionUsageDescription`, vorsorglich).
+- **Bedienungshilfen:** Reduce Motion ersetzt Flug- und Skalier-Animationen durch Überblenden, der Halo entfällt. Zeilen melden „ausgewählt“ an VoiceOver.
+
+### 3.6 Offen
+
+- Siri / App Intent „Einkäufe einsprechen“ (#19) auf demselben Parser.
+- Namen der allgemeinen Katalog-Läden lokalisieren („Market“ statt „Markt“ in der englischen App). Der Name ist zugleich Marker in den Erinnerungen, das braucht deshalb ein eigenes Konzept.
+- Beim Einsprechen genannte Kategorien („beim Metzger um die Ecke“) als eigener Laden anlegen.
+- Test auf echtem Gerät: Latenz des Modell-Durchlaufs pro Satz, Erkennungsqualität von Ladennamen mit `contextualStrings`.

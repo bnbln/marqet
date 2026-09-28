@@ -34,6 +34,8 @@ final class AppModel {
     @ObservationIgnored private var isUndoing = false
     var showsCompleted = false
     var hasLoadedItems = false
+    /// The row whose title currently owns the keyboard, across pager and detail views.
+    var editingItemID: ShoppingItem.ID?
     var errorMessage: String?
 
     // MARK: Pager state
@@ -82,6 +84,11 @@ final class AppModel {
     @ObservationIgnored var sessionTracker = ShoppingSessionTracker()
     /// Apple Intelligence store suggestions per item key (Pro), filled before triage.
     var intelligentSuggestions: [String: Store.ID] = [:]
+
+    // MARK: Voice (KONZEPT §3)
+
+    /// Open dictation screen; `nil` when closed.
+    var voiceRequest: VoiceRequest?
 
     // MARK: Triage (KONZEPT §7.4)
 
@@ -178,6 +185,8 @@ final class AppModel {
         case rename(ShoppingItem)
         case deletion(ShoppingItem)
         case creation(ShoppingItem)
+        /// Several items at once, e.g. from a dictation – undone together.
+        case creations([ShoppingItem])
         case stores([Store], PageID)
     }
 
@@ -371,6 +380,35 @@ final class AppModel {
         }
     }
 
+    /// Creates several items with one undo step (dictation, KONZEPT §3.2). Returns the new items.
+    @discardableResult
+    func addItems(_ entries: [(title: String, page: PageID)]) async -> [ShoppingItem] {
+        guard let selectedListID else { return [] }
+        let matcher = StoreMatcher(stores: stores)
+        var created: [ShoppingItem] = []
+        for entry in entries {
+            let title = entry.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !title.isEmpty else { continue }
+            let store = entry.page.storeID.flatMap(store(_:))
+            do {
+                let snapshot = try await gateway.createReminder(
+                    title: title,
+                    notes: StoreMarker.write(storeName: store?.name, into: nil),
+                    in: selectedListID
+                )
+                let item = ShoppingItemMapper.item(from: snapshot, matcher: matcher)
+                items.append(item)
+                created.append(item)
+                if let store { rememberAssignment(of: item, to: store) }
+            } catch {
+                present(error)
+            }
+        }
+        if let last = created.last { recentlyAddedItemID = last.id }
+        if !created.isEmpty, !isUndoing { lastUndoAction = .creations(created) }
+        return created
+    }
+
     /// Moves an item to a store (or back to unsorted) and learns from it.
     func assign(_ item: ShoppingItem, to store: Store?, learn: Bool = true) async {
         if !isUndoing, item.storeID != store?.id { lastUndoAction = .assignment(item) }
@@ -385,6 +423,19 @@ final class AppModel {
         if !isUndoing { lastUndoAction = .rename(item) }
         update(item.id) { $0.title = title }
         await perform { _ = try await $0.updateTitle(title, ofReminder: item.id) }
+    }
+
+    /// Replaces the user's part of the notes; the 🛒 marker line stays as it is in Reminders.
+    func setNotes(_ notes: String, for item: ShoppingItem) async {
+        let text = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let userNotes = text.isEmpty ? nil : text
+        guard userNotes != item.userNotes else { return }
+        update(item.id) { $0.userNotes = userNotes }
+        await perform {
+            _ = try await $0.updateNotes(ofReminder: item.id) { current in
+                StoreMarker.write(storeName: StoreMarker.parse(current).storeName, into: userNotes)
+            }
+        }
     }
 
     /// Checks an item off – or, within the undo window, back on (KONZEPT §7.2).
@@ -467,6 +518,10 @@ final class AppModel {
             if let current = items.first(where: { $0.id == created.id }) {
                 await delete(current)
             }
+        case .creations(let created):
+            for item in created {
+                if let current = items.first(where: { $0.id == item.id }) { await delete(current) }
+            }
         case .stores(let previous, let page):
             for old in previous {
                 guard let index = stores.firstIndex(where: { $0.id == old.id }) else { continue }
@@ -513,13 +568,14 @@ final class AppModel {
     /// Opens the composer on `page`. A hidden store becomes planned so its card appears.
     /// Opens a card full screen – not while typing, and not the "Weitere Läden" card.
     func focus(_ page: PageID) {
-        guard page != .more, composerTarget == nil, focusedPage == nil else { return }
+        guard hasLoadedItems, page != .more, composerTarget == nil, editingItemID == nil, focusedPage == nil else { return }
         dismissBriefing()
         activePage = page
         focusedPage = page
     }
 
     func startComposer(on page: PageID) {
+        editingItemID = nil
         dismissBriefing()
         var page = page
         if page == .more { page = .unsorted }

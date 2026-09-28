@@ -21,6 +21,10 @@ struct StoreCard: View {
     @State private var isDraggingList = false
     /// Measured height of the inbox footer, so the last item can scroll above it.
     @State private var triageFooterHeight: CGFloat = 100
+    @State private var revealLoadedContent = false
+    @State private var hasShownSkeleton = false
+    @State private var skeletonPulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var showsTriageFooter: Bool { store == nil && !items.isEmpty && !isExpanded }
 
     private var tint: Color { store?.color ?? .gray }
@@ -33,25 +37,17 @@ struct StoreCard: View {
     var body: some View {
         VStack(spacing: 0) {
             if showsHeader { header }
-            if isExpanded, store != nil {
-                itemList
-            } else if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
-                VStack(spacing: 0) {
-                    // With the keyboard up, the card can get too short for the full empty state.
-                    ViewThatFits(in: .vertical) {
-                        emptyState(showsSymbol: true)
-                        emptyState(showsSymbol: false)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background {
-                            Color.clear
-                                .contentShape(Rectangle())
-                                .onTapGesture(perform: dismissComposerFromBackground)
-                        }
+            ZStack {
+                if !model.hasLoadedItems {
+                    loadingContent
+                        .transition(.opacity.combined(with: .offset(y: -8)))
+                } else {
+                    loadedContent
+                        .opacity(revealLoadedContent ? 1 : 0)
+                        .offset(y: revealLoadedContent ? 0 : 12)
                 }
-            } else {
-                itemList
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .modifier(CardChrome(isExpanded: isExpanded, glowColor: store?.color))
@@ -76,12 +72,85 @@ struct StoreCard: View {
             Task { for item in moved { await model.assign(item, to: store) } }
             return true
         }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.38), value: model.hasLoadedItems)
+        .onChange(of: model.hasLoadedItems, initial: true) { old, loaded in
+            if !loaded {
+                hasShownSkeleton = true
+                revealLoadedContent = false
+            } else if hasShownSkeleton && old != loaded && !reduceMotion {
+                withAnimation(.smooth(duration: 0.48).delay(0.1)) {
+                    revealLoadedContent = true
+                }
+            } else {
+                revealLoadedContent = true
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var loadedContent: some View {
+        if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
+            ViewThatFits(in: .vertical) {
+                emptyState(showsSymbol: true)
+                emptyState(showsSymbol: false)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                if isExpanded && model.composerTarget == nil {
+                    Color(.secondarySystemGroupedBackground)
+                } else {
+                    Button(action: handleBackgroundTap) {
+                        Color(.secondarySystemGroupedBackground)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(model.composerTarget == nil ? "Liste öffnen" : "Eingabe schließen")
+                }
+            }
+        } else {
+            itemList
+        }
+    }
+
+    private var loadingContent: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(0..<6, id: \.self) { index in
+                HStack(spacing: 14) {
+                    Circle()
+                        .strokeBorder(Color(.tertiarySystemFill), lineWidth: 2)
+                        .frame(width: 27, height: 27)
+                    Capsule()
+                        .fill(Color(.tertiarySystemFill))
+                        .frame(width: [144, 106, 178, 126, 158, 96][index], height: 9)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 58)
+                if index < 5 {
+                    Rectangle()
+                        .fill(Color(.separator).opacity(0.3))
+                        .frame(height: 0.5)
+                        .padding(.leading, 62)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.top, 10)
+        .opacity(skeletonPulse ? 0.68 : 1)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 1.05).repeatForever(autoreverses: true)) {
+                skeletonPulse = true
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Einträge werden geladen")
     }
 
     // MARK: Header
 
     private var header: some View {
-        StoreCardHeader(page: page, store: store, items: items, state: state, isExpanded: isExpanded, showsActions: showsHeaderActions)
+        StoreCardHeader(page: page, store: store, items: items, state: state, isExpanded: isExpanded, showsActions: showsHeaderActions, isLoading: !model.hasLoadedItems)
     }
 
     // MARK: Items
@@ -100,8 +169,11 @@ struct StoreCard: View {
                     // Category sections in walking order for grocery stores, one flat list otherwise (KONZEPT §6.3).
                     ForEach(model.sections(for: page, items: items)) { section in
                         Section {
-                            ForEach(section.items) { item in
+                            ForEach(Array(section.items.enumerated()), id: \.element.id) { index, item in
                                 ItemRow(item: item, tint: readableTint)
+                                    .opacity(revealLoadedContent ? 1 : 0)
+                                    .offset(y: revealLoadedContent ? 0 : 8)
+                                    .animation(reduceMotion ? nil : .smooth(duration: 0.42).delay(Double(min(index, 8)) * 0.045), value: revealLoadedContent)
                                     .listRowBackground(Color(.secondarySystemGroupedBackground))
                                     .listRowSeparator(.visible, edges: .bottom)
                                     .listRowSeparatorTint(Color(.separator).opacity(0.4))
@@ -113,6 +185,17 @@ struct StoreCard: View {
                                     .font(.subheadline.weight(.semibold))
                                     .textCase(nil)
                                     .foregroundStyle(readableTint)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    // Pinned while scrolling: an opaque band, so rows never
+                                    // show through the section title.
+                                    .background {
+                                        Color(.secondarySystemGroupedBackground)
+                                            .padding(.horizontal, -40)
+                                            // UIKit leaves a fractional top inset around pinned
+                                            // plain-list headers. Cover it before a row can peek through.
+                                            .padding(.top, -12)
+                                            .padding(.bottom, -8)
+                                    }
                             }
                         }
                     }
@@ -121,13 +204,12 @@ struct StoreCard: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background {
-                // A tap on unused list space closes the composer. List rows and their
-                // controls stay in front of this background hit target.
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture(perform: dismissComposerFromBackground)
-            }
+            // The pinned section titles carry their own opaque band. The top edge effect would
+            // tint them with the bar's color scheme (black under a dark brand color).
+            .scrollEdgeEffectHidden(true, for: .top)
+            // The List's own scroll view consumes taps before its background sees them.
+            // A parent tap handles unused white space; row buttons keep their own actions.
+            .onTapGesture(perform: handleBackgroundTap)
             .scrollIndicators(.visible)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Color.clear.frame(height: isExpanded ? 72 : (showsTriageFooter ? triageFooterHeight : 54))
@@ -169,9 +251,12 @@ struct StoreCard: View {
         }
     }
 
-    private func dismissComposerFromBackground() {
-        guard model.composerTarget != nil else { return }
-        model.endComposer()
+    private func handleBackgroundTap() {
+        if model.composerTarget != nil {
+            model.endComposer()
+        } else if !isExpanded {
+            model.focus(page)
+        }
     }
 
     /// Entry into the triage flow, pinned to the bottom of the inbox card (KONZEPT §7.4), centered.
@@ -304,6 +389,7 @@ struct StoreCardHeader: View {
     var showsBackground = true
     /// Store menu and close button. Off where the system bar carries them (Duo detail view).
     var showsActions = true
+    var isLoading = false
 
     @Environment(AppModel.self) private var model
 
@@ -324,9 +410,16 @@ struct StoreCardHeader: View {
                     .font(.title2.bold())
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                Text(subtitle)
-                    .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
+                if isLoading {
+                    Capsule()
+                        .fill(.white.opacity(0.4))
+                        .frame(width: 94, height: 8)
+                        .accessibilityLabel("Einträge werden geladen")
+                } else {
+                    Text(Self.subtitle(store: store, items: items, state: state, distance: store.flatMap { model.distanceText(to: $0.id) }))
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                }
             }
             Spacer(minLength: 0)
             if showsActions {
@@ -381,12 +474,11 @@ struct StoreCardHeader: View {
         }
     }
 
-    private var subtitle: String {
+    static func subtitle(store: Store?, items: [ShoppingItem], state: StoreCardState?, distance: String?) -> String {
         let open = items.filter { !$0.isCompleted }.count
         guard let store else {
             return open == 0 ? String(localized: "Alles sortiert") : String(localized: "\(open) zum Zuordnen")
         }
-        let distance = model.distanceText(to: store.id)
         if let address = store.address, !address.isEmpty { return [address, distance].compactMap { $0 }.joined(separator: " · ") }
         if let detail = store.detail, !detail.isEmpty { return [detail, distance].compactMap { $0 }.joined(separator: " · ") }
         if let distance, open > 0 { return String(localized: "\(open) offen · \(distance)") }
@@ -411,18 +503,37 @@ struct StoreActionsMenu<MenuLabel: View>: View {
     @State private var showsStoreDetails = false
     @State private var showsMap = false
     @State private var showsLoyaltyEditor = false
+    @State private var showsLoyaltyCards = false
+    @State private var showsLeaflet = false
+
+    private var cards: [LoyaltyCard] { model.loyaltyCards(for: store.id) }
+    private var leafletURL: URL? {
+        store.catalogKey.flatMap { model.catalog?.entry(forKey: $0) }?.leafletURL
+    }
 
     var body: some View {
         Menu {
-            Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
-            Button("Karte", systemImage: "map") { showsMap = true }
-            Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
-            Button("Kundenkarte hinzufügen", systemImage: "wallet.pass") { showsLoyaltyEditor = true }
-            if store.type.showsCategorySections {
-                Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
+            Section {
+                if leafletURL != nil {
+                    Button("Aktueller Prospekt", systemImage: "newspaper") { showsLeaflet = true }
+                }
+                if !cards.isEmpty {
+                    Button(cards.count == 1 ? "Kundenkarte zeigen" : "Kundenkarten zeigen", systemImage: "wallet.pass.fill") {
+                        showsLoyaltyCards = true
+                    }
+                }
+                Button("Kundenkarte hinzufügen", systemImage: "wallet.pass") { showsLoyaltyEditor = true }
             }
-            if items.isEmpty {
-                Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
+            Section {
+                Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
+                Button("Karte", systemImage: "map") { showsMap = true }
+                Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
+                if store.type.showsCategorySections {
+                    Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
+                }
+                if items.isEmpty {
+                    Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
+                }
             }
         } label: {
             label
@@ -440,6 +551,12 @@ struct StoreActionsMenu<MenuLabel: View>: View {
         }
         .sheet(isPresented: $showsLoyaltyEditor) {
             LoyaltyCardEditor(for: store).leadingSheetPlacement()
+        }
+        .fullScreenCover(isPresented: $showsLoyaltyCards) {
+            LoyaltyCardScreen(cards: cards)
+        }
+        .sheet(isPresented: $showsLeaflet) {
+            if let leafletURL { SafariView(url: leafletURL).ignoresSafeArea() }
         }
     }
 }
@@ -498,6 +615,7 @@ struct ItemRow: View {
 
     @Environment(AppModel.self) private var model
     @State private var isEditing = false
+    @State private var isEditingNote = false
     @State private var draftTitle = ""
     @FocusState private var isTitleFocused: Bool
 
@@ -558,28 +676,16 @@ struct ItemRow: View {
         }
         .draggable(item.id)
         .contextMenu {
-            Menu("Laden ändern", systemImage: "storefront") {
-                Button("Inbox", systemImage: item.storeID == nil ? "checkmark" : "tray") {
-                    Task { await model.assign(item, to: nil) }
-                }
-                ForEach(model.stores.sorted { $0.sortIndex < $1.sortIndex }) { store in
-                    Button(store.name, systemImage: item.storeID == store.id ? "checkmark" : "circle.fill") {
-                        Task { await model.assign(item, to: store) }
-                    }
-                }
-            }
-            Menu("Kategorie ändern", systemImage: "square.grid.2x2") {
-                let current = model.category(of: item)
-                ForEach(ItemCategory.allCases, id: \.self) { category in
-                    Button(category.displayName, systemImage: category == current ? "checkmark" : category.symbol) {
-                        model.setCategory(category, for: item)
-                    }
-                }
-            }
-            Button("Bearbeiten", systemImage: "pencil", action: startEditing)
-            Button("Löschen", systemImage: "trash", role: .destructive) {
-                Task { await model.delete(item) }
-            }
+            ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+        }
+        .sheet(isPresented: $isEditingNote) {
+            ItemNoteSheet(item: item)
+        }
+        .onChange(of: model.editingItemID) { _, editingID in
+            if isEditing && editingID != item.id { finishEditing() }
+        }
+        .onDisappear {
+            if isEditing { finishEditing() }
         }
         .tint(.primary)
     }
@@ -596,6 +702,7 @@ struct ItemRow: View {
     private func startEditing() {
         draftTitle = item.title
         isEditing = true
+        model.editingItemID = item.id
         DispatchQueue.main.async { isTitleFocused = true }
     }
 
@@ -603,6 +710,7 @@ struct ItemRow: View {
         guard isEditing else { return }
         isEditing = false
         isTitleFocused = false
+        if model.editingItemID == item.id { model.editingItemID = nil }
         let title = draftTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         if !title.isEmpty && title != item.title {
             Task { await model.rename(item, to: title) }

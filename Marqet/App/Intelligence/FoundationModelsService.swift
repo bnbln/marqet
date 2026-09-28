@@ -14,6 +14,14 @@ protocol IntelligenceService: Sendable {
     func suggestStores(for titles: [String], stores: [IntelligenceStore]) async throws -> [String: String]
     /// Item title → category.
     func categorize(_ titles: [String]) async throws -> [String: ItemCategory]
+    /// A spoken shopping list → entries with stores, streamed while the model writes (KONZEPT §3).
+    func interpretDictation(_ transcript: String, stores: [String], language: VoiceLanguage) -> AsyncThrowingStream<[SpokenEntry], any Error>
+}
+
+extension IntelligenceService {
+    func interpretDictation(_ transcript: String, stores: [String], language: VoiceLanguage) -> AsyncThrowingStream<[SpokenEntry], any Error> {
+        AsyncThrowingStream { $0.finish() }
+    }
 }
 
 /// Apple Intelligence via Foundation Models, with guided generation.

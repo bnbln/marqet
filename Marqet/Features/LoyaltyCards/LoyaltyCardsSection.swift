@@ -63,35 +63,6 @@ struct LoyaltyCardsSection: View {
     }
 }
 
-/// The store's customer card as a system-bar button (compact full screen). One card opens it
-/// directly; without a card the button offers to add one, so the place stays learnable.
-struct LoyaltyCardToolbarButton: View {
-    let store: Store
-    @Environment(AppModel.self) private var model
-    @State private var showsCards = false
-    @State private var showsEditor = false
-
-    var body: some View {
-        let cards = model.loyaltyCards(for: store.id)
-        Group {
-            if cards.isEmpty {
-                Button("Kundenkarte hinzufügen", systemImage: "wallet.pass") { showsEditor = true }
-            } else {
-                Button(cards.count == 1 ? "Kundenkarte zeigen" : "Kundenkarten zeigen", systemImage: "wallet.pass.fill") {
-                    showsCards = true
-                }
-            }
-        }
-        .tint(.primary)
-        .fullScreenCover(isPresented: $showsCards) {
-            LoyaltyCardScreen(cards: cards)
-        }
-        .sheet(isPresented: $showsEditor) {
-            LoyaltyCardEditor(for: store)
-        }
-    }
-}
-
 /// Settings → Kundenkarten: all cards, including those without a store.
 struct LoyaltyCardsSettingsView: View {
     @Environment(AppModel.self) private var model

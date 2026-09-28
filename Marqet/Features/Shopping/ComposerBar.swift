@@ -40,16 +40,23 @@ struct ComposerBar: View {
                     placeholder: placeholder,
                     onCommit: commit
                 )
-                Button("Senden", systemImage: "arrow.up.circle.fill", action: send)
-                    .labelStyle(.iconOnly)
-                    .font(.system(size: 30))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(
-                        canSend ? Color.white : Color(.tertiaryLabel),
-                        canSend ? accentColor : Color(.tertiarySystemFill)
-                    )
-                    .disabled(!canSend)
-                    .animation(.snappy, value: canSend)
+                // Empty field: dictate instead (KONZEPT §3.1); unnamed items go to the target card.
+                Group {
+                    if canSend {
+                        Button("Senden", systemImage: "arrow.up.circle.fill", action: send)
+                            .foregroundStyle(Color.white, accentColor)
+                    } else {
+                        Button("Einsprechen", systemImage: "mic.circle.fill") {
+                            model.startVoice(defaultPage: model.composerTarget)
+                        }
+                        .foregroundStyle(Color.primary, Color(.tertiarySystemFill))
+                    }
+                }
+                .labelStyle(.iconOnly)
+                .font(.system(size: 30))
+                .symbolRenderingMode(.palette)
+                .contentTransition(.symbolEffect(.replace))
+                .animation(.snappy, value: canSend)
             }
             .padding(.leading, 16)
             .padding(.trailing, 8)

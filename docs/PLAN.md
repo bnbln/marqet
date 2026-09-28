@@ -1,6 +1,30 @@
 # Marqet – Soll-Ist-Vergleich und Plan
 
-Stand: 26.09.2026 · Grundlage: deine Anforderungen (Chat), [KONZEPT.md](KONZEPT.md), [KONZEPT-DUO-IPAD.md](KONZEPT-DUO-IPAD.md), [MARKTANALYSE.md](MARKTANALYSE.md) sowie der Code auf `main` (Commit `2c99e7b`, plus eine vorgemerkte Änderung an `StorePager.swift`).
+Stand: 28.09.2026 (§0 neu, §1–§8 vom 26.09.) · Grundlage: deine Anforderungen (Chat), [KONZEPT.md](KONZEPT.md), [KONZEPT-DUO-IPAD.md](KONZEPT-DUO-IPAD.md), [MARKTANALYSE.md](MARKTANALYSE.md) sowie der Code auf `main`.
+
+---
+
+## 0. v1.0 fertig machen (Stand 28.09.2026)
+
+Entscheidung vom 28.09.: **Erst v1.0 bis zum Launch abschließen**, danach Siri und Widgets (v1.1, ein erster Entwurf entsteht parallel). Legende: ✅ erledigt · 🟡 teilweise · 👤 braucht dich · ❌ offen
+
+| # | Punkt | Stand | Anmerkung |
+|---|---|---|---|
+| B1 | Kauf (StoreKit 2, Paywall, Familienfreigabe, Wiederherstellen) | ✅ | 28.09.: Fehler behoben, bei dem ein bezahltes Pro gesperrt bleiben konnte (Freischaltung jetzt direkt aus der verifizierten Transaktion) |
+| B2 | Logo-Rückfallschalter (E1) | ✅ | Build-Setting `MARQET_BRAND_LOGOS = NO` zeigt überall Monogramme (auch Edeka/Netto). Getestet |
+| B3 | Datenschutz-Manifest | ✅ | `PrivacyInfo.xcprivacy`, UserDefaults CA92.1 |
+| B4 | Rechtliches | 🟡 👤 | Entwürfe in `docs/legal` um Kamera und Kundenkarten ergänzt. **Du:** Name, Anschrift, Support-Adresse in Impressum und Datenschutz eintragen, Seiten veröffentlichen, URLs in App Store Connect, rechtliche Prüfung |
+| B5 | Echte Geräte | 👤 | iPhone mit iCloud (Marker-Sync, geteilte Liste), Duo (Schließen-Button, Buch-Layout), Kamera-Scan der Kundenkarten, mehrzeiliges Einfügen im Composer |
+| B6 | SwiftData-Versionierung | ✅ | V0 → V1 → V2 mit Migrationstests |
+| B7 | Englisch | ✅ | 341 von 341 Texten übersetzt, Berechtigungstexte inklusive; im Simulator geprüft (Home, Onboarding). Store-Texte und Screenshots fehlen noch (👤, siehe B9) |
+| B8 | Qualitätsrunde | 🟡 | ✅ Onboarding-Raster, Header-Farben, Abschnitts-Überschriften deckend, Composer schließt im Vollbild per Tipp, „TK“ → Tiefkühl. ❌ VoiceOver-Durchgang, Dynamic Type AX5, 300-Einträge-Performance, Fehlerzustände (Liste gelöscht, Zugriff entzogen) |
+| B9 | TestFlight-Beta | 👤 | Mindestens 5 Haushalte, 2–3 Wochen |
+| B10 | Developer-Account, Bundle-ID, Markenrecherche „Marqet“ | 👤 | Team `C4VHG63LL9` ist eingetragen, Bundle-ID `app.marqet.Marqet` bestätigen |
+| B11 | „Orte“ | ✅ | Filialen, Karte, Sortierung nach Entfernung und Smart |
+| – | Niedrigerer Header im kompakten Vollbild | ❌ | Vorschlag: Logo und Name in die Systemleiste, farbiger Streifen schmaler. Entscheidung offen |
+| – | ShopFully-Erstanfrage (Gate G2) | 👤 | unverbindlich, vor dem Launch |
+
+**Reihenfolge ab jetzt:** Qualitätsrunde (B8) → deine Punkte B4, B10 parallel → echte Geräte (B5) → TestFlight (B9) → Einreichung.
 
 ---
 

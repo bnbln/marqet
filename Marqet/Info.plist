@@ -27,12 +27,18 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>MarqetUsesBrandLogos</key>
+	<string>$(MARQET_BRAND_LOGOS)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Marqet scannt mit der Kamera den Barcode deiner Kundenkarten. Die Bilder verlassen dein Gerät nicht.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Marqet hört zu, wenn du deine Einkäufe einsprichst. Die Aufnahme wird auf deinem Gerät in Text umgewandelt und nicht gespeichert.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Marqet wandelt deine eingesprochenen Einkäufe auf deinem Gerät in Einträge für deine Listen um.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

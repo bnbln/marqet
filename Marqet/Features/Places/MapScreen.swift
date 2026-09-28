@@ -18,6 +18,7 @@ struct MapScreen: View {
     @State private var searchResults: [PlaceResult] = []
     @State private var selectedPin: MapPin?
     @State private var isLoading = false
+    @AppStorage("mapShowsOnlyStoresWithItems") private var showsOnlyStoresWithItems = true
 
     private static let initialRadius: Double = 2_500
 
@@ -27,6 +28,7 @@ struct MapScreen: View {
 
     var body: some View {
         let pins = model.mapPins(found: found).filter { pin in
+            guard showsOnlyStoresWithItems else { return true }
             guard let store = pin.store else { return false }
             return model.openItemCount(of: store.id) > 0
         }
@@ -68,8 +70,9 @@ struct MapScreen: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(role: .close) { dismiss() }
                 }
+                ToolbarItem(placement: .primaryAction) { filterMenu }
                 if isLoading {
-                    ToolbarItem(placement: .primaryAction) { ProgressView() }
+                    ToolbarItem(placement: .topBarTrailing) { ProgressView() }
                 }
             }
             .task {
@@ -81,6 +84,11 @@ struct MapScreen: View {
                     scheduleLoad(center: origin, radius: Self.initialRadius, immediately: true)
                 }
             }
+            .onChange(of: showsOnlyStoresWithItems) {
+                // Other stores need their own branch search; start again where the map is.
+                guard let lastLoad else { return }
+                scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
+            }
             .sheet(item: $selectedPin) { pin in
                 PinSheet(pin: pin) { page in
                     selectedPin = nil
@@ -90,10 +98,21 @@ struct MapScreen: View {
                         dismiss()
                     }
                 }
-                .presentationDetents([.height(300)])
             }
         }
         .tint(.primary)
+    }
+
+    private var filterMenu: some View {
+        Menu {
+            Picker("Anzeigen", selection: $showsOnlyStoresWithItems) {
+                Label("Läden mit Einträgen", systemImage: "checklist").tag(true)
+                Label("Alle Läden", systemImage: "storefront").tag(false)
+            }
+        } label: {
+            Label("Filter", systemImage: "line.3.horizontal.decrease")
+        }
+        .accessibilityValue(showsOnlyStoresWithItems ? "Läden mit Einträgen" : "Alle Läden")
     }
 
     private func title(of pin: MapPin) -> String {
@@ -132,7 +151,7 @@ struct MapScreen: View {
         isLoading = true
         defer { isLoading = false }
         var results: [PlaceResult] = []
-        for store in model.storesForBranchSearch() {
+        for store in model.storesForBranchSearch(onlyWithItems: showsOnlyStoresWithItems) {
             guard !Task.isCancelled else { return }
             let chain = store.catalogKey.flatMap { model.catalog?.entry(forKey: $0) }
             results += (try? await model.placeSearch.branches(of: store, chain: chain, near: center, radius: radius)) ?? []
@@ -306,33 +325,179 @@ private struct CountBadge: View {
 // MARK: - Sheet
 
 /// Actions for a pin: go to the card, save a branch, add a chain or place as a store, route.
+/// Opaque and sized to its content, so nothing of the map shows through the text.
 private struct PinSheet: View {
     let pin: MapPin
     /// Called when done; a page means "show this card".
     let onDone: (PageID?) -> Void
     @Environment(AppModel.self) private var model
+    @State private var height: CGFloat = 300
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 14) {
-                badge
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(pin.store?.name ?? pin.place?.name ?? "").font(.headline)
-                    Text([address, model.distanceText(to: pin.coordinate)].compactMap { $0 }.joined(separator: " · "))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            if let store = pin.store {
-                Text("\(model.openItemCount(of: store.id)) offene Einträge")
-                    .foregroundStyle(.secondary)
-            }
-            actions
+        VStack(alignment: .leading, spacing: 20) {
+            header
+            facts
+            if let store = pin.store { itemPreview(of: store) }
+            VStack(spacing: 10) { actions }
                 .controlSize(.large)
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+        .fixedSize(horizontal: false, vertical: true)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
         .frame(maxHeight: .infinity, alignment: .top)
-        .tint(.primary)
+        .presentationDetents([.height(height)])
+        .presentationBackground(Color(.systemBackground))
+        .presentationDragIndicator(.visible)
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 14) {
+            badge
+            VStack(alignment: .leading, spacing: 3) {
+                Text(kindLabel)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(accentText)
+                Text(name)
+                    .font(.title2.bold())
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: 0)
+            Button(role: .close) { onDone(nil) }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .tint(.primary)
+        }
+    }
+
+    /// Address and distance on their own lines – the address may be long, the distance never is.
+    private var facts: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let address {
+                Label(address, systemImage: "mappin.and.ellipse")
+                    .foregroundStyle(.primary)
+            }
+            HStack(spacing: 8) {
+                if let distance = model.distanceText(to: pin.coordinate) {
+                    Chip(text: Text(distance), symbol: "location.fill")
+                }
+                if case .saved(let location) = pin.kind, location.isPreferred {
+                    Chip(text: Text("Bevorzugt"), symbol: "star.fill")
+                }
+                if let store = pin.store {
+                    let count = model.openItemCount(of: store.id)
+                    Chip(text: count == 1 ? Text("1 offener Eintrag") : Text("\(count) offene Einträge"), symbol: "checklist")
+                }
+            }
+        }
+        .font(.subheadline)
+        .labelStyle(FactLabelStyle())
+    }
+
+    /// The first open items, so the sheet answers "what do I need here?".
+    @ViewBuilder
+    private func itemPreview(of store: Store) -> some View {
+        let open = model.items.filter { !$0.isCompleted && $0.storeID == store.id }
+        if !open.isEmpty {
+            let shown = open.prefix(4).map(\.title).joined(separator: ", ")
+            let rest = open.count - min(open.count, 4)
+            Text(rest > 0 ? "\(shown) und \(rest) weitere" : shown)
+                .font(.body)
+                .foregroundStyle(.primary)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(14)
+                .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 16, style: .continuous))
+        }
+    }
+
+    @ViewBuilder
+    private var badge: some View {
+        if let store = shownStore {
+            StoreBadge(store: store, size: 52)
+        } else {
+            Image(systemName: pin.place?.suggestedType.defaultSymbol ?? "mappin")
+                .font(.title2)
+                .foregroundStyle(.primary)
+                .frame(width: 52, height: 52)
+                .background(Color(.tertiarySystemFill), in: .circle)
+        }
+    }
+
+    // MARK: Actions
+
+    @ViewBuilder
+    private var actions: some View {
+        switch pin.kind {
+        case .saved(let location):
+            if let store = pin.store {
+                primaryButton("Zur Card", symbol: "rectangle.stack") { onDone(.store(store.id)) }
+            }
+            HStack(spacing: 10) {
+                routeButton
+                if !location.isPreferred {
+                    secondaryButton("Bevorzugen", symbol: "star") {
+                        model.setPreferredLocation(location)
+                        onDone(nil)
+                    }
+                }
+            }
+        case .branch(let place):
+            if let store = pin.store {
+                primaryButton("Als meine Filiale merken", symbol: "mappin.and.ellipse") {
+                    model.addLocation(place, to: store.id)
+                    onDone(nil)
+                }
+                HStack(spacing: 10) {
+                    secondaryButton("Zur Card", symbol: "rectangle.stack") { onDone(.store(store.id)) }
+                    routeButton
+                }
+            }
+        case .suggestion(let place, _), .place(let place):
+            primaryButton("Als Laden hinzufügen", symbol: "plus") {
+                model.addStore(from: place)
+                onDone(nil)
+            }
+            routeButton
+        }
+    }
+
+    private func primaryButton(_ title: LocalizedStringKey, symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(onAccent)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.glassProminent)
+        .tint(accent)
+    }
+
+    private func secondaryButton(_ title: LocalizedStringKey, symbol: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Label(title, systemImage: symbol)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.glass)
+    }
+
+    private var routeButton: some View {
+        secondaryButton("Route", symbol: "arrow.triangle.turn.up.right.diamond") {
+            PlaceResult(name: name, address: address, coordinate: pin.coordinate, mapItemIdentifier: nil, suggestedType: .other).openInMaps()
+        }
+    }
+
+    // MARK: Data
+
+    private var name: String {
+        pin.store?.name ?? pin.place?.name ?? ""
     }
 
     private var address: String? {
@@ -342,70 +507,50 @@ private struct PinSheet: View {
         }
     }
 
-    @ViewBuilder
-    private var badge: some View {
-        if let store = pin.store {
-            StoreBadge(store: store, size: 44)
-        } else if case .suggestion(_, let key) = pin.kind, let chain = model.catalog?.entry(forKey: key) {
-            StoreBadge(store: chain.makeStore(sortIndex: 0), size: 44)
-        } else {
-            Image(systemName: pin.place?.suggestedType.defaultSymbol ?? "mappin")
-                .font(.title2)
-                .frame(width: 44, height: 44)
-                .background(Color(.tertiarySystemFill), in: .circle)
-        }
-    }
-
-    @ViewBuilder
-    private var actions: some View {
+    private var kindLabel: LocalizedStringKey {
         switch pin.kind {
-        case .saved(let location):
-            HStack(spacing: 12) {
-                if let store = pin.store {
-                    Button("Zur Card", systemImage: "rectangle.stack") { onDone(.store(store.id)) }
-                        .buttonStyle(.glassProminent)
-                }
-                routeButton
-            }
-            if !location.isPreferred {
-                Button("Als bevorzugte Filiale", systemImage: "star") {
-                    model.setPreferredLocation(location)
-                    onDone(nil)
-                }
-            }
-        case .branch(let place):
-            if let store = pin.store {
-                Button {
-                    model.addLocation(place, to: store.id)
-                    onDone(nil)
-                } label: {
-                    Label("Als meine Filiale merken", systemImage: "mappin.and.ellipse").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.glassProminent)
-                HStack(spacing: 12) {
-                    Button("Zur Card", systemImage: "rectangle.stack") { onDone(.store(store.id)) }
-                        .buttonStyle(.glass)
-                    routeButton
-                }
-            }
-        case .suggestion(let place, _), .place(let place):
-            Button {
-                model.addStore(from: place)
-                onDone(nil)
-            } label: {
-                Label("Als Laden hinzufügen", systemImage: "plus").frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.glassProminent)
-            routeButton
+        case .saved: "Deine Filiale"
+        case .branch: "Filiale in der Nähe"
+        case .suggestion: "Noch nicht in deinen Läden"
+        case .place: "Ort"
         }
     }
 
-    private var routeButton: some View {
-        Button("Route", systemImage: "arrow.triangle.turn.up.right.diamond") {
-            let name = pin.store?.name ?? pin.place?.name ?? ""
-            PlaceResult(name: name, address: address, coordinate: pin.coordinate, mapItemIdentifier: nil, suggestedType: .other).openInMaps()
+    /// The own store, or the chain as a store for suggestions.
+    private var shownStore: Store? {
+        if let store = pin.store { return store }
+        guard case .suggestion(_, let key) = pin.kind else { return nil }
+        return model.catalog?.entry(forKey: key)?.makeStore(sortIndex: 0)
+    }
+
+    private var accent: Color { shownStore?.color ?? .accentColor }
+    private var onAccent: Color { shownStore?.foregroundOnColor ?? .white }
+    private var accentText: Color { shownStore?.readableColor ?? .secondary }
+}
+
+private struct Chip: View {
+    let text: Text
+    let symbol: String
+
+    var body: some View {
+        Label { text } icon: { Image(systemName: symbol) }
+            .font(.subheadline.weight(.medium))
+            .foregroundStyle(.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color(.tertiarySystemFill), in: .capsule)
+    }
+}
+
+/// Icon in secondary colour, text in full contrast.
+private struct FactLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            configuration.icon
+                .foregroundStyle(.secondary)
+                .imageScale(.small)
+            configuration.title
         }
-        .buttonStyle(.glass)
     }
 }
 

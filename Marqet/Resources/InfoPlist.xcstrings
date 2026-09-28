@@ -27,6 +27,12 @@
             "state" : "new",
             "value" : "Marqet"
           }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet"
+          }
         }
       }
     },
@@ -38,6 +44,12 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Marqet scannt mit der Kamera den Barcode deiner Kundenkarten. Die Bilder verlassen dein Gerät nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet uses the camera to scan the barcode of your loyalty cards. The images never leave your device."
           }
         }
       }
@@ -60,6 +72,23 @@
         }
       }
     },
+    "NSMicrophoneUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet hört zu, wenn du deine Einkäufe einsprichst. Die Aufnahme wird auf deinem Gerät in Text umgewandelt und nicht gespeichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet listens when you dictate your shopping. The recording is turned into text on your device and never stored."
+          }
+        }
+      }
+    },
     "NSRemindersFullAccessUsageDescription" : {
       "comment" : "Reminders permission prompt",
       "extractionState" : "manual",
@@ -74,6 +103,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Marqet reads your shopping list from the Reminders app and saves an item's store in its notes."
+          }
+        }
+      }
+    },
+    "NSSpeechRecognitionUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet wandelt deine eingesprochenen Einkäufe auf deinem Gerät in Einträge für deine Listen um."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marqet turns your dictated shopping into entries for your lists, on your device."
           }
         }
       }

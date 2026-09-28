@@ -273,12 +273,13 @@ struct ShoppingRouteStop: Identifiable {
 }
 
 extension AppModel {
-    /// Stores whose branches the map looks up: only chains with open list items. MapKit
-    /// throttles searches, so at most `limit`.
-    func storesForBranchSearch(limit: Int = 8) -> [Store] {
-        Array(sortedStores.filter {
-            !($0.catalogKey?.hasPrefix("generic-") ?? false) && openItemCount(of: $0.id) > 0
-        }.prefix(limit))
+    /// Stores whose branches the map looks up: chains with open list items, with `onlyWithItems`
+    /// off the other chains after them. MapKit throttles searches, so at most `limit`.
+    func storesForBranchSearch(onlyWithItems: Bool = true, limit: Int = 8) -> [Store] {
+        let chains = sortedStores.filter { !($0.catalogKey?.hasPrefix("generic-") ?? false) }
+        let withItems = chains.filter { openItemCount(of: $0.id) > 0 }
+        let others = onlyWithItems ? [] : chains.filter { openItemCount(of: $0.id) == 0 }
+        return Array((withItems + others).prefix(limit))
     }
 
     /// Saved branches, branches of own stores found around the map, and chains not added yet.

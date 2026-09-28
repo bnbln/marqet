@@ -107,6 +107,12 @@ struct CategoryClassifierTests {
         ("Rice", .pantry), ("Beer", .alcohol), ("Ice cream", .frozen),
     ]
 
+    @Test(arguments: ["Spinat TK", "TK Erbsen", "Erbsen tiefgekühlt", "Himbeeren gefroren", "Frozen peas"])
+    func freezerMarkerWinsOverTheFirstWord(_ title: String) throws {
+        let classifier = CategoryClassifier(dictionary: try CategoryDictionary.bundled())
+        #expect(classifier.classify(title).category == .frozen)
+    }
+
     @Test func goldsetAccuracyIsAtLeast90Percent() {
         var misses: [String] = []
         for (title, expected) in Self.goldset {

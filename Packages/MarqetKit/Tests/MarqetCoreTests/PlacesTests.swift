@@ -68,7 +68,7 @@ struct PlacesTests {
     @Test func cardBuilderFollowsGivenOrder() {
         let items = [aldi, rewe, dm].map { ShoppingItem(id: $0.name, title: "x", storeRef: .known($0.id)) }
         let deck = CardBuilder.deck(items: items, stores: [aldi, rewe, dm], storeOrder: [dm.id, aldi.id])
-        #expect(deck.pages == [.brochures, .unsorted, .store(dm.id), .store(aldi.id), .store(rewe.id), .more])
+        #expect(deck.pages == [.map, .brochures, .unsorted, .store(dm.id), .store(aldi.id), .store(rewe.id), .more])
     }
 
     // MARK: Chain recognition

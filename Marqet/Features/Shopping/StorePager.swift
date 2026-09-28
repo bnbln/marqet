@@ -31,7 +31,9 @@ struct StorePager: View {
                         slotView(slot, content: content, deck: deck, metrics: metrics, horizontalSafeAreaInsets: proxy.safeAreaInsets)
                             .frame(width: metrics.slotWidth)
                             .padding(.top, 8)
-                            .padding(.bottom, 32)
+                            // Keep the active card close to the composer while typing so more
+                            // of its list remains visible above the keyboard.
+                            .padding(.bottom, model.composerTarget == nil ? 32 : 8)
                     }
                 }
                 .scrollTargetLayout()
@@ -242,6 +244,10 @@ struct PageIndicator: View {
     @ViewBuilder
     private func dot(for page: PageID) -> some View {
         switch page {
+        case .map:
+            Image(systemName: "map.fill")
+                .font(.system(size: 8, weight: .semibold))
+                .foregroundStyle(.secondary)
         case .brochures:
             Image(systemName: "newspaper.fill")
                 .font(.system(size: 8, weight: .semibold))
@@ -261,6 +267,7 @@ struct PageIndicator: View {
 
     private func label(for page: PageID) -> String {
         switch page {
+        case .map: String(localized: "Karte")
         case .brochures: String(localized: "Angebote")
         case .unsorted: String(localized: "Inbox")
         case .more: String(localized: "Weitere Läden")
@@ -278,6 +285,8 @@ struct PageCard: View {
 
     var body: some View {
         switch page {
+        case .map:
+            MapCard()
         case .brochures:
             BrochuresCard()
         case .more:

@@ -228,6 +228,7 @@ private struct PrivacyView: View {
             Text("Den Laden eines Eintrags speichert Marqet als Zeile „🛒 Laden“ in den Notizen der Erinnerung. Mit wem du die Liste teilst, sieht diese Zeile auch.")
             Text("Apple Intelligence läuft auf deinem Gerät. Marqet erfasst keine Nutzungsdaten.")
             Text("Deinen Standort nutzt Marqet nur, wenn du es erlaubst: für Filialen in der Nähe und die Sortierung nach Entfernung. Er wird weder gespeichert noch übertragen.")
+            Text("Kundenkarten bleiben auf deinem Gerät. Beim Scannen liest Marqet nur den Barcode aus, Kamerabilder werden weder gespeichert noch übertragen.")
             Text("Käufe wickelt der App Store von Apple ab. Marqet erhält keine Zahlungsdaten.")
         }
         .navigationTitle("Datenschutz")

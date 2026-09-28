@@ -2,6 +2,8 @@ import Foundation
 
 /// Stable identity of one page in the card pager and its scroll targets (KONZEPT §7.2).
 public enum PageID: Hashable, Sendable {
+    /// Map overview of the stores with open items, first page; opens the full map.
+    case map
     /// Central collection of official retailer brochures, before Inbox.
     case brochures
     case unsorted
@@ -11,6 +13,7 @@ public enum PageID: Hashable, Sendable {
 
     public var rawValue: String {
         switch self {
+        case .map: "map"
         case .brochures: "brochures"
         case .unsorted: "unsorted"
         case .more: "more"
@@ -20,6 +23,7 @@ public enum PageID: Hashable, Sendable {
 
     public init?(rawValue: String) {
         switch rawValue {
+        case "map": self = .map
         case "brochures": self = .brochures
         case "unsorted": self = .unsorted
         case "more": self = .more

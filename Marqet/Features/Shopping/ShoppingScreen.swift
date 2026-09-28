@@ -7,8 +7,9 @@ struct ShoppingScreen: View {
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showsAddStore = false
     @State private var showsSettings = false
+    @State private var showsProfile = false
+    @State private var showsLoyaltyCards = false
     @State private var showsStoreOrder = false
-    @State private var showsMap = false
     @State private var isComposerFocused = false
     /// Bumped by the add button and undo; each drives a light haptic tap.
     @State private var addFeedback = 0
@@ -36,7 +37,9 @@ struct ShoppingScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color(.systemGroupedBackground).ignoresSafeArea())
                     .overlay(alignment: .bottom) {
-                        if model.composerTarget == nil {
+                        if model.editingItemID != nil {
+                            editingCloseButton
+                        } else if model.composerTarget == nil {
                             bottomControls
                         }
                     }
@@ -54,19 +57,29 @@ struct ShoppingScreen: View {
                     .sheet(isPresented: $showsSettings) {
                         SettingsView()
                     }
+                    .sheet(isPresented: $showsProfile) {
+                        ProfileView()
+                    }
+                    .sheet(isPresented: $showsLoyaltyCards) {
+                        NavigationStack { LoyaltyCardsSettingsView() }
+                    }
                     .sheet(isPresented: $showsStoreOrder) {
                         StoreOrderSheet().leadingSheetPlacement()
                     }
                     .observeHinge($hinge)
-                    .sheet(isPresented: $showsMap) {
-                        MapScreen()
-                    }
+                    .voiceCaptureCover(isPresenter: model.focusedPage == nil)
                     .fullScreenCover(isPresented: triageBinding) {
                         TriageScreen()
                     }
                     .fullScreenCover(item: focusBinding) { focused in
-                        StoreFocusScreen(page: focused.page, hinge: hinge)
-                            .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
+                        Group {
+                            if focused.page == .map {
+                                MapScreen()
+                            } else {
+                                StoreFocusScreen(page: focused.page, hinge: hinge)
+                            }
+                        }
+                        .navigationTransition(.zoom(sourceID: focused.page.rawValue, in: cardZoom))
                     }
                     .overlay(alignment: .top) { briefingBlock }
                     .overlay(alignment: .top) {
@@ -92,7 +105,7 @@ struct ShoppingScreen: View {
                         if target != nil, model.focusedPage == nil { isComposerFocused = true }
                         if target == nil { isComposerFocused = false }
                     }
-                    .onChange(of: model.hasLoadedItems) { _, loaded in
+                    .onChange(of: model.hasLoadedItems, initial: true) { _, loaded in
                         #if DEBUG
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-compose") {
                             model.startComposer(on: model.deck.pages.first(where: { $0.storeID != nil }) ?? .unsorted)
@@ -101,8 +114,14 @@ struct ShoppingScreen: View {
                            let store = model.deck.pages.first(where: { $0.storeID != nil }) {
                             model.focus(store)
                         }
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-focus-inbox") {
+                            model.focus(.unsorted)
+                        }
                         if loaded, ProcessInfo.processInfo.arguments.contains("-demo-triage") {
                             model.startTriage()
+                        }
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-voice") {
+                            model.startVoice()
                         }
                         #endif
                     }
@@ -147,14 +166,64 @@ struct ShoppingScreen: View {
                 .offset(y: 12 + briefingAmount * 60)
                 .opacity(1 - briefingAmount)
             if !hinge.hasHinge {
-                HStack {
-                    Spacer()
-                    addMenu
+                if sizeClass == .compact {
+                    // iPhone: microphone at the left thumb, add at the right – the dots sit between.
+                    HStack {
+                        voiceButton
+                        Spacer()
+                        addMenu
+                    }
+                } else {
+                    GlassEffectContainer(spacing: 12) {
+                        HStack(spacing: 12) {
+                            Spacer()
+                            voiceButton
+                            addMenu
+                        }
+                    }
                 }
             }
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 4)
+    }
+
+    private var editingCloseButton: some View {
+        HStack {
+            Spacer()
+            Button {
+                model.editingItemID = nil
+            } label: {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .frame(width: 52, height: 52)
+                    .glassEffect(.regular.interactive(), in: .circle)
+                    .contentShape(.circle)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Bearbeiten schließen")
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 4)
+    }
+
+    /// Dictation next to the add button (KONZEPT §3.1): speak items and stores in one go.
+    private var voiceButton: some View {
+        Button {
+            addFeedback += 1
+            model.startVoice()
+        } label: {
+            Image(systemName: "mic.fill")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.primary)
+                .frame(width: 52, height: 52)
+                .glassEffect(.regular.interactive(), in: .circle)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Einsprechen")
+        .accessibilityHint("Sag, was du brauchst und wo du es kaufst.")
     }
 
     /// Add button: tap adds to the active card, long press picks the target (KONZEPT §7.3).
@@ -202,11 +271,19 @@ struct ShoppingScreen: View {
         .tint(.primary)
     }
 
-    // System navigation and settings items remain available in the iPhone Duo vertical bar.
+    // System navigation remains available in the iPhone Duo vertical bar.
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
-        if hinge.hasHinge, model.composerTarget == nil {
+        if hinge.hasHinge, model.composerTarget == nil, model.editingItemID == nil {
+            ToolbarItem(placement: .bottomBar) {
+                Button("Einsprechen", systemImage: "mic.fill") { model.startVoice() }
+                    .tint(.primary)
+            }
             ToolbarItem(placement: .bottomBar) { addToolbarMenu }
+        }
+        ToolbarItem(placement: .topBarLeading) {
+            profileMenu
+                .opacity(1 - briefingAmount)
         }
         ToolbarItem(placement: .topBarLeading) {
             VStack(alignment: .leading, spacing: 0) {
@@ -223,15 +300,6 @@ struct ShoppingScreen: View {
             .opacity(1 - briefingAmount)
         }
         .sharedBackgroundVisibility(.hidden)
-        if model.lastUndoAction != nil {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Rückgängig", systemImage: "arrow.uturn.backward") {
-                    undoFeedback += 1
-                    Task { await model.undoLastAction() }
-                }
-            }
-            ToolbarSpacer(.fixed, placement: .topBarTrailing)
-        }
         ToolbarItem(placement: .topBarTrailing) {
             Menu {
                 Button(model.showsCompleted ? "Erledigte ausblenden" : "Erledigte anzeigen",
@@ -247,12 +315,28 @@ struct ShoppingScreen: View {
             }
             .tint(.primary)
         }
-        ToolbarItem(placement: .topBarTrailing) {
-            Button("Karte", systemImage: "map") { showsMap = true }
-        }
-        ToolbarItem(placement: .topBarTrailing) {
+    }
+
+    private var profileMenu: some View {
+        Menu {
+            Button("Profil", systemImage: "person.crop.circle") { showsProfile = true }
+            Button("Kundenkarten", systemImage: "wallet.pass") { showsLoyaltyCards = true }
             Button("Einstellungen", systemImage: "gearshape") { showsSettings = true }
+            if model.lastUndoAction != nil {
+                Section("Letzte Aktion") {
+                    Button("Rückgängig", systemImage: "arrow.uturn.backward") {
+                        undoFeedback += 1
+                        Task { await model.undoLastAction() }
+                    }
+                }
+            }
+        } label: {
+            Label("Profil und mehr", systemImage: "person.fill")
+                .labelStyle(.iconOnly)
+                .font(.title3.weight(.semibold))
         }
+        .accessibilityLabel("Profil und mehr")
+        .tint(.primary)
     }
 }
 

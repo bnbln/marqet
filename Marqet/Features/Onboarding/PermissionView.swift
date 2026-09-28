@@ -19,17 +19,27 @@ struct PermissionView: View {
             }
         } actions: {
             if status == .notDetermined {
-                Button("Zugriff erlauben") {
+                Button {
                     Task { await model.requestAccess() }
+                } label: {
+                    Text("Zugriff erlauben")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .frame(maxWidth: 560)
             } else {
-                Button("Einstellungen öffnen") {
+                Button {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         openURL(url)
                     }
+                } label: {
+                    Text("Einstellungen öffnen")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .frame(maxWidth: 560)
             }
         }
     }

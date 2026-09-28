@@ -61,6 +61,16 @@ public final class OrderEntity {
     }
 }
 
+/// Layout of builds up to M6, before versioning. Listed only so staged migration recognizes
+/// those stores – without it, opening them fails and the app falls back to an in-memory store.
+public enum MarqetSchemaV0: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(0, 0, 0) }
+
+    public static var models: [any PersistentModel.Type] {
+        [StoreEntity.self, CategoryMemoryEntity.self, AssignmentMemoryEntity.self, OrderEntity.self]
+    }
+}
+
 /// Schema version 1 – the first released model (PLAN B6). Every later model change adds a new
 /// `VersionedSchema` and a stage in `MarqetMigrationPlan`, never an unversioned edit.
 public enum MarqetSchemaV1: VersionedSchema {
@@ -71,23 +81,37 @@ public enum MarqetSchemaV1: VersionedSchema {
     }
 }
 
+/// Schema version 2 – adds customer cards (KONZEPT #42). The other models are unchanged.
+public enum MarqetSchemaV2: VersionedSchema {
+    public static var versionIdentifier: Schema.Version { Schema.Version(2, 0, 0) }
+
+    public static var models: [any PersistentModel.Type] {
+        MarqetSchemaV1.models + [LoyaltyCardEntity.self]
+    }
+}
+
 public enum MarqetMigrationPlan: SchemaMigrationPlan {
-    public static var schemas: [any VersionedSchema.Type] { [MarqetSchemaV1.self] }
-    public static var stages: [MigrationStage] { [] }
+    public static var schemas: [any VersionedSchema.Type] { [MarqetSchemaV0.self, MarqetSchemaV1.self, MarqetSchemaV2.self] }
+    public static var stages: [MigrationStage] {
+        [
+            .lightweight(fromVersion: MarqetSchemaV0.self, toVersion: MarqetSchemaV1.self),
+            .lightweight(fromVersion: MarqetSchemaV1.self, toVersion: MarqetSchemaV2.self),
+        ]
+    }
 }
 
 /// One container for everything Marqet stores itself.
 public enum PersistenceContainer {
     /// `url` is for tests only; the app uses the default location in Application Support.
     public static func make(inMemory: Bool = false, url: URL? = nil) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: MarqetSchemaV1.self)
+        let schema = Schema(versionedSchema: MarqetSchemaV2.self)
         let configuration = if let url {
             ModelConfiguration("Marqet", schema: schema, url: url, cloudKitDatabase: .none)
         } else {
             ModelConfiguration("Marqet", schema: schema, isStoredInMemoryOnly: inMemory, cloudKitDatabase: .none)
         }
         return try ModelContainer(
-            for: Schema(versionedSchema: MarqetSchemaV1.self),
+            for: schema,
             migrationPlan: MarqetMigrationPlan.self,
             configurations: configuration
         )

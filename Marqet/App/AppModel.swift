@@ -60,6 +60,8 @@ final class AppModel {
 
     private(set) var composerTarget: PageID?
     var composerText = ""
+    /// The item just typed in; its card scrolls it into view (it may land in any category section).
+    private(set) var recentlyAddedItemID: ShoppingItem.ID?
 
     // MARK: Store lifecycle
 
@@ -128,6 +130,8 @@ final class AppModel {
 
     /// Branches of the user's stores.
     var locations: [StoreLocation] = []
+    /// Customer cards, shown in the full-screen card of their stores (KONZEPT #42).
+    var loyaltyCards: [LoyaltyCard] = []
     var storeSortMode: StoreSortMode {
         didSet { defaults.set(storeSortMode.rawValue, forKey: Keys.storeSortMode) }
     }
@@ -159,6 +163,7 @@ final class AppModel {
     @ObservationIgnored let storeRepository: StoreRepository
     @ObservationIgnored let learning: LearningRepository
     @ObservationIgnored let locationRepository: LocationRepository
+    @ObservationIgnored let loyaltyRepository: LoyaltyCardRepository
     @ObservationIgnored let locationProvider: any LocationProviding
     @ObservationIgnored let placeSearch: any PlaceSearching
     @ObservationIgnored let intelligence: any IntelligenceService
@@ -190,6 +195,7 @@ final class AppModel {
         self.storeRepository = StoreRepository(container: container)
         self.learning = LearningRepository(container: container)
         self.locationRepository = LocationRepository(container: container)
+        self.loyaltyRepository = LoyaltyCardRepository(container: container)
         self.locationProvider = location ?? LocationService()
         self.placeSearch = placeSearch ?? MapKitPlaceSearch()
         self.storeSortMode = StoreSortMode(rawValue: defaults.string(forKey: Keys.storeSortMode) ?? "") ?? .manual
@@ -214,6 +220,7 @@ final class AppModel {
         do {
             stores = try storeRepository.all()
             locations = try locationRepository.all()
+            loyaltyCards = try loyaltyRepository.all()
             classifier.learned = try learning.categoryMemory()
             assignmentMemory = try learning.assignmentMemory()
         } catch {
@@ -348,6 +355,7 @@ final class AppModel {
             )
             let item = ShoppingItemMapper.item(from: snapshot, matcher: StoreMatcher(stores: stores))
             items.append(item)
+            recentlyAddedItemID = item.id
             if !isUndoing { lastUndoAction = .creation(item) }
             // Typing it into a store's card is an assignment, too.
             if let store { rememberAssignment(of: item, to: store) }
@@ -509,6 +517,8 @@ final class AppModel {
         var page = page
         if page == .more { page = .unsorted }
         if let id = page.storeID { plan(id) }
+        // Full screen shows the target card, so new items never land on a card out of sight.
+        if focusedPage != nil, focusedPage != page { focusedPage = page }
         composerTarget = page
         activePage = page
         pageRequest = page

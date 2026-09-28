@@ -68,6 +68,11 @@ struct SettingsView: View {
                     } label: {
                         LabeledContent("Läden verwalten", value: "\(model.stores.count)")
                     }
+                    NavigationLink {
+                        LoyaltyCardsSettingsView()
+                    } label: {
+                        LabeledContent("Kundenkarten", value: "\(model.loyaltyCards.count)")
+                    }
                     Picker("Zuordnen startet mit", selection: $model.preferredTriageMode) {
                         Text("Nacheinander").tag(TriageSession.Mode.single)
                         Text("Übersicht").tag(TriageSession.Mode.board)

@@ -1,6 +1,6 @@
 # Marqet – MVP-Konzept
 
-Stand: 26.09.2026 (Rev. 3: iPhone Duo & iPad) · Status: M1 umgesetzt, als Nächstes M0-Duo-Spike + M2
+Stand: 28.09.2026 (Rev. 7: Angebote-Card, Kundenkarten) · Status: M1 umgesetzt, als Nächstes M0-Duo-Spike + M2
 Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYSE.md) · iPhone Duo & iPad: [KONZEPT-DUO-IPAD.md](KONZEPT-DUO-IPAD.md)
 
 > Marqet ist eine iOS-App, die die Einkaufsliste aus Apple Erinnerungen nach Läden sortiert.
@@ -47,10 +47,41 @@ Wettbewerb, Angebote-APIs und Langfrist-Strategie: [MARKTANALYSE.md](MARKTANALYS
 | 32 | Händler-Logos | *Rev. 4 (26.09.):* **Echte Logos bleiben**, das Risiko wird getragen (ersetzt #3 „ohne Logos“). Rückfall auf Monogramme per Schalter, Quellen in `ASSET_SOURCES.md` |
 | 33 | Umfang v1.0 | *Rev. 4:* **„Orte“ (Filialen, Karte, Sortierung nach Entfernung/Smart) in v1.0** (ersetzt #24/#25), Routen bleiben v1.3 |
 | 34 | iCloud-Sync eigener Läden | *Rev. 4:* **v1.1**; v1.0 speichert lokal, Läden werden über die Marker auf jedem Gerät erkannt |
-| 35 | Unsortiert-Card | *Rev. 4:* **Immer sichtbar und direkt nach Prospekte**, auch ohne Einträge (ersetzt #5) |
-| 36 | Prospekte-Card | *Rev. 5 (26.09.):* **Erste Card vor Inbox**, zentrale Sammlung offizieller Händler-Prospekte über `leafletURL`; „Weitere Läden“ bleibt letzte Card |
+| 35 | Unsortiert-Card | *Rev. 4:* **Immer sichtbar und direkt nach Angebote**, auch ohne Einträge (ersetzt #5) |
+| 36 | Prospekte-Card | *Rev. 5 (26.09.), Name siehe #41:* **Erste Card vor Inbox**, zentrale Sammlung offizieller Händler-Prospekte über `leafletURL`; „Weitere Läden“ bleibt letzte Card |
 | 36 | Projektdatei | *Rev. 4:* **`project.yml` ist die einzige Quelle**, `scripts/generate.sh` erzeugt das Projekt, `scripts/ci.sh` prüft alles |
 | 37 | Name der ersten Card | *Rev. 5 (26.09.):* **„Inbox“** statt „Unsortiert“; „Läden zuordnen“ mittig am Card-Ende |
 | 38 | Laden-Vollbild | *Rev. 5:* Tipp auf den Header oder Hochziehen der Liste zoomt die Card auf Vollbild (Zoom-Transition). Plus bleibt, Seitenpunkte fallen weg. Der aktuelle Prospekt steht direkt unter dem Header, ohne zusätzliche Abschnittsüberschrift |
 | 39 | Prospekt-Link | *Rev. 5:* **v1.0** (vorgezogen aus #27) im Laden-Vollbild: offizielle Angebotsseite der Kette im `SFSafariViewController`. Einzelangebote bleiben v2.0 (#27) |
 | 40 | Zusammenfassung über der Inbox | *Rev. 5 (26.09.):* Beim ersten Laden pro App-Start, wenn Läden offene Einträge haben oder geplant sind: großer Titel und Karte „Was jetzt wichtig ist“ (Läden mit Anzahl, nächster Laden, Inbox) mit „Einkauf starten“ und „Zuordnen“. Die Inbox rutscht darunter, die Seitenpunkte sind ausgeblendet. Wischen zur nächsten Card blendet alles fingergenau aus. Nur iPhone (eine Card). Text aus festen Regeln, nicht vom Sprachmodell – die Zahlen müssen stimmen |
+| 41 | Name der Prospekte-Card | *Rev. 7 (28.09.):* **„Angebote“** statt „Prospekte“ (ersetzt den Namen aus #36). Die Card wächst ab v2.0 ohne Umbenennung von Prospekten zu Einzelangeboten (#27). Das einzelne Heft heißt weiter „Prospekt“ („Aktueller Prospekt“ im Laden-Vollbild). Code-Namen (`BrochuresCard`, `PageID.brochures`) bleiben |
+| 42 | Kundenkarten | *Rev. 7 (28.09.):* **v1.1, Free.** Karten per Kamera scannen und Läden zuordnen, eine Karte kann für mehrere Ketten gelten (Payback). Anzeige **im Laden-Vollbild** statt in einem eigenen Menü wie bei Bring!: Die Karte des aktuellen Ladens liegt dort, wo man an der Kasse steht. Details in §2 |
+
+---
+
+## 2. Kundenkarten (v1.1)
+
+**Idee:** Bring! legt Kundenkarten in ein Menü neben der Liste. Marqet kennt den Laden, in dem man gerade einkauft, und zeigt deshalb **die passende Karte im Laden-Vollbild**. An der Kasse ist das ein Tipp statt Suchen.
+
+### 2.1 Ablauf
+
+| Schritt | Verhalten |
+|---|---|
+| Anlegen | Im Laden-Vollbild (Toolbar-Button bzw. Zeile), im Laden-Menü „…“ oder in den Einstellungen unter „Kundenkarten“. Kamera-Scan (VisionKit `DataScannerViewController`), Rückfall: Nummer und Barcode-Typ von Hand |
+| Zuordnen | Beim Anlegen aus dem Laden-Vollbild ist der Laden vorgewählt. Mehrfachauswahl für Programme über mehrere Ketten (Payback). *Offen:* Der Katalog schlägt bekannte Programme vor (`loyaltyPrograms` pro Kette, per Katalog-Update pflegbar, weil Partner wechseln) |
+| Zeigen (kompakt) | *Rev. 7b:* iPhone, Duo außen und schmale iPad-Fenster: **native Toolbar-Buttons** in der Systemleiste des Laden-Vollbilds, gruppiert als [Prospekt · Kundenkarte] neben [Menü · Schließen]. Keine Listenzeilen für Prospekt und Karte, die Liste beginnt direkt unter dem Header. Kundenkarte: `wallet.pass.fill` öffnet den Barcode, ohne Karte `wallet.pass` zum Anlegen. Barcode im Vollbild, **Bildschirmhelligkeit auf Maximum**, beim Schließen zurück. Mehrere Karten: seitlich wischen |
+| Zeigen (breit) | iPad und Duo innen: Prospekt und Kundenkarten als Zeilen in der linken Kontextspalte, die Liste rechts bleibt stehen |
+| Home-Pager | Keine Karten auf den Laden-Cards, der Pager bleibt ruhig. Die Karte gehört zum Einkauf im Laden, also zum Vollbild |
+
+### 2.2 Technik
+
+- **Modell `LoyaltyCard`** (SwiftData, `MarqetSchemaV2` mit Lightweight-Migration ab V1; die Layouts vor V1 sind als `MarqetSchemaV0` registriert): `id`, `name`, `payload` (Barcode-Inhalt), `symbology`, `colorKey`, `storeIDs` (eigene Läden und Katalog-Ketten). Sync über iCloud zusammen mit den eigenen Läden (E4).
+- **Barcode zeichnen:** Code 128, QR, PDF417 und Aztec über Core Image. EAN-13/EAN-8 zeichnet `EANBarcode` in `MarqetCore` selbst (Prüfziffer, Paritäten, getestet), mit Ruhezone links 11 und rechts 7 Module.
+- **Typ-Erkennung beim Tippen:** gültige EAN-13/EAN-8 → EAN, sonst Code 128; der Scan liefert den Typ direkt, eine manuelle Wahl gewinnt.
+- **Kein Wallet-Import:** PassKit gibt fremde Pässe nicht heraus. Ein Export in Wallet bräuchte einen signierten Pass vom Server, das ist nicht geplant.
+- **Payback-Coupons:** Keine offene Schnittstelle. Höchstens ein Absprung in die Payback-App, falls installiert.
+
+### 2.3 Datenschutz & Umfang
+
+- Kartennummern sind personenbezogen, bleiben aber auf dem Gerät bzw. in der eigenen iCloud. Das Privacy-Label bleibt „Keine Daten erfasst“.
+- **Free:** Kundenkarten sind keine Intelligenz (#15), sie machen die App im Laden unverzichtbar und gehören deshalb allen.

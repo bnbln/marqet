@@ -27,7 +27,7 @@ public struct CardDeck: Equatable, Sendable {
     }
 }
 
-/// Builds the deck: `[Prospekte] [Inbox] [Läden …] [Weitere Läden]` with the card lifecycle rules.
+/// Builds the deck: `[Angebote] [Inbox] [Läden …] [Weitere Läden]` with the card lifecycle rules.
 public enum CardBuilder {
     public struct Context: Sendable {
         /// Pages that must not disappear: currently on screen, or the target of the open composer.

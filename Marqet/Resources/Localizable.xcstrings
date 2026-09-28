@@ -207,6 +207,12 @@
     "Als Nächstes: %@" : {
 
     },
+    "An der Kasse zeigen" : {
+
+    },
+    "Angebote" : {
+
+    },
     "Angebote der Woche bei %@" : {
 
     },
@@ -258,6 +264,15 @@
     "Backzutaten" : {
 
     },
+    "Barcode" : {
+
+    },
+    "Barcode nicht darstellbar" : {
+
+    },
+    "Barcode-Typ" : {
+
+    },
     "Baumarkt" : {
 
     },
@@ -277,6 +292,9 @@
 
     },
     "Brot & Backwaren" : {
+
+    },
+    "Code 128 erlaubt keine Umlaute oder Sonderzeichen." : {
 
     },
     "Das hat nicht geklappt" : {
@@ -318,6 +336,15 @@
     "Die bevorzugte Filiale bestimmt Entfernung, Kartenpunkt und die Adresse auf der Card." : {
 
     },
+    "Die Karte erscheint im Vollbild dieser Läden. Eine Payback-Karte kannst du mehreren Läden zuordnen." : {
+
+    },
+    "Die Nummer braucht %lld Ziffern." : {
+
+    },
+    "Die Prüfziffer passt nicht – bitte Nummer prüfen oder anderen Barcode-Typ wählen." : {
+
+    },
     "Die Reihenfolge hier ist auch die Reihenfolge deiner Ladenkarten." : {
 
     },
@@ -325,6 +352,9 @@
 
     },
     "Diesen Laden gibt es schon." : {
+
+    },
+    "Dieser Barcode-Typ enthält nur Ziffern." : {
 
     },
     "Discounter" : {
@@ -465,6 +495,12 @@
     "Getränke" : {
 
     },
+    "Gib der Karte einen Namen." : {
+
+    },
+    "Gilt in diesen Läden" : {
+
+    },
     "Guten Abend" : {
 
     },
@@ -475,6 +511,9 @@
 
     },
     "Hallo" : {
+
+    },
+    "Halte den Barcode deiner Kundenkarte vor die Kamera." : {
 
     },
     "Haushalt" : {
@@ -510,6 +549,12 @@
     "Karte mit der gespeicherten Filiale von %@" : {
 
     },
+    "Karte scannen" : {
+
+    },
+    "Kartennummer" : {
+
+    },
     "Käse" : {
 
     },
@@ -525,19 +570,52 @@
     "Käufe wiederherstellen" : {
 
     },
+    "Keine Angebote verfügbar" : {
+
+    },
     "Keine Filiale in der Nähe gefunden." : {
 
     },
-    "Keine Prospekte verfügbar" : {
+    "Keine Kundenkarte" : {
+
+    },
+    "Keine Kundenkarten" : {
 
     },
     "Keine weiteren Läden" : {
+
+    },
+    "Keinem Laden zugeordnet" : {
 
     },
     "Kette suchen" : {
 
     },
     "Koralle" : {
+
+    },
+    "Kundenkarte" : {
+
+    },
+    "Kundenkarte hinzufügen" : {
+
+    },
+    "Kundenkarte löschen" : {
+
+    },
+    "Kundenkarte löschen?" : {
+
+    },
+    "Kundenkarte zeigen" : {
+
+    },
+    "Kundenkarten" : {
+
+    },
+    "Kundenkarten zeigen" : {
+
+    },
+    "KW %lld" : {
 
     },
     "Laden" : {
@@ -675,7 +753,13 @@
     "Name, z. B. Hofladen Maier" : {
 
     },
+    "Name, z. B. Payback" : {
+
+    },
     "Neue Einträge landen in der Inbox – Marqet fragt dich beim nächsten Öffnen, in welchen Laden sie gehören." : {
+
+    },
+    "Neue Kundenkarte" : {
 
     },
     "Neue Liste anlegen" : {
@@ -729,7 +813,13 @@
     "Ozeanblau" : {
 
     },
-    "Prospekte" : {
+    "Payback, %@-Karte …" : {
+
+    },
+    "Prospekt %@" : {
+
+    },
+    "QR-Code" : {
 
     },
     "Region" : {
@@ -757,6 +847,12 @@
 
     },
     "Sag: „Hey Siri, setz Milch auf die Liste %@“." : {
+
+    },
+    "Scanne deine Karten einmal – Marqet zeigt sie im Vollbild des passenden Ladens." : {
+
+    },
+    "Scanne die Karte oder gib die Nummer ein." : {
 
     },
     "Schließen" : {
@@ -829,6 +925,9 @@
 
     },
     "Vorrat" : {
+
+    },
+    "Vorschau" : {
 
     },
     "Vorschlag" : {

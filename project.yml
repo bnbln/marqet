@@ -49,6 +49,7 @@ targets:
         CFBundleDevelopmentRegion: de
         CFBundleLocalizations: [de, en]
         NSRemindersFullAccessUsageDescription: Marqet liest deine Einkaufsliste aus der Erinnerungen-App und speichert den Laden eines Eintrags in dessen Notizen.
+        NSCameraUsageDescription: Marqet scannt mit der Kamera den Barcode deiner Kundenkarten. Die Bilder verlassen dein Gerät nicht.
         NSLocationWhenInUseUsageDescription: Marqet zeigt Filialen deiner Läden in der Nähe und sortiert deine Läden auf Wunsch nach Entfernung. Dein Standort bleibt auf deinem Gerät.
         UILaunchScreen: {}
         UIApplicationSceneManifest:

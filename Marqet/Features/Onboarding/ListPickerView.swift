@@ -41,12 +41,18 @@ struct ListPickerView: View {
         .navigationTitle("Einkaufsliste")
         .safeAreaInset(edge: .bottom) {
             if embedded {
-                Button("Weiter") { onSelected?() }
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.glassProminent)
-                    .controlSize(.large)
-                    .disabled(model.selectedListID == nil)
-                    .padding(20)
+                Button {
+                    onSelected?()
+                } label: {
+                    Text("Weiter")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+                .controlSize(.large)
+                .disabled(model.selectedListID == nil)
+                .frame(maxWidth: 560)
+                .frame(maxWidth: .infinity)
+                .padding(20)
             }
         }
     }

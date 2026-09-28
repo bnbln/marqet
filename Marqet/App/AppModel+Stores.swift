@@ -150,6 +150,7 @@ extension AppModel {
             try learning.forget(storeID: id)
             try locationRepository.deleteAll(storeID: id)
             locations.removeAll { $0.storeID == id }
+            detachLoyaltyCards(from: id)
         } catch {
             present(error)
         }

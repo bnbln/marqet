@@ -26,7 +26,7 @@ struct BrochuresCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Prospekte")
+                Text("Angebote")
                     .font(.title2.bold())
                 Text("Offizielle Angebotsseiten der Händler")
                     .font(.subheadline)
@@ -36,7 +36,7 @@ struct BrochuresCard: View {
             ScrollView {
                 if entries.isEmpty {
                     ContentUnavailableView(
-                        "Keine Prospekte verfügbar",
+                        "Keine Angebote verfügbar",
                         systemImage: "newspaper",
                         description: Text("Für deine Region sind noch keine offiziellen Angebotsseiten hinterlegt.")
                     )

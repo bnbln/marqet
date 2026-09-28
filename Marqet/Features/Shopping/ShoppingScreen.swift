@@ -101,6 +101,9 @@ struct ShoppingScreen: View {
                            let store = model.deck.pages.first(where: { $0.storeID != nil }) {
                             model.focus(store)
                         }
+                        if loaded, ProcessInfo.processInfo.arguments.contains("-demo-triage") {
+                            model.startTriage()
+                        }
                         #endif
                     }
             }
@@ -256,7 +259,9 @@ struct ShoppingScreen: View {
 extension ShoppingScreen {
     private struct FocusedPage: Identifiable {
         let page: PageID
-        var id: String { page.rawValue }
+        /// Constant: switching the composer to another store swaps the full-screen card in
+        /// place instead of dismissing and presenting the cover again.
+        var id: String { "focus" }
     }
 
     private var focusBinding: Binding<FocusedPage?> {

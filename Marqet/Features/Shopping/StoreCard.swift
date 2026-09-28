@@ -11,7 +11,6 @@ struct StoreCard: View {
     /// Full screen in `StoreFocusScreen` instead of a card in the pager.
     var isExpanded = false
     var showsHeader = true
-    var showsOffers = true
     /// Store menu and close button in the header; the Duo detail view has them in the system bar.
     var showsHeaderActions = true
     var horizontalSafeAreaInsets = EdgeInsets()
@@ -90,14 +89,6 @@ struct StoreCard: View {
     private var itemList: some View {
         ScrollViewReader { proxy in
             List {
-                if isExpanded, showsOffers, let store {
-                    Section {
-                        OffersSection(store: store)
-                            .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
-                            .listRowBackground(Color(.secondarySystemGroupedBackground))
-                            .listRowSeparator(.hidden)
-                    }
-                }
                 if items.isEmpty && (!model.showsCompleted || completedItems.isEmpty) {
                     Section {
                         emptyState(showsSymbol: true)
@@ -161,10 +152,18 @@ struct StoreCard: View {
                 if pulledUp, isDraggingList, !isExpanded { model.focus(page) }
             }
             // No keyboard dismissal on scroll here: the scroll to a new item would close the composer.
-            .onChange(of: items.count) { old, new in
-                // Newly added items appear at the bottom – keep them in view while typing.
-                if new > old, model.composerTarget == page, let last = items.last {
-                    proxy.scrollTo(last.id, anchor: .bottom)
+            .onChange(of: model.recentlyAddedItemID) { _, id in
+                // A new item lands in its category section, not necessarily at the bottom.
+                // Ask the model, not `items`: a full-screen card that just switched stores can
+                // still hold the previous render's items here.
+                guard let id, model.deck.items(on: page).contains(where: { $0.id == id }) else { return }
+                Task { @MainActor in
+                    // The list inserts the row in a later layout pass; scroll once it exists,
+                    // and once more in case the first pass was still before it.
+                    await Task.yield()
+                    withAnimation(.smooth) { proxy.scrollTo(id) }
+                    try? await Task.sleep(for: .milliseconds(150))
+                    withAnimation(.smooth) { proxy.scrollTo(id) }
                 }
             }
         }
@@ -411,12 +410,14 @@ struct StoreActionsMenu<MenuLabel: View>: View {
     @State private var showsSectionOrder = false
     @State private var showsStoreDetails = false
     @State private var showsMap = false
+    @State private var showsLoyaltyEditor = false
 
     var body: some View {
         Menu {
             Button("Eintrag hinzufügen", systemImage: "plus") { model.startComposer(on: page) }
             Button("Karte", systemImage: "map") { showsMap = true }
             Button("Adresse & Info", systemImage: "mappin.and.ellipse") { showsStoreDetails = true }
+            Button("Kundenkarte hinzufügen", systemImage: "wallet.pass") { showsLoyaltyEditor = true }
             if store.type.showsCategorySections {
                 Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
             }
@@ -436,6 +437,9 @@ struct StoreActionsMenu<MenuLabel: View>: View {
         }
         .sheet(isPresented: $showsMap) {
             MapScreen(focusedStoreID: store.id).leadingSheetPlacement()
+        }
+        .sheet(isPresented: $showsLoyaltyEditor) {
+            LoyaltyCardEditor(for: store).leadingSheetPlacement()
         }
     }
 }

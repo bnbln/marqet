@@ -14,6 +14,7 @@ struct StoreContextPane: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 OffersSection(store: store)
+                LoyaltyCardsSection(store: store)
                 branchSection
                 if let detail = store.detail, !detail.isEmpty {
                     Label(detail, systemImage: "info.circle")

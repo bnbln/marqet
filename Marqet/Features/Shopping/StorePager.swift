@@ -7,7 +7,7 @@ struct StorePager: View {
     @Binding var showsAddStore: Bool
     @Environment(AppModel.self) private var model
     // The inbox is the first visible target from the very first layout. The deck keeps
-    // Prospekte before it for paging, but that must never become the launch position.
+    // Angebote before it for paging, but that must never become the launch position.
     @State private var position = ScrollPosition(id: PageID.unsorted.rawValue, anchor: .leading)
     @State private var leadingIndex = 0
     /// Bumped when a swipe crosses the midpoint to another card; drives a light haptic tick.
@@ -161,7 +161,7 @@ struct StorePager: View {
         leadingIndex = leading
         let visible = SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: metrics.slots)
         let pages = content.compactMap { $0.isGhost ? nil : $0.page }
-        guard let anchored = SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) else { return }
+        guard let anchored = SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages, slots: metrics.slots) else { return }
         // Duo: the right-hand card is always the active one. iPad: keep a tapped card while visible.
         if metrics.anchor == .trailing || !visible.contains(model.activePage) {
             model.activePage = anchored
@@ -180,11 +180,11 @@ struct StorePager: View {
 
     private func navigate(to page: PageID, content: [SpreadLayout.Slot], pages: [PageID], metrics: PagerMetrics) {
         model.activePage = page
+        let target = SpreadLayout.leadingIndex(forActive: page, pages: pages, slots: metrics.slots, anchor: metrics.anchor)
         let alreadyInPlace = metrics.anchor == .trailing
-            ? SpreadLayout.anchoredPage(leadingIndex: leadingIndex, pages: pages) == page
+            ? target == leadingIndex
             : SpreadLayout.isVisible(page, leadingIndex: leadingIndex, content: content, slots: metrics.slots)
         guard !alreadyInPlace else { return }
-        let target = SpreadLayout.leadingIndex(forActive: page, pages: pages, slots: metrics.slots, anchor: metrics.anchor)
         guard content.indices.contains(target) else { return }
         leadingIndex = target
         withAnimation(.smooth) {
@@ -261,7 +261,7 @@ struct PageIndicator: View {
 
     private func label(for page: PageID) -> String {
         switch page {
-        case .brochures: String(localized: "Prospekte")
+        case .brochures: String(localized: "Angebote")
         case .unsorted: String(localized: "Inbox")
         case .more: String(localized: "Weitere Läden")
         case .store(let id): model.store(id)?.name ?? ""

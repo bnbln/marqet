@@ -27,25 +27,30 @@ struct SpreadLayoutTests {
 
     // MARK: Trailing anchor (Duo)
 
-    @Test func trailingAnchorPrependsBlankSlot() {
+    @Test func trailingAnchorHasNoBlankSlot() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
-        #expect(content.map(\.id).first == "filler:0")
-        #expect(content.first?.page == nil)
-        #expect(content.first?.isGhost == false)
-        #expect(content.count == pages.count + 1)
+        #expect(content.map(\.page) == pages)
     }
 
     @Test func unfoldingKeepsActiveOnTheRightWithPredecessorLeft() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
         let leading = SpreadLayout.leadingIndex(forActive: aldi, pages: pages, slots: 2, anchor: .trailing)
         #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [rewe, aldi])
-        #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) == aldi)
+        #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages, slots: 2) == aldi)
     }
 
     @Test func inboxKeepsBrochuresOnTheLeft() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
         let leading = SpreadLayout.leadingIndex(forActive: .unsorted, pages: pages, slots: 2, anchor: .trailing)
         #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [.brochures, .unsorted])
+    }
+
+    @Test func brochuresNeverLeaveABlankHalf() {
+        let content = SpreadLayout.contentSlots(pages: pages, slots: 2, anchor: .trailing)
+        let leading = SpreadLayout.leadingIndex(forActive: .brochures, pages: pages, slots: 2, anchor: .trailing)
+        #expect(leading == 0)
+        #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [.brochures, .unsorted])
+        #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages, slots: 2) == .unsorted)
     }
 
     @Test func lastPageStillReachesTheAnchor() {
@@ -59,17 +64,12 @@ struct SpreadLayoutTests {
         // Scroll view snapped one slot further: the former right card is now on the left.
         let leading = SpreadLayout.leadingIndex(forActive: aldi, pages: pages, slots: 2, anchor: .trailing) + 1
         #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 2) == [aldi, dm])
-        #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages) == dm)
+        #expect(SpreadLayout.anchoredPage(leadingIndex: leading, pages: pages, slots: 2) == dm)
     }
 
-    @Test func onePageKeepsItsBlankAnchorSlot() {
-        let content = SpreadLayout.contentSlots(pages: [.more], slots: 2, anchor: .trailing)
-        #expect(content.map(\.page) == [nil, .more])
-        #expect(!content[0].isGhost)
-    }
-
-    @Test func singleSlotHasNoFillers() {
-        #expect(SpreadLayout.contentSlots(pages: pages, slots: 1, anchor: .trailing).count == pages.count)
+    @Test func onePageStartsOnTheLeft() {
+        #expect(SpreadLayout.leadingIndex(forActive: .more, pages: [.more], slots: 2, anchor: .trailing) == 0)
+        #expect(SpreadLayout.anchoredPage(leadingIndex: 0, pages: [.more], slots: 2) == .more)
     }
 
     // MARK: Leading anchor (iPad)
@@ -83,7 +83,7 @@ struct SpreadLayoutTests {
     @Test func leadingAnchorClampsAtTheEnd() {
         let content = SpreadLayout.contentSlots(pages: pages, slots: 3, anchor: .leading)
         let leading = SpreadLayout.leadingIndex(forActive: .more, pages: pages, slots: 3, anchor: .leading)
-        #expect(leading == 2)
+        #expect(leading == 3)
         #expect(SpreadLayout.visiblePages(leadingIndex: leading, content: content, slots: 3) == [aldi, dm, .more])
         #expect(SpreadLayout.isVisible(.more, leadingIndex: leading, content: content, slots: 3))
     }

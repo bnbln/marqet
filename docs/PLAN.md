@@ -99,7 +99,7 @@ Legende: ✅ fertig · 🟡 teilweise · ❌ fehlt · ⚠️ widerspricht dem Ko
 | Version | Inhalt | Status | Grundlage im Code |
 |---|---|---|---|
 | **v1.0** | wie oben plus iPad-Kurzbefehle, Zeiger-Effekte, mehrere Fenster, Items per Drag sortieren, Kategorie per Drag, Wörterbuch ≈ 2.500 Begriffe | 🟡 | – |
-| **v1.1 „Schneller“** | Siri und Kurzbefehle (App Intents), interaktive Widgets, Prospekt-Link, `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen | ❌ | Katalog-Felder `leafletURL` vorbereitet, `onHingeChange` im SDK |
+| **v1.1 „Schneller“** | Siri und Kurzbefehle (App Intents), interaktive Widgets, Prospekt-Link, **Kundenkarten im Laden-Vollbild** (KONZEPT #42), `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen | ❌ | Katalog-Felder `leafletURL` vorbereitet, `onHingeChange` im SDK; Kundenkarten brauchen `loyaltyPrograms` im Katalog und `LoyaltyCard` im Schema |
 | **v1.0 (vorgezogen, E2): „Orte“** | Filialen per MapKit, Karte, Laden aus der Karte anlegen, Sortierung nach Entfernung und „Smart“ | ❌ | `address` als Freitext vorhanden, `mapSearchTerms` im Katalog, Spezifikation in KONZEPT §14 |
 | **v1.3 „Unterwegs“** | Einkaufsrunde mit Routenoptimierung, Standort-Hinweise, Apple Watch, Live Activity | ❌ | Spezifikation in KONZEPT §14.3 |
 | **v2.0 „Angebote“** | Angebote passend zur Liste über einen Partner (ShopFully oder Bonial) | ❌ | Geschäftsthema, Gates G1–G4 in der MARKTANALYSE |
@@ -138,6 +138,8 @@ Die Reihenfolge folgt dem kritischen Pfad zum Launch. Alles, was nicht auf ihm l
 - Standort: `NSLocationWhenInUseUsageDescription` (DE/EN). Datenschutz-Angaben prüfen: MapKit-Anfragen gehen an Apple, nicht an uns, das Label bleibt voraussichtlich „Keine Daten erfasst“.
 - App-Store-Material: Screenshots über `-demo` auf iPhone, iPad und Duo, Texte, Datenschutz-Angaben („Keine Daten erfasst“).
 - TestFlight-Beta (B9): 2–3 Wochen, danach Fixes.
+- **Unverbindliche Erstanfrage bei ShopFully** (MARKTANALYSE, Gate G2): Mindestreichweite, Konditionen, lizenzierte Cover und Logos im Feed. Kein Vertrag vor dem Launch, aber die Antwort bestimmt, wann v2.0 realistisch ist.
+- `SwiftData`-Schema (B6) gleich um `LoyaltyCard` ergänzen, damit v1.1 ohne Migration auskommt.
 
 **Fertig, wenn:** die TestFlight-Build keine Crash-Cluster zeigt, die Beta-Rückmeldungen eingearbeitet sind und die App eingereicht ist.
 
@@ -162,13 +164,13 @@ Die Reihenfolge folgt dem kritischen Pfad zum Launch. Alles, was nicht auf ihm l
 ### Phase 6 · Launch v1.0
 
 ### Phase 7 · v1.1 „Schneller“ (erstes Update nach dem Launch)
-App Intents und Siri, Widgets, Prospekt-Link, `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen, **iCloud-Sync der eigenen Läden (E4)**.
+App Intents und Siri, Widgets, Prospekt-Link, Kundenkarten (Scan, Zuordnung zu Läden, Barcode im Laden-Vollbild mit voller Helligkeit), `@Laden`-Syntax, Hinweis „Meist bei Rewe“, Katalog-Updates vom Server, Duo-Küchenmodus, linke Seite anheften, Text aus anderen Apps auf eine Card ziehen, **iCloud-Sync der eigenen Läden (E4)**.
 
 ### Phase 8 · v1.3 „Unterwegs“
 Einkaufsrunde mit Routenoptimierung (Tiefkühlware zuletzt), Übergabe an Apple Maps, Standort-Hinweise, Apple Watch, Live Activity. Baut direkt auf den Filialen aus Phase 5 auf.
 
 ### Phase 9 · v2.0 „Angebote“ (Geschäftsthema)
-Nach dem Launch das Erstgespräch mit ShopFully bzw. Bonial führen. Mit Vertrag dann Angebots-Treffer (per Opt-in über PLZ). Bei der Gelegenheit die Logo-Rechte (E1) mit den Händlern absichern.
+Nach dem Launch das Vertragsgespräch mit ShopFully bzw. Bonial führen (die Erstanfrage läuft schon in Phase 3). Ziel wie bei Bring!: echte Prospekt-Cover im Regal der Angebote-Card, Einzelangebote und „Angebot → Liste“. Mit Vertrag dann Angebots-Treffer (per Opt-in über PLZ). Bei der Gelegenheit die Logo-Rechte (E1) mit den Händlern absichern.
 
 ---
 

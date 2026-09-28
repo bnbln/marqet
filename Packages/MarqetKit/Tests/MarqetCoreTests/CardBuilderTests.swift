@@ -18,17 +18,17 @@ struct CardBuilderTests {
     let dm = store("dm", sortIndex: 0)
     let lidl = store("Lidl", sortIndex: 2)
 
-    @Test func pagesAreUnsortedThenStoresBySortIndexThenMore() {
+    @Test func pagesAreOffersUnsortedThenStoresBySortIndexThenMore() {
         let deck = CardBuilder.deck(
             items: [Self.item("Milch", aldi), Self.item("Zahnpasta", dm), Self.item("Batterien", nil)],
             stores: [aldi, dm, lidl]
         )
-        #expect(deck.pages == [.unsorted, .store(dm.id), .store(aldi.id), .more])
+        #expect(deck.pages == [.brochures, .unsorted, .store(dm.id), .store(aldi.id), .more])
     }
 
     @Test func emptyListKeepsUnsortedBeforeMore() {
         let deck = CardBuilder.deck(items: [], stores: [aldi, dm])
-        #expect(deck.pages == [.unsorted, .more])
+        #expect(deck.pages == [.brochures, .unsorted, .more])
     }
 
     @Test func itemsAreOrderedOldestFirst() {
@@ -51,7 +51,7 @@ struct CardBuilderTests {
     @Test func plannedEmptyStoreStays() {
         let planned = Self.store("Markt", sortIndex: 3, planned: true)
         let deck = CardBuilder.deck(items: [], stores: [aldi, planned])
-        #expect(deck.pages == [.unsorted, .store(planned.id), .more])
+        #expect(deck.pages == [.brochures, .unsorted, .store(planned.id), .more])
         #expect(deck.state(of: planned.id) == .planned)
         #expect(deck.state(of: aldi.id) == nil)
     }
@@ -80,12 +80,12 @@ struct CardBuilderTests {
 
     @Test func retainedUnsortedPageStaysForTheComposer() {
         let deck = CardBuilder.deck(items: [], stores: [], context: .init(retainedPages: [.unsorted]))
-        #expect(deck.pages == [.unsorted, .more])
+        #expect(deck.pages == [.brochures, .unsorted, .more])
     }
 
     @Test func pageIDRoundTrip() {
         let id = UUID()
-        for page in [PageID.unsorted, .more, .store(id)] {
+        for page in [PageID.brochures, .unsorted, .more, .store(id)] {
             #expect(PageID(rawValue: page.rawValue) == page)
         }
         #expect(PageID(rawValue: "store:nope") == nil)

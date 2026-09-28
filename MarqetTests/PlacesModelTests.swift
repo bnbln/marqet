@@ -122,7 +122,7 @@ struct PlacesModelTests {
         await model.setStoreSortMode(.distance)
         #expect(model.storeSortMode == .distance)
         let stores = model.deck.pages.compactMap { if case .store(let id) = $0 { id } else { nil } }
-        #expect(model.deck.pages.first == .unsorted)
+        #expect(Array(model.deck.pages.prefix(2)) == [.brochures, .unsorted])
         #expect(Array(stores.prefix(2)) == [edeka.id, rewe.id])
         #expect(model.distanceText(to: edeka.id) != nil)
 
@@ -198,14 +198,15 @@ struct PlacesModelTests {
         #expect(pins.first.map { if case .saved = $0.kind { true } else { false } } == true)
     }
 
-    @Test func branchSearchSkipsGenericKindsAndPrefersOpenItems() async throws {
+    @Test func branchSearchSkipsGenericKindsAndStoresWithoutItems() async throws {
         let model = try await makeModel(items: [("Brot", "🛒 Edeka")])
         _ = model.addStore(from: try #require(model.catalog?.entry(forKey: "generic-bakery")), planned: false)
         _ = model.addStore(from: try #require(model.catalog?.entry(forKey: "rewe")), planned: false)
         let stores = model.storesForBranchSearch()
         #expect(stores.first?.catalogKey == "edeka")
         #expect(!stores.contains { $0.catalogKey == "generic-bakery" })
-        #expect(stores.contains { $0.catalogKey == "rewe" })
+        // Only stores with open items: an empty Rewe card needs no branch right now.
+        #expect(!stores.contains { $0.catalogKey == "rewe" })
     }
 
     @Test func budniIsRecognizedAsChain() async throws {

@@ -23,8 +23,8 @@ struct CardZoomSource: ViewModifier {
     }
 }
 
-/// One card full screen. On wide layouts, store details sit left of the active list; compact
-/// layouts keep the existing single-card detail view.
+/// One card full screen. On wide layouts, store details sit left of the active list. Compact
+/// layouts show the list alone; leaflet, customer card, menu and close sit in the system bar.
 struct StoreFocusScreen: View {
     let page: PageID
     /// Duo: add, store menu and close sit in the system bar, as on Home (KONZEPT-DUO-IPAD §3).
@@ -35,14 +35,19 @@ struct StoreFocusScreen: View {
     @State private var showsAddStore = false
     @State private var addFeedback = 0
     @State private var horizontalSafeAreaInsets = EdgeInsets()
+    /// Store context left of the list (iPad, open Duo). Otherwise the system bar carries the actions.
+    @State private var isSplit = false
+
+    /// The wide iPad layout keeps its own header actions; everything else uses the system bar.
+    private var showsSystemBar: Bool { hinge.hasHinge || !isSplit }
 
     var body: some View {
         NavigationStack {
             content
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { if hinge.hasHinge { duoToolbar } }
-                .toolbar(hinge.hasHinge ? .automatic : .hidden, for: .navigationBar)
+                .toolbar { if showsSystemBar { systemToolbar } }
+                .toolbar(showsSystemBar ? .automatic : .hidden, for: .navigationBar)
                 .toolbarVerticalCompressionPreferringItems()
         }
         // As on Home: the stack would otherwise reset the tint to the app accent.
@@ -85,7 +90,7 @@ struct StoreFocusScreen: View {
             }
             .background(Color(.secondarySystemGroupedBackground).ignoresSafeArea())
             .overlay(alignment: .bottom) {
-                if model.composerTarget == nil { bottomControls(deck: deck) }
+                if model.composerTarget == nil { bottomControls(deck: deck, metrics: metrics) }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Group {
@@ -106,6 +111,7 @@ struct StoreFocusScreen: View {
             .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets in
                 horizontalSafeAreaInsets = insets
             }
+            .onChange(of: usesSplit, initial: true) { _, split in isSplit = split }
             .sensoryFeedback(.impact(weight: .light), trigger: addFeedback)
             .onChange(of: model.composerTarget) { _, target in
                 if target != nil { isComposerFocused = true }
@@ -135,10 +141,18 @@ struct StoreFocusScreen: View {
     }
 
     /// "Läden zuordnen" centered at the height of the add button (inbox only).
-    private func bottomControls(deck: CardDeck) -> some View {
+    private func bottomControls(deck: CardDeck, metrics: PagerMetrics) -> some View {
         ZStack(alignment: .bottom) {
             if page == .unsorted, !deck.items(on: page).isEmpty {
-                TriageButton()
+                if metrics.anchor == .trailing {
+                    // Duo inside: centered in the right half (the anchor side), not on the crease.
+                    TriageButton()
+                        .frame(width: metrics.slotWidth)
+                        .padding(.leading, metrics.scrollX + metrics.slotWidth + metrics.spacing - 20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    TriageButton()
+                }
             }
             if !hinge.hasHinge {
                 HStack {
@@ -157,10 +171,10 @@ struct StoreFocusScreen: View {
         case .brochures, .more:
             EmptyView()
         case .unsorted:
-            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isExpanded: true, showsHeaderActions: !hinge.hasHinge)
+            StoreCard(page: page, store: nil, items: deck.items(on: page), state: nil, isExpanded: true, showsHeaderActions: false)
         case .store(let id):
             if let store = model.store(id) {
-                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isExpanded: true, showsHeaderActions: !hinge.hasHinge)
+                StoreCard(page: page, store: store, items: deck.items(on: page), state: deck.state(of: id), isExpanded: true, showsHeaderActions: false)
             }
         }
     }
@@ -178,8 +192,7 @@ struct StoreFocusScreen: View {
             items: storeItems,
             state: deck.state(of: store.id),
             isExpanded: true,
-            showsHeader: false,
-            showsOffers: false
+            showsHeader: false
         )
         let contextWidth = metrics.scrollX + metrics.slotWidth - metrics.leadingMargin
 
@@ -209,15 +222,25 @@ struct StoreFocusScreen: View {
         .frame(minHeight: 0, maxHeight: .infinity, alignment: .top)
     }
 
-    /// Duo system bar: add at the thumb like on Home, store menu and close above it.
+    /// System bar: leaflet and customer card (compact only – wide layouts show them in the
+    /// context column), store menu and close. Duo: add at the thumb like on Home.
     @ToolbarContentBuilder
-    private var duoToolbar: some ToolbarContent {
-        ToolbarItem(placement: .bottomBar) {
-            Button("Hinzufügen", systemImage: "plus") {
-                addFeedback += 1
-                model.startComposer(on: page)
+    private var systemToolbar: some ToolbarContent {
+        if hinge.hasHinge {
+            ToolbarItem(placement: .bottomBar) {
+                Button("Hinzufügen", systemImage: "plus") {
+                    addFeedback += 1
+                    model.startComposer(on: page)
+                }
+                .tint(.primary)
             }
-            .tint(.primary)
+        }
+        if !isSplit, let store = page.storeID.flatMap({ model.store($0) }) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                LeafletToolbarButton(store: store)
+                LoyaltyCardToolbarButton(store: store)
+            }
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
         if let store = page.storeID.flatMap({ model.store($0) }) {
             ToolbarItem(placement: .topBarTrailing) {
@@ -250,6 +273,23 @@ struct StoreFocusScreen: View {
 }
 
 // MARK: - Offers & leaflets
+
+/// The retailer's official leaflet as a system-bar button (compact full screen).
+struct LeafletToolbarButton: View {
+    let store: Store
+    @Environment(AppModel.self) private var model
+    @State private var showsLeaflet = false
+
+    var body: some View {
+        if let url = store.catalogKey.flatMap({ model.catalog?.entry(forKey: $0) })?.leafletURL {
+            Button("Aktueller Prospekt", systemImage: "newspaper") { showsLeaflet = true }
+                .tint(.primary)
+                .sheet(isPresented: $showsLeaflet) {
+                    SafariView(url: url).ignoresSafeArea()
+                }
+        }
+    }
+}
 
 /// The retailer's official leaflet link, shown directly below its detail header.
 struct OffersSection: View {

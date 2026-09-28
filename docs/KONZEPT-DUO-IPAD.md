@@ -57,7 +57,7 @@ Stand: 26.09.2026 · Ergänzt [KONZEPT.md](KONZEPT.md) · Grundlage: DuoDemo (HI
 Der Home-Pager bleibt eine Folge normaler Karten. Seine Reihenfolge ist:
 
 ```
-Seiten:  [Prospekte] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]
+Seiten:  [Angebote] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]
 Home:    compact = 1 · iPad = bis zu 4 · Duo am Falz = 2
 ```
 
@@ -101,17 +101,17 @@ Die Plätze werden aus der **Container-Breite** berechnet, nicht aus Geräte-Typ
 Die Home-Kartenfolge und der Detail-Zoom sind getrennte Ansichten:
 
 ```
-Home, Duo aktiv Inbox       →  [ Prospekte | Inbox ]
+Home, Duo aktiv Inbox       →  [ Angebote | Inbox ]
 Home, Duo aktiv Rewe        →  [ Inbox | Rewe ]
 Home, letzte Seite          →  [ letzte Ladenkarte | Weitere Läden ]
 Zoom, Rewe auf Duo/iPad     →  [ Rewe: Karte + Prospekt | Rewe-Liste ]
 ```
 
-Beispiel mit `[Prospekte] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]`:
+Beispiel mit `[Angebote] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]`:
 
 | Zugeklappt aktiv | Aufgeklappt links | Aufgeklappt rechts (Anker) |
 |---|---|---|
-| Inbox | Prospekte | Inbox |
+| Inbox | Angebote | Inbox |
 | Rewe im Home-Pager | Inbox | Rewe |
 | Rewe im Zoom-Detail | Rewe-Kopf, Karte, Route, Prospekt | Rewe-Liste |
 | Weitere Läden | letzter Laden | Weitere Läden |
@@ -140,8 +140,8 @@ Beispiel mit `[Prospekte] [Inbox] [Rewe] [Aldi] [dm] … [Weitere Läden]`:
 
 ### 2.5 Technische Umsetzung
 
-- **`SpreadLayout` in MarqetCore** (pure Logik): Seiten + aktive Seite + Plätze + Anker → sichtbares Fenster, inklusive der Regel „links von der Inbox = Prospekte“.
-- **`StorePager` (SwiftUI):** `ScrollView(.horizontal)` + `HStack` + `.scrollTargetBehavior(.viewAligned)` + `.scrollPosition(id:)`. Home-Reihenfolge: `[Prospekte] [Inbox] [Läden …] [Weitere Läden]`. Das Duo verankert die aktive Home-Card rechts; auf dem iPad bleiben Karten linksbündig in Pager-Reihenfolge. Keine Ladeninfos ersetzen eine Nachbarkarte.
+- **`SpreadLayout` in MarqetCore** (pure Logik): Seiten + aktive Seite + Plätze + Anker → sichtbares Fenster, inklusive der Regel „links von der Inbox = Angebote“.
+- **`StorePager` (SwiftUI):** `ScrollView(.horizontal)` + `HStack` + `.scrollTargetBehavior(.viewAligned)` + `.scrollPosition(id:)`. Home-Reihenfolge: `[Angebote] [Inbox] [Läden …] [Weitere Läden]`. Das Duo verankert die aktive Home-Card rechts; auf dem iPad bleiben Karten linksbündig in Pager-Reihenfolge. Keine Ladeninfos ersetzen eine Nachbarkarte.
 - **`StoreFocusScreen` (Zoom-Detail):** Bei breitem Container und aktivem Laden spannt der farbige Header beide Spalten, während Titel und Aktionen links bleiben. Darunter scrollen Prospekt und Filialkontext gemeinsam links; rechts erscheint dieselbe Ladenliste ohne doppelten Header. „Route“ übergibt die offenen Läden mit bekannten Filialen in Entfernungsreihenfolge als Zwischenstopps an Apple Karten. Auf schmalen Displays bleibt das Vollbild-Detail einspaltig.
 - **Aktive Seite** in `@SceneStorage("selectedPageV2")` als stabile ID (`brochures`, `unsorted`, Store-UUID, `more`). Jede iPad-Fensterszene hat so ihre eigene aktive Card.
 - **Eingabetext, Fokus-Ziel und Zuordnen-Fortschritt** liegen im `AppModel`, nicht in View-`@State`. Wird eine View beim Displaywechsel neu erzeugt, geht nichts verloren.
@@ -307,12 +307,12 @@ Build-Einstellungen: `TARGETED_DEVICE_FAMILY = 1,2` (iPhone + iPad), Deployment 
 
 **Unit (MarqetCore):** `SpreadLayout`
 - Plätze je Breite, gerade Anzahl bei Falz
-- Duo Home: `[Prospekte | Inbox]`; die letzte echte Seite bleibt `[Weitere Läden]`
+- Duo Home: `[Angebote | Inbox]`; die letzte echte Seite bleibt `[Weitere Läden]`
 - Zoom-Detail auf Duo/iPad: `[Ladeninfos | aktive Liste]`; keine Kontextkarte im Home-Pager
 - iPad Home mit zwei bis vier Plätzen: echte Karten bleiben linksbündig in ihrer Reihenfolge
 - Wischschritt 1
 - Fokuswechsel auf die linke Card
-- nur eine Seite vorhanden (Prospekte stehen links von der Inbox)
+- nur eine Seite vorhanden (Angebote stehen links von der Inbox)
 - RTL gespiegelt auf dem iPad, nicht auf dem Duo
 
 **UI-Matrix** (Duo-Simulator per Device Hub, iPad-Simulatoren):
@@ -333,7 +333,7 @@ Build-Einstellungen: `TARGETED_DEVICE_FAMILY = 1,2` (iPhone + iPad), Deployment 
 
 1. **Anker-Seite:** Entspricht das Außendisplay der rechten Innenhälfte? (Device Hub bzw. Hardware)
 2. **Falz-Region innen quer:** Frame flach (inaktiv) und angewinkelt (aktiv). Liegt sie bei x ≈ 475?
-3. **`ScrollView` mit 2 Plätzen, Leerplatz vor der ersten Seite und Falz-Lücke:** Prospekte steht vor Inbox; „Weitere Läden“ bleibt nur die letzte echte Seite
+3. **`ScrollView` mit 2 Plätzen, Leerplatz vor der ersten Seite und Falz-Lücke:** Angebote steht vor Inbox; „Weitere Läden“ bleibt nur die letzte echte Seite
 4. **`presentationPlacement(.leading)`** innen quer. Was passiert mit einem offenen Sheet beim Zuklappen?
 5. **`onHingeChange`** im Simulator: Liefert der Device Hub Winkel und Status?
 6. **Tastatur und Fokus über das Falten:** Bleibt die Tastatur offen, bleibt die Eingabezeile sichtbar?

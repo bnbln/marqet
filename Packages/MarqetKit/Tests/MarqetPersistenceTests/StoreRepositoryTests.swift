@@ -48,3 +48,28 @@ struct StoreRepositoryTests {
         #expect(try repository.all().map(\.name) == ["Lidl"])
     }
 }
+
+@Suite("LoyaltyCardRepository")
+@MainActor
+struct LoyaltyCardRepositoryTests {
+    let repository = LoyaltyCardRepository(container: try! PersistenceContainer.make(inMemory: true))
+
+    @Test func roundTripUpdateAndDelete() throws {
+        let rewe = UUID(), dm = UUID()
+        var card = LoyaltyCard(name: "Payback", payload: "4006381333931", symbology: .ean13, colorHex: "#003EAA",
+                               storeIDs: [rewe], createdAt: Date(timeIntervalSince1970: 10))
+        let second = LoyaltyCard(name: "dm", payload: "DM-42", symbology: .code128, colorHex: "#1D2F6F",
+                                 storeIDs: [dm], createdAt: Date(timeIntervalSince1970: 20))
+        try repository.save(card)
+        try repository.save(second)
+        #expect(try repository.all() == [card, second])
+
+        card.storeIDs = [rewe, dm]
+        card.name = "Payback Karte"
+        try repository.save(card)
+        #expect(try repository.all() == [card, second])
+
+        try repository.delete(id: card.id)
+        #expect(try repository.all() == [second])
+    }
+}

@@ -54,7 +54,7 @@ struct AppModelTests {
         #expect(store.catalogKey == "aldi-sued")
         #expect(model.items.first?.storeID == store.id)
         // The unsorted inbox is always the first page (K3).
-        #expect(model.deck.pages == [.unsorted, .store(store.id), .more])
+        #expect(model.deck.pages == [.brochures, .unsorted, .store(store.id), .more])
     }
 
     @Test func composerAddsToStoreWritesMarkerAndLearns() async throws {
@@ -86,11 +86,11 @@ struct AppModelTests {
     @Test func plannedStoreStaysAndHideRemovesIt() async throws {
         let model = try await makeModel()
         let dm = try catalogStore(model, "dm")
-        #expect(model.deck.pages == [.unsorted, .more])
+        #expect(model.deck.pages == [.brochures, .unsorted, .more])
         model.plan(dm.id)
-        #expect(model.deck.pages == [.unsorted, .store(dm.id), .more])
+        #expect(model.deck.pages == [.brochures, .unsorted, .store(dm.id), .more])
         model.hide(dm.id)
-        #expect(model.deck.pages == [.unsorted, .more])
+        #expect(model.deck.pages == [.brochures, .unsorted, .more])
     }
 
     // MARK: M5 – store management
@@ -280,6 +280,90 @@ struct AppModelTests {
         model.startComposer(on: .unsorted)
         #expect(model.briefing == nil)
         #expect(model.briefingProgress == 0)
+    }
+
+    // MARK: Composer – the new item must stay in sight
+
+    @Test func switchingTargetWhileFullScreenFollowsWithTheFullScreenCard() async throws {
+        let model = try await makeModel(items: [("Milch", "🛒 Rewe")])
+        let rewe = try #require(model.stores.first)
+        let dm = try catalogStore(model, "dm")
+        model.focus(.store(rewe.id))
+        model.startComposer(on: .store(rewe.id))
+        #expect(model.focusedPage == .store(rewe.id))
+
+        // A tap on the dm chip: the full-screen card switches along, the hidden dm card is planned.
+        model.startComposer(on: .store(dm.id))
+        #expect(model.focusedPage == .store(dm.id))
+        #expect(model.deck.pages.contains(.store(dm.id)))
+        #expect(model.activePage == .store(dm.id))
+    }
+
+    @Test func switchingTargetOnHomeDoesNotOpenFullScreen() async throws {
+        let model = try await makeModel()
+        let dm = try catalogStore(model, "dm")
+        model.startComposer(on: .unsorted)
+        model.startComposer(on: .store(dm.id))
+        #expect(model.focusedPage == nil)
+        #expect(model.pageRequest == .store(dm.id))
+    }
+
+    @Test func addedItemIsMarkedForScrollingIntoView() async throws {
+        let model = try await makeModel(items: [("Äpfel", "🛒 Rewe"), ("Zahnpasta", "🛒 Rewe")])
+        let rewe = try #require(model.stores.first)
+        model.startComposer(on: .store(rewe.id))
+        await model.addItem(title: "Bananen", to: .store(rewe.id))
+        let added = try #require(model.items.first { $0.title == "Bananen" })
+        #expect(model.recentlyAddedItemID == added.id)
+        #expect(model.deck.items(on: .store(rewe.id)).contains { $0.id == added.id })
+    }
+
+    @Test func composerTargetStaysOnScreenWhenEmptied() async throws {
+        let model = try await makeModel()
+        let dm = try catalogStore(model, "dm")
+        model.hide(dm.id)
+        model.startComposer(on: .store(dm.id))
+        #expect(model.deck.pages.contains(.store(dm.id)))
+        model.endComposer()
+        // Still planned after closing the composer: the user chose this store on purpose.
+        #expect(model.deck.pages.contains(.store(dm.id)))
+    }
+
+    // MARK: Kundenkarten (KONZEPT #42)
+
+    @Test func loyaltyCardBelongsToSeveralStoresAndSurvivesStoreDeletion() async throws {
+        let model = try await makeModel()
+        let rewe = try catalogStore(model, "rewe")
+        let dm = try catalogStore(model, "dm")
+        let card = LoyaltyCard(name: " Payback ", payload: "4006 3813 3393 1", symbology: .ean13,
+                               colorHex: "#003EAA", storeIDs: [rewe.id, dm.id, rewe.id, UUID()])
+        #expect(model.saveLoyaltyCard(card))
+        let saved = try #require(model.loyaltyCards.first)
+        #expect(saved.name == "Payback")
+        #expect(saved.payload == "4006381333931")
+        #expect(saved.storeIDs == [rewe.id, dm.id])
+        #expect(model.loyaltyCards(for: dm.id).map(\.id) == [card.id])
+
+        await model.deleteStore(rewe.id)
+        #expect(model.loyaltyCards(for: rewe.id).isEmpty)
+        #expect(try #require(model.loyaltyCards.first).storeIDs == [dm.id])
+        #expect(try model.loyaltyRepository.all().first?.storeIDs == [dm.id])
+    }
+
+    @Test func invalidLoyaltyCardIsRefused() async throws {
+        let model = try await makeModel()
+        let card = LoyaltyCard(name: "Payback", payload: "4006381333932", symbology: .ean13, colorHex: "#003EAA")
+        #expect(!model.saveLoyaltyCard(card))
+        #expect(model.loyaltyCards.isEmpty)
+    }
+
+    @Test func deletingLoyaltyCardRemovesIt() async throws {
+        let model = try await makeModel()
+        let card = LoyaltyCard(name: "dm", payload: "DM-1", symbology: .code128, colorHex: "#1D2F6F")
+        #expect(model.saveLoyaltyCard(card))
+        model.deleteLoyaltyCard(card.id)
+        #expect(model.loyaltyCards.isEmpty)
+        #expect(try model.loyaltyRepository.all().isEmpty)
     }
 
     @Test(arguments: [(7, "Guten Morgen"), (13, "Guten Tag"), (19, "Guten Abend"), (2, "Hallo")])

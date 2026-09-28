@@ -1,6 +1,6 @@
 # Marqet – Wettbewerb, Angebote & Langfrist-Strategie
 
-Stand: 26.09.2026 · Ergänzt [KONZEPT.md](KONZEPT.md)
+Stand: 28.09.2026 · Ergänzt [KONZEPT.md](KONZEPT.md)
 
 ---
 
@@ -8,7 +8,7 @@ Stand: 26.09.2026 · Ergänzt [KONZEPT.md](KONZEPT.md)
 
 | App | Modell | Stärken | Schwächen | Was Marqet daraus mitnimmt |
 |---|---|---|---|---|
-| **Bring!** | Kostenlos, finanziert über Partner (Angebote, Rezepte, Marken) | Artikel-Katalog mit Icons, automatische Kategorie-Sortierung, geteilte Listen, Rezepte, **Prospekte & Angebote direkt auf die Liste**, Kundenkarten | Eigenes Datensilo, keine Laden-Ansicht (nur über mehrere Listen), viel Partner-Content | Kategorie-Qualität als Messlatte; der Weg „Angebot → Liste“ ist das Vorbild für v2 |
+| **Bring!** | Kostenlos, finanziert über Partner (Angebote, Rezepte, Marken) | Artikel-Katalog mit Icons, automatische Kategorie-Sortierung, geteilte Listen, Rezepte, **Prospekte & Angebote direkt auf die Liste**, Kundenkarten | Eigenes Datensilo, keine Laden-Ansicht (nur über mehrere Listen), viel Partner-Content | Kategorie-Qualität als Messlatte; der Weg „Angebot → Liste“ ist das Vorbild für v2; Kundenkarten, aber am Laden statt im Menü (KONZEPT #42). Details: §2, Nachrecherche 28.09. |
 | **MeinProspekt** (Bonial / Axel Springer, Schwester von kaufDA) | Werbefinanziert (Händler zahlen für Reichweite) | Prospekte von tausenden Händlern, „+ Merken“ legt ein Angebot auf die Liste, geteilte Listen, Favoriten-Alarme | Die Liste ist Beiwerk zum Prospekt, keine echte Einkaufsplanung | Angebote werden pro Produkt gemerkt; Favoriten-Alarm als spätere Idee |
 | **Listonic** (DE: „Die Einkaufsliste – Listonic“) | Kostenlos, Werbung + Offerista-Placements | Sortierung nach Gängen, Kategorien-Reihenfolge anpassbar, Preise/Budget, Echtzeit-Sharing | Werbelastig, generisches Design | Anpassbare Kategorie-Reihenfolge pro Laden ist Standard und muss rein |
 | **Die Einkaufsliste** (unabhängige App) | Kostenlos | Mengen/Einheiten-Erkennung, **Kategorie-Reihenfolge pro Supermarkt** konfigurierbar | Alles manuell, eigenes Silo | Bestätigt die Idee „Laufweg pro Laden“; Marqet lernt ihn automatisch statt per Konfiguration |
@@ -58,6 +58,30 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 | **Offizielle Händlerseiten** | Jede große Kette hat eine öffentliche Angebots- bzw. Prospektseite, teils mit Marktwahl | Ab v1.0 als Link im Laden-Vollbild (KONZEPT #39), `leafletURL` im Katalog (25 Ketten) |
 | Staatliche Preisbeobachtung | In Deutschland nur gefordert (vzbv, foodwatch), keine offenen Daten; Österreich hat einen Preistransparenz-Bericht der AMA, aber keine Einzelpreise | Keine Quelle |
 
+### Nachrecherche 28.09.2026: Wie Bring! an Prospekte kommt
+
+Bring! zeigt echte Prospekt-Cover und Händlerlogos in einem Regal. Die Frage war, woher die Daten kommen und ob man sie einfach verbreiten darf, weil Händler ja Reichweite wollen.
+
+| Befund | Quelle | Folgerung für Marqet |
+|---|---|---|
+| **Händler bezahlen für Verbreitung** und bekommen Messwerte (Aufrufe, Klicks, Filial-Targeting). Prospekte sind Werbung mit Abrechnung, keine frei verteilbaren Inhalte | ShopFully/Offerista-Modell (§2) | „Die wollen das doch“ ist keine Lizenz. Cover und Logos nur über einen Vertrag |
+| **Bis 2024 ausschließlich über Partnernetzwerke.** Offerista (ShopFully) nennt Bring! als Kanal für die Angebotsausspielung neben Bing und Chefkoch | [Offerista](https://www.offerista.com/at/weihnachtsstudie-2024-einblicke-in-das-einkaufsverhalten-in-osterreich-und-europa/), [Lebensmittelpraxis](https://lebensmittelpraxis.de/handel-aktuell/41800-angebotskommunikation-bring-integriert-handzettel-von-kaufland-penny-und-netto.html) | Der Feed liefert Cover-Bild, Händlerlogo, Gültigkeit und Filialzuordnung mit, die Rechte stecken im Werbevertrag. Genau das fehlt uns heute |
+| **Seit Oktober 2024 zusätzlich Direktverträge** mit Kaufland, Penny und Netto. Die Technik stammt von der Schweizer Prospekt-App Profital (bei Bring! seit 2023) | [Lebensmittelpraxis](https://lebensmittelpraxis.de/handel-aktuell/41800-angebotskommunikation-bring-integriert-handzettel-von-kaufland-penny-und-netto.html) | Direktverträge kommen erst mit großer Reichweite. Für uns bleibt ShopFully der Einstieg |
+| **Retail Media:** Mit Edeka, Migros und Billa spielt Bring! Angebote passend zur Einkaufsliste aus, nicht alle Prospekte | [medianet](https://medianet.at/news/retail/bring-app-startet-mit-partner-billa-personalisiertes-werbeformat-65055.html), [Bring! Labs](https://www.bringlabs.com/en/insights) | Bestätigt die „Angebots-Treffer“ aus §3.1. Bezahlte Treffer sind als „Anzeige“ zu kennzeichnen (§3.3) |
+| **Kundenkarten:** Scan per Barcode, Farbe und Name frei, abgelegt im Menü „Erweitert“ der Liste | [iphone-ticker](https://www.iphone-ticker.de/einkaufslisten-app-bring-verwaltet-jetzt-kundenkarten-134250/), [Bring! Blog](https://www.getbring.com/blog-posts/save-your-loyalty-cards-in-bring) | Übernehmen, aber besser platzieren: die Karte des Ladens im Laden-Vollbild (KONZEPT #42, v1.1) |
+
+**Was Bring! besser macht, und was davon wir übernehmen:**
+
+| Bring! | Marqet heute | Entscheidung |
+|---|---|---|
+| Echte Prospekt-Cover im Regal | Monogramm-Cover und Link auf die offizielle Seite | Erst mit Partner-Feed (v2.0). **Erstanfrage bei ShopFully vorziehen** (Gate G2) |
+| Angebot per Tipp auf die Liste | fehlt | v2.0 |
+| Angebote passend zur Liste | fehlt | v2.0 (Angebots-Treffer) |
+| Kundenkarten | fehlt | **v1.1**, ohne Partner machbar |
+| Rezepte, Marken-Content | fehlt | Nein, passt nicht zur Positionierung |
+
+Die Card heißt deshalb schon ab v1.0 **„Angebote“** (KONZEPT #41): Heute stehen dort die Prospekte, ab v2.0 kommen die Einzelangebote dazu, ohne dass sich der Name ändert.
+
 **Wichtige Einschränkung beim „besten Angebot“:** Verfügbar sind nur **Aktionspreise** aus Prospekten, **keine regulären Preise**. Ein echter Warenkorb-Preisvergleich („bei Lidl insgesamt 4,20 € billiger“) ist damit nicht seriös möglich. Möglich ist: *„Butter ist diese Woche bei Lidl im Angebot (1,69 €, bis Sa)“*. Genau so müssen wir das Feature auch vermarkten.
 
 ---
@@ -68,7 +92,7 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 
 | Stufe | Feature | Nutzen |
 |---|---|---|
-| **v1.0 – Prospekt-Link** ✅ | Das Laden-Vollbild und die zentrale Prospektseite öffnen offizielle Angebotsseiten der Händler (`SFSafariViewController`, `leafletURL` aus dem Katalog) | Ohne Partner, ohne Scraping; jede Quelle bleibt direkt dem Händler zugeordnet |
+| **v1.0 – Prospekt-Link** ✅ | Das Laden-Vollbild und die Angebote-Card öffnen offizielle Angebotsseiten der Händler (`SFSafariViewController`, `leafletURL` aus dem Katalog) | Ohne Partner, ohne Scraping; jede Quelle bleibt direkt dem Händler zugeordnet |
 | **v1.x – Prospekt pro Markt** | Filial-ID der bevorzugten Filiale in die URL (z. B. Rewe-Marktseite), damit der Nutzer nicht erneut seinen Markt wählen muss | Braucht je Kette ein URL-Schema, nur für die großen 5 |
 | **v2.0 – Angebots-Treffer** | Für jedes offene Item wird geprüft, ob es in einem der Läden des Nutzers im Angebot ist. Das Item bekommt ein Badge `🏷 Lidl 1,69 € · bis Sa`, im Zuordnen-Screen erscheint „Im Angebot bei Lidl“ als Vorschlagsgrund, jede Laden-Card bekommt ein Sheet „Angebote für deine Liste“ | Der eigentliche Wow-Effekt: das beste Angebot wird zur Liste passend vorgeschlagen |
 | **v2.0 – Angebot → Liste** | Angebote eines Ladens durchsuchen, per Tipp mit Marker direkt auf die Liste | Wie bei Bring! und MeinProspekt |
@@ -107,7 +131,7 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 | Gate | Kriterium |
 |---|---|
 | G1 Produkt | Retention nach 4 Wochen stabil, Nutzer ordnen regelmäßig Items zu |
-| G2 Reichweite | Konkrete Nutzerzahlen als Verhandlungsbasis, erstes Gespräch mit ShopFully (Publisher) und Bonial (Reach). Mindestschwellen und Konditionen werden dort geklärt |
+| G2 Reichweite | Konkrete Nutzerzahlen als Verhandlungsbasis, Gespräch mit ShopFully (Publisher) und Bonial (Reach). *Seit 28.09.:* Eine **unverbindliche Erstanfrage bei ShopFully schon vor dem Launch** klärt Mindestschwellen, Konditionen und ob Cover-Bilder und Logos im Feed lizenziert sind. Das Vertragsgespräch folgt mit echten Nutzerzahlen |
 | G3 Vertrag | Datenumfang (Einzelangebote, nicht nur Prospekt-PDFs), Regionen DE/AT/CH, Vergütung, Kennzeichnungspflichten |
 | G4 Datenschutz | Opt-in-Konzept, Datenschutzerklärung, Privacy-Label aktualisiert |
 
@@ -122,6 +146,7 @@ Keine App ist gleichzeitig **nach Läden organisiert** und **nativ in Apple Erin
 
 - [Bring! – Features](https://getbring.com/de/features) · [appgefahren: Bring! integriert Angebote und Prospekte](https://www.appgefahren.de/bring-einkaufsliste-integriert-angebote-und-prospekte-217824.html) · [mobiflip: Vom Prospekt direkt auf die Einkaufsliste](https://www.mobiflip.de/bring-vom-prospekt-direkt-auf-die-einkaufsliste/)
 - [Offerista kooperiert mit Listonic](https://www.offerista.com/pm-offerista-kooperiert-internationaler-einkauflisten-app-listonic/) · [Offerista for Publishers](https://www.offerista.com/en/offerista-for-publishers/) · [Offerista & Publitas Kooperation](https://www.offerista.com/de/die-zukunft-des-prospekts-offerista-und-publitas-starten-europaweite-kooperation/) · [Shopfully & Offerista: neue Marke](https://shopfully.com/newsroom/shopfully-offerista-new-brand-identity/)
+- [Lebensmittelpraxis: Bring integriert Handzettel von Kaufland, Penny und Netto](https://lebensmittelpraxis.de/handel-aktuell/41800-angebotskommunikation-bring-integriert-handzettel-von-kaufland-penny-und-netto.html) · [medianet: Bring! mit Billa](https://medianet.at/news/retail/bring-app-startet-mit-partner-billa-personalisiertes-werbeformat-65055.html) · [Bring! Labs – Insights](https://www.bringlabs.com/en/insights) · [iphone-ticker: Bring! verwaltet Kundenkarten](https://www.iphone-ticker.de/einkaufslisten-app-bring-verwaltet-jetzt-kundenkarten-134250/) · [Bring! Blog: Kundenkarten](https://www.getbring.com/blog-posts/save-your-loyalty-cards-in-bring)
 - [Bonial – Unternehmen](https://www.bonial.com/en/company) · [Bonial Reach](https://www.bonial.com/produkte-bonial-reach) · [Supermarkt Inside: Wer ist kaufDA/MeinProspekt?](https://www.supermarkt-inside.de/wer-und-was-ist-kaufda-meinprospekt/)
 - [MeinProspekt – App Store](https://apps.apple.com/de/app/meinprospekt-mit-einkaufsliste/id1031838771) · [MeinProspekt Support: Angebot auf die Einkaufsliste](https://support.meinprospekt.de/hc/de/articles/10450115270290-Wie-kann-ich-ein-Angebot-zu-meiner-Einkaufsliste-hinzuf%C3%BCgen)
 - [marktguru inoffizielle API (GitHub)](https://github.com/Nusscookie/offers-api) · [kaufDA-Scraper (Apify)](https://apify.com/bovi/kaufda-circulars)

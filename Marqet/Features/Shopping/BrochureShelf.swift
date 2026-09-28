@@ -1,7 +1,7 @@
 import MarqetCore
 import SwiftUI
 
-/// Newsstand-style shelf: brochure covers stand in rows of two to four on a floating ledge.
+/// Newsstand-style shelf: brochure covers stand in rows of two to four in soft shelf trays.
 struct BrochureShelf: View {
     let entries: [StoreCatalog.Entry]
     let open: (StoreCatalog.Entry) -> Void
@@ -9,6 +9,8 @@ struct BrochureShelf: View {
     @State private var width: CGFloat = 0
 
     private static let spacing: CGFloat = 16
+    /// The tray reaches this far past the outer covers (the scroll view clips anything wider).
+    static let trayInset: CGFloat = 10
     private static let minimumCoverWidth: CGFloat = 92
 
     /// Three covers on a phone card, two on very narrow widths, four on wide ones.
@@ -26,11 +28,11 @@ struct BrochureShelf: View {
 
     private var coverWidth: CGFloat {
         let columns = CGFloat(columns)
-        return max((width - Self.spacing * (columns - 1)) / columns, 0)
+        return max((width - 2 * Self.trayInset - Self.spacing * (columns - 1)) / columns, 0)
     }
 
     var body: some View {
-        LazyVStack(spacing: 26) {
+        LazyVStack(spacing: 22) {
             ForEach(rows, id: \.first?.id) { row in
                 ShelfRow(entries: row, coverWidth: coverWidth, spacing: Self.spacing, open: open)
             }
@@ -46,65 +48,62 @@ private struct ShelfRow: View {
     let spacing: CGFloat
     let open: (StoreCatalog.Entry) -> Void
 
+    private var coverHeight: CGFloat { coverWidth / BrochureCover.aspectRatio }
+    /// How far the covers stand above the tray's bottom edge.
+    private static let floorInset: CGFloat = 14
+
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .bottom, spacing: spacing) {
-                ForEach(entries) { entry in
-                    Button { open(entry) } label: {
-                        BrochureCover(entry: entry)
-                            .frame(width: coverWidth)
-                    }
-                    .buttonStyle(CoverButtonStyle())
-                    .accessibilityLabel("Prospekt \(entry.name)")
-                    .accessibilityHint("Öffnet die offizielle Angebotsseite von \(entry.name)")
+        HStack(alignment: .bottom, spacing: spacing) {
+            ForEach(entries) { entry in
+                Button { open(entry) } label: {
+                    BrochureCover(entry: entry)
+                        .frame(width: coverWidth, height: coverHeight)
                 }
+                .buttonStyle(CoverButtonStyle())
+                .accessibilityLabel("Prospekt \(entry.name)")
+                .accessibilityHint("Öffnet die offizielle Angebotsseite von \(entry.name)")
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 8)
-            .zIndex(1)
-
-            ShelfLedge()
-                // Covers stand slightly into the ledge's top face.
-                .padding(.top, -6)
-                .padding(.horizontal, -8)
         }
-    }
-}
-
-/// A modern ledge: a light top face, a slim front edge and a soft shadow below.
-private struct ShelfLedge: View {
-    var body: some View {
-        VStack(spacing: 0) {
-            LinearGradient(
-                colors: [Color(.systemGray5), Color(.systemGray4)],
-                startPoint: .top, endPoint: .bottom
-            )
-            .frame(height: 12)
-
-            Color(.systemGray3)
-                .frame(height: 5)
-                .overlay(alignment: .top) {
-                    Color.white.opacity(0.35).frame(height: 0.5)
-                }
-        }
-        .clipShape(.rect(cornerRadius: 4, style: .continuous))
+        .padding(.horizontal, BrochureShelf.trayInset)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, Self.floorInset)
         .background(alignment: .bottom) {
-            Capsule()
-                .fill(.black.opacity(0.18))
-                .frame(height: 10)
-                .padding(.horizontal, 14)
-                .offset(y: 8)
-                .blur(radius: 8)
+            ShelfTray()
+                .frame(height: coverHeight * 0.42 + Self.floorInset)
         }
-        .accessibilityHidden(true)
     }
 }
 
-/// A generated brochure cover in the retailer's colors.
+/// A soft recessed tray the covers stand in, with a slightly brighter front lip.
+private struct ShelfTray: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .fill(Color(.quaternarySystemFill))
+            .overlay(alignment: .bottom) {
+                UnevenRoundedRectangle(
+                    cornerRadii: .init(bottomLeading: 18, bottomTrailing: 18),
+                    style: .continuous
+                )
+                .fill(Color(.tertiarySystemFill))
+                .frame(height: 8)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.04), lineWidth: 0.5)
+            }
+            .accessibilityHidden(true)
+    }
+}
+
+/// A clean paper cover: the retailer's logo on a lightly tinted page, a brand-colored spine
+/// and a hint of pages behind it.
 private struct BrochureCover: View {
     let entry: StoreCatalog.Entry
 
-    private var store: Store { entry.makeStore(sortIndex: 0) }
+    static let aspectRatio: CGFloat = 0.74
+    private static let corners = RectangleCornerRadii(topLeading: 3, bottomLeading: 3, bottomTrailing: 8, topTrailing: 8)
+
+    @Environment(\.colorScheme) private var colorScheme
 
     private static let calendarWeek: Int = {
         var calendar = Calendar(identifier: .iso8601)
@@ -113,75 +112,67 @@ private struct BrochureCover: View {
     }()
 
     var body: some View {
-        let store = store
-        let foreground = store.foregroundOnColor
+        let store = entry.makeStore(sortIndex: 0)
+        let shape = UnevenRoundedRectangle(cornerRadii: Self.corners, style: .continuous)
 
         GeometryReader { proxy in
             let width = proxy.size.width
-            ZStack(alignment: .topLeading) {
-                LinearGradient(
-                    colors: [store.color, store.color.mix(with: .black, by: 0.18)],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                )
-                // Oversized decorative disc, like a cover graphic.
-                .overlay(alignment: .bottomTrailing) {
-                    Circle()
-                        .fill(foreground.opacity(0.12))
-                        .frame(width: width * 1.1, height: width * 1.1)
-                        .offset(x: width * 0.4, y: width * 0.3)
-                }
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                StoreBadge(store: store, size: width * 0.42)
+                    .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+                Spacer(minLength: 0)
 
-                VStack(alignment: .leading, spacing: 0) {
-                    HStack(alignment: .top) {
-                        StoreBadge(store: store, size: width * 0.3)
-                        Spacer(minLength: 4)
-                        Text("KW \(Self.calendarWeek)")
-                            .font(.system(size: width * 0.09, weight: .bold, design: .rounded))
-                            .foregroundStyle(foreground.opacity(0.8))
-                            .lineLimit(1)
-                    }
-
-                    Spacer(minLength: 6)
-
+                VStack(spacing: 2) {
                     Text(entry.name)
-                        .font(.system(size: width * 0.17, weight: .heavy, design: .rounded))
-                        .foregroundStyle(foreground)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.6)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Text("Angebote")
-                        .font(.system(size: width * 0.1, weight: .semibold, design: .rounded))
-                        .foregroundStyle(foreground.opacity(0.75))
-                        .padding(.top, 1)
+                        .font(.system(size: max(width * 0.11, 12), weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    Text("KW \(Self.calendarWeek)")
+                        .font(.system(size: max(width * 0.08, 10), weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
                 }
-                .padding(width * 0.09)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-
-                // Spine and a soft gloss sell the printed-paper feel.
-                LinearGradient(
-                    stops: [
-                        .init(color: .black.opacity(0.22), location: 0),
-                        .init(color: .white.opacity(0.12), location: 0.035),
-                        .init(color: .clear, location: 0.09),
-                    ],
-                    startPoint: .leading, endPoint: .trailing
-                )
-                LinearGradient(
-                    colors: [.white.opacity(0.16), .clear],
-                    startPoint: .topTrailing, endPoint: .center
-                )
+                .padding(.bottom, width * 0.1)
             }
-            .frame(width: proxy.size.width, height: proxy.size.height)
+            .padding(.leading, width * 0.05)
+            .padding(.horizontal, width * 0.08)
+            .frame(width: width, height: proxy.size.height)
         }
-        .aspectRatio(0.72, contentMode: .fit)
-        .clipShape(.rect(cornerRadii: .init(topLeading: 2, bottomLeading: 2, bottomTrailing: 6, topTrailing: 6), style: .continuous))
+        .background(paper(for: store), in: shape)
+        // Brand-colored spine, like the bound edge of a brochure.
+        .overlay(alignment: .leading) {
+            store.color
+                .frame(width: 5)
+                .overlay(alignment: .trailing) { Color.black.opacity(0.12).frame(width: 0.5) }
+        }
+        // Gentle page curvature: a touch of light across the paper.
         .overlay {
-            UnevenRoundedRectangle(cornerRadii: .init(topLeading: 2, bottomLeading: 2, bottomTrailing: 6, topTrailing: 6), style: .continuous)
-                .strokeBorder(.black.opacity(0.1), lineWidth: 0.5)
+            LinearGradient(
+                colors: [.white.opacity(colorScheme == .dark ? 0.04 : 0.35), .clear, .black.opacity(0.03)],
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            .allowsHitTesting(false)
         }
-        .shadow(color: .black.opacity(0.22), radius: 6, x: 2, y: 4)
-        .shadow(color: .black.opacity(0.12), radius: 1, x: 0, y: 1)
+        .clipShape(shape)
+        .overlay { shape.strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5) }
+        // Pages peeking out behind the cover.
+        .background {
+            shape.fill(pageEdge).offset(x: 2.5, y: -1.5).padding(.vertical, 2)
+        }
+        .shadow(color: .black.opacity(0.14), radius: 1, y: 1)
+        .shadow(color: .black.opacity(colorScheme == .dark ? 0.4 : 0.12), radius: 12, y: 8)
+    }
+
+    private func paper(for store: Store) -> Color {
+        colorScheme == .dark
+            ? store.color.mix(with: Color(white: 0.16), by: 0.82)
+            : store.color.mix(with: .white, by: 0.9)
+    }
+
+    private var pageEdge: Color {
+        colorScheme == .dark ? Color(white: 0.24) : Color(white: 0.93)
     }
 }
 

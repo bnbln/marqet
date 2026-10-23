@@ -193,7 +193,7 @@ struct StoreCard: View {
                         switch line {
                         case .header(let category):
                             titleLabel(category)
-                                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .bottomLeading)
+                                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .leading)
                                 .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
                                 .listRowBackground(Color(.secondarySystemGroupedBackground))
                                 .listRowSeparator(.hidden)
@@ -233,13 +233,18 @@ struct StoreCard: View {
                 completedSection
             }
             .listStyle(.plain)
+            // Lets the title rows stay compact; item rows are taller on their own.
+            .environment(\.defaultMinListRowHeight, Self.titleHeight)
             .coordinateSpace(.named(Self.listSpace))
             .overlay(alignment: .top) { pinnedTitle.clipped() }
             .modifier(DragSessionTracker())
             .scrollContentBackground(.hidden)
             // The pinned section titles carry their own opaque band. The top edge effect would
             // tint them with the bar's color scheme (black under a dark brand color).
-            .scrollEdgeEffectHidden(true, for: .top)
+            // With the keyboard up the card is short already; the bottom blur would hide even
+            // more rows. One modifier for both edges: a second one for the bottom edge let the
+            // black top effect come back over the titles.
+            .scrollEdgeEffectHidden(true, for: model.composerTarget != nil ? [.top, .bottom] : .top)
             // The List's own scroll view consumes taps before its background sees them.
             // A parent tap handles unused white space; row buttons keep their own actions.
             .onTapGesture(perform: handleBackgroundTap)
@@ -247,8 +252,6 @@ struct StoreCard: View {
             // Every card blurs its list progressively above the bottom controls (mic, add, dots,
             // triage), which float unblurred on top. The bar reserves the space and drives the effect.
             .scrollEdgeEffectStyle(.soft, for: .bottom)
-            // With the keyboard up the card is short already; the blur would hide even more rows.
-            .scrollEdgeEffectHidden(model.composerTarget != nil, for: .bottom)
             .safeAreaBar(edge: .bottom, spacing: 0) {
                 if showsTriageFooter {
                     triageFooter
@@ -297,7 +300,7 @@ struct StoreCard: View {
 
     // MARK: Category titles
 
-    static let titleHeight: CGFloat = 40
+    static let titleHeight: CGFloat = 34
     static let listSpace = "cardList"
 
     /// Icon and title close together, like a section header – a `Label` in a list row would get
@@ -309,7 +312,7 @@ struct StoreCard: View {
         }
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(readableTint)
-        .padding(.bottom, 6)
+        .padding(.vertical, 6)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isHeader)
     }
@@ -321,7 +324,7 @@ struct StoreCard: View {
         if let current = titleOffsets.filter({ $0.value <= 0.5 }).max(by: { $0.value < $1.value }) {
             let next = titleOffsets.values.filter { $0 > 0.5 }.min() ?? .infinity
             titleLabel(current.key)
-                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .bottomLeading)
+                .frame(maxWidth: .infinity, minHeight: Self.titleHeight, alignment: .leading)
                 .padding(.horizontal, 20)
                 // An opaque band, so rows never show through the title.
                 .background(Color(.secondarySystemGroupedBackground))

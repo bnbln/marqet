@@ -16,3 +16,7 @@ jobs:
         run: brew install xcodegen
       - name: Verify
         run: scripts/ci.sh
+        env:
+          # StoreKit test products came back empty on the iPhone Duo (iOS 27.1) simulator.
+          MARQET_SIMULATOR_NAME: iPhone 17
+          MARQET_SIMULATOR_RUNTIME: iOS-27-0

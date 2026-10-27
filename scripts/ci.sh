@@ -20,11 +20,16 @@ echo "▸ Package tests"
 (cd Packages/MarqetKit && swift test --quiet)
 
 echo "▸ App tests"
+# MARQET_SIMULATOR_NAME / MARQET_SIMULATOR_RUNTIME (e.g. "iPhone 17" / "iOS-27-0") pick a specific device;
+# otherwise the last available iPhone is used.
 DEVICE_ID="${MARQET_SIMULATOR_ID:-$(xcrun simctl list devices available -j | python3 -c '
-import json, sys
+import json, os, sys
 devices = json.load(sys.stdin)["devices"]
-phones = [d for runtime, list in devices.items() if "iOS" in runtime for d in list if d["name"].startswith("iPhone")]
-print(phones[-1]["udid"])')}"
+phones = [(runtime, d) for runtime, list in devices.items() if "iOS" in runtime for d in list if d["name"].startswith("iPhone")]
+name, runtime = os.environ.get("MARQET_SIMULATOR_NAME"), os.environ.get("MARQET_SIMULATOR_RUNTIME")
+preferred = [d for r, d in phones if (not name or d["name"] == name) and (not runtime or r.endswith(runtime))]
+print((preferred or [d for _, d in phones])[-1]["udid"])')}"
+echo "Simulator: $(xcrun simctl list devices | grep "$DEVICE_ID")"
 xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
 # EventKit integration tests need Reminders access; without it they are skipped, not failed.
 xcrun simctl privacy "$DEVICE_ID" grant reminders app.marqet.Marqet 2>/dev/null || true

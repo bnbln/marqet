@@ -9,9 +9,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode
-        # Newest released Xcode 27; skip betas and release candidates.
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_27*.app | grep -viE 'beta|release_candidate' | sort -V | tail -1)"
+      - name: Show Xcode
+        # The image's default Xcode is its newest stable release; it also carries release candidates.
+        run: xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Verify

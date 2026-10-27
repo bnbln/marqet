@@ -222,7 +222,7 @@
 		68440EB6E1E9D12D43C573CF /* BranchPickerSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerSection.swift; sourceTree = "<group>"; };
 		698AD3C2DE7126D084A9616C /* WidgetSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSample.swift; sourceTree = "<group>"; };
 		6C36556FC45F2FFF3189F223 /* TriageScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriageScreen.swift; sourceTree = "<group>"; };
-		6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */ = {isa = PBXFileReference; path = Marqet.icon; sourceTree = "<group>"; };
+		6D48EE0E2082B73D1BEEACD2 /* Marqet.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = Marqet.icon; sourceTree = "<group>"; };
 		6E4D320616F77292D85E5EE0 /* BrochuresCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrochuresCard.swift; sourceTree = "<group>"; };
 		6F68A05A39E8357D0141B5FA /* WidgetComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetComponents.swift; sourceTree = "<group>"; };
 		725C14DEC2722E4728B0E5E1 /* WidgetModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetModelTests.swift; sourceTree = "<group>"; };
@@ -778,7 +778,6 @@
 				};
 			};
 			buildConfigurationList = C287CC3FE11A0BA65C0DCAFA /* Build configuration list for PBXProject "Marqet" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -792,12 +791,13 @@
 				F6D6148A8957996070DC673E /* XCLocalSwiftPackageReference "Packages/MarqetKit" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 64AC9F8E12AD1FB3541251F4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				B57C97E7B88B33900EAB3896 /* Marqet */,
-				2286EB055C2BEBDF29EB8994 /* MarqetTests */,
 				C3080134A7858FF45583C84B /* MarqetWidgets */,
+				2286EB055C2BEBDF29EB8994 /* MarqetTests */,
 			);
 		};
 /* End PBXProject section */

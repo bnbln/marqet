@@ -11,6 +11,8 @@ before="$(shasum Marqet.xcodeproj/project.pbxproj)"
 xcodegen generate --quiet
 if [[ "$(shasum Marqet.xcodeproj/project.pbxproj)" != "$before" ]]; then
     echo "✘ Marqet.xcodeproj was out of date with project.yml – it has been regenerated; review and commit it." >&2
+    git --no-pager diff --stat -- Marqet.xcodeproj >&2
+    git --no-pager diff -- Marqet.xcodeproj >&2
     exit 1
 fi
 

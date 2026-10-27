@@ -4,12 +4,14 @@ on:
   pull_request:
 jobs:
   verify:
-    runs-on: macos-26
+    # Xcode 27 ships in its own image, not in macos-26.
+    runs-on: xcode-27
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_27*.app | sort -V | tail -1)"
+        # Newest released Xcode 27; skip betas and release candidates.
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode_27*.app | grep -viE 'beta|release_candidate' | sort -V | tail -1)"
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Verify

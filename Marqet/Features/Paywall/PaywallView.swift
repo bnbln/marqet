@@ -72,6 +72,8 @@ struct PaywallView: View {
                         ProgressView()
                     } else if let product = purchases.product {
                         Text("Für \(product.displayPrice) freischalten")
+                    } else if purchases.state == .unavailable {
+                        Text("Bald verfügbar")
                     } else {
                         Text("Freischalten")
                     }
@@ -85,6 +87,10 @@ struct PaywallView: View {
             switch purchases.state {
             case .pending:
                 Text("Der Kauf wartet auf Freigabe, zum Beispiel durch „Kaufanfrage“.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            case .unavailable:
+                Text("Marqet Pro ist noch nicht verfügbar.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             case .failed(let message):

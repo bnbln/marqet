@@ -1387,6 +1387,16 @@
         }
       }
     },
+    "Bald verfügbar" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coming soon"
+          }
+        }
+      }
+    },
     "Barcode" : {
       "localizations" : {
         "en" : {
@@ -3935,12 +3945,12 @@
         }
       }
     },
-    "Marqet Pro ist gerade nicht verfügbar." : {
+    "Marqet Pro ist noch nicht verfügbar." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Marqet Pro isn’t available right now."
+            "value" : "Marqet Pro isn’t available yet."
           }
         }
       }

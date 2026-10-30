@@ -18,6 +18,8 @@ final class PurchaseManager {
         case purchasing
         /// Waiting for approval, e.g. Ask to Buy.
         case pending
+        /// The App Store has no Pro product (yet), e.g. before it is set up in App Store Connect.
+        case unavailable
         case failed(String)
     }
 
@@ -25,10 +27,12 @@ final class PurchaseManager {
     private(set) var state: State = .idle
     private(set) var isFamilyShared = false
 
+    @ObservationIgnored private let productID: String
     @ObservationIgnored private let onEntitlementChange: @MainActor (Bool) -> Void
     @ObservationIgnored private var updates: Task<Void, Never>?
 
-    init(onEntitlementChange: @escaping @MainActor (Bool) -> Void) {
+    init(productID: String = PurchaseManager.proProductID, onEntitlementChange: @escaping @MainActor (Bool) -> Void) {
+        self.productID = productID
         self.onEntitlementChange = onEntitlementChange
     }
 
@@ -42,8 +46,8 @@ final class PurchaseManager {
         guard product == nil else { return }
         state = .loading
         do {
-            product = try await Product.products(for: [Self.proProductID]).first
-            state = product == nil ? .failed(String(localized: "Marqet Pro ist gerade nicht verfügbar.")) : .idle
+            product = try await Product.products(for: [productID]).first
+            state = product == nil ? .unavailable : .idle
         } catch {
             state = .failed(error.localizedDescription)
         }
@@ -64,7 +68,7 @@ final class PurchaseManager {
                 // right after a purchase, and `Transaction.updates` does not repeat own purchases –
                 // re-reading here could leave a paid Pro locked until the next launch.
                 isFamilyShared = transaction.ownershipType == .familyShared
-                onEntitlementChange(transaction.productID == Self.proProductID && transaction.revocationDate == nil)
+                onEntitlementChange(transaction.productID == productID && transaction.revocationDate == nil)
                 state = .idle
                 return true
             case .pending:
@@ -97,7 +101,7 @@ final class PurchaseManager {
         var familyShared = false
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result,
-                  transaction.productID == Self.proProductID,
+                  transaction.productID == productID,
                   transaction.revocationDate == nil else { continue }
             entitled = true
             familyShared = transaction.ownershipType == .familyShared

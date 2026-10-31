@@ -247,8 +247,9 @@ public enum VoiceRuleParser {
     // MARK: Items & quantities
 
     /// Usually one item per clause. "Butter Zwiebeln" – an enumeration without commas – becomes
-    /// two when every word is a grocery the dictionary knows on its own (German nouns only, so
-    /// "frische Milch" or "Kinder Riegel" stay one item).
+    /// two when every word is a grocery the dictionary knows on its own or a hyphenated compound
+    /// noun ("Brötchen HDMI-Kabel"); German nouns only, so "frische Milch" or "Kinder Riegel" stay
+    /// one item.
     private static func items(from words: [Token], language: VoiceLanguage) -> [(name: String, quantity: String?, isAttribute: Bool)] {
         guard let item = item(from: words) else { return [] }
         let names = item.name.split(separator: " ").map(String.init)
@@ -259,7 +260,11 @@ public enum VoiceRuleParser {
         // A known phrase ("Rote Bete", "Saure Sahne") stays together.
         let isPhrase = groceries.dictionary.words[keys.joined(separator: " ")] != nil
             || zip(keys, keys.dropFirst()).contains { groceries.dictionary.words["\($0) \($1)"] != nil }
-        guard !isPhrase, keys.allSatisfy({ groceries.dictionaryCategory(for: $0) != nil }) else { return [item] }
+        // "HDMI-Kabel", "USB-Stick": a capitalized compound with a hyphen is a noun of its own.
+        let standsAlone = zip(names, keys).allSatisfy { name, key in
+            name.contains("-") || groceries.dictionaryCategory(for: key) != nil
+        }
+        guard !isPhrase, standsAlone else { return [item] }
         // The quantity was said with the first item ("500 g Butter Zwiebeln").
         return names.enumerated().map { index, name in (name, index == 0 ? item.quantity : nil, false) }
     }

@@ -137,13 +137,29 @@ private struct VoiceCaptureContent: View {
         session.activeChoice.flatMap { session.option(for: $0) }?.store.color ?? accentColor
     }
 
+    /// Nothing said yet: the intro explains how to speak.
+    private var showsIntro: Bool {
+        guard session.groups.isEmpty, session.transcript.full.isEmpty else { return false }
+        switch session.phase {
+        case .preparing, .listening: return true
+        default: return false
+        }
+    }
+
+    /// While preparing, the transcript line carries the progress; once listening, the intro speaks.
+    private var showsTranscript: Bool {
+        !(showsIntro && session.phase == .listening)
+    }
+
     var body: some View {
         Group {
             if isWide {
                 // iPad and the open Duo: what was said on the left, the lists on the right.
                 AdaptiveSplit {
                     VStack(alignment: .leading, spacing: 20) {
-                        TranscriptView(session: session, isExpanded: true)
+                        if showsTranscript {
+                            TranscriptView(session: session, isExpanded: true)
+                        }
                         Spacer(minLength: 0)
                     }
                     .padding(28)
@@ -152,11 +168,15 @@ private struct VoiceCaptureContent: View {
                 }
             } else {
                 VStack(spacing: 0) {
-                    TranscriptView(session: session, isExpanded: session.phase != .review)
-                        .padding(.horizontal, 20)
-                    .padding(.top, 4)
+                    if showsTranscript {
+                        TranscriptView(session: session, isExpanded: session.phase != .review)
+                            .padding(.horizontal, 20)
+                            .padding(.top, 4)
+                            .transition(.opacity)
+                    }
                     lists
                 }
+                .animation(.smooth(duration: 0.3), value: showsTranscript)
             }
         }
         .background(alignment: .bottom) {
@@ -169,8 +189,11 @@ private struct VoiceCaptureContent: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(spacing: 14) {
-                    if session.groups.isEmpty {
-                        EmptyDictationHint(session: session)
+                    if showsIntro {
+                        VoiceIntro(session: session, accentColor: accentColor)
+                            .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
+                    } else if session.groups.isEmpty, session.phase == .review {
+                        NothingRecognizedHint()
                             .transition(.opacity)
                     }
                     ForEach(session.groups) { group in
@@ -196,6 +219,7 @@ private struct VoiceCaptureContent: View {
                 .padding(.top, 16)
                 .padding(.bottom, 24)
                 .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.5, bounce: 0.28), value: session.groups)
+                .animation(.smooth(duration: 0.35), value: showsIntro)
             }
             .scrollIndicators(.hidden)
             .scrollBounceBehavior(.basedOnSize)
@@ -480,41 +504,332 @@ private struct VoiceRow: View {
     }
 }
 
-// MARK: - Empty state
+// MARK: - Intro
 
-private struct EmptyDictationHint: View {
+/// Before the first word: how dictation works, told as a short conversation. Two example phrases
+/// come in from the right as speech bubbles in the accent color, each answered by the list it
+/// lands on – the store goes with its phrase, a short pause starts the next thought. Below, the
+/// user's stores as the names Marqet listens for, and where things without a store go.
+private struct VoiceIntro: View {
     let session: VoiceSession
+    let accentColor: Color
+
+    @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Steps of the little conversation shown so far, see `Step`.
+    @State private var revealed = 0
+
+    private enum Step: Int, CaseIterable {
+        case firstPhrase = 1, firstList, pause, secondPhrase, secondList, stores
+    }
 
     var body: some View {
-        VStack(spacing: 18) {
-            if session.phase == .review {
-                Image(systemName: "text.badge.xmark")
-                    .font(.system(size: 40))
-                    .foregroundStyle(.secondary)
-                Text("Keine Einträge erkannt")
-                    .font(.headline)
-                Text("Tippe auf „Weitersprechen“ und versuch es noch einmal.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("„10 Eier vom Markt und bei Rewe 500 g Hackfleisch“")
-                    .font(.body.italic())
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                let known = session.options.filter { !$0.isNew }.prefix(5)
-                if !known.isEmpty {
-                    HStack(spacing: -6) {
-                        ForEach(Array(known)) { option in
-                            StoreBadge(store: option.store, size: 30)
-                                .overlay(Circle().strokeBorder(Color(.systemGroupedBackground), lineWidth: 2))
-                        }
+        VStack(alignment: .leading, spacing: 0) {
+            header
+                .padding(.bottom, 22)
+
+            SpeechBubble(text: "10 Eier vom **Markt**", color: accentColor)
+                .modifier(Reveal(isVisible: shows(.firstPhrase), from: .trailing))
+            ExampleList(
+                store: exampleStore(key: "generic-market"),
+                fallbackName: String(localized: "Markt"),
+                items: [ExampleList.Item(name: String(localized: "Eier"), quantity: "10")]
+            )
+            .padding(.top, 8)
+            .modifier(Reveal(isVisible: shows(.firstList), from: .bottom))
+
+            PauseDivider()
+                .padding(.vertical, 14)
+                .modifier(Reveal(isVisible: shows(.pause), from: .bottom))
+
+            SpeechBubble(text: "Bei **Rewe** 500 g Hackfleisch und Zwiebeln", color: accentColor)
+                .modifier(Reveal(isVisible: shows(.secondPhrase), from: .trailing))
+            ExampleList(
+                store: exampleStore(key: "rewe"),
+                fallbackName: "Rewe",
+                items: [
+                    ExampleList.Item(name: String(localized: "Hackfleisch"), quantity: "500 g"),
+                    ExampleList.Item(name: String(localized: "Zwiebeln"), quantity: nil),
+                ]
+            )
+            .padding(.top, 8)
+            .modifier(Reveal(isVisible: shows(.secondList), from: .bottom))
+
+            storesSection
+                .padding(.top, 28)
+                .modifier(Reveal(isVisible: shows(.stores), from: .bottom))
+        }
+        .frame(maxWidth: 520)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 4)
+        .padding(.top, 4)
+        .sensoryFeedback(trigger: revealed) { _, step in
+            !reduceMotion && (step == Step.firstPhrase.rawValue || step == Step.secondPhrase.rawValue)
+                ? .impact(weight: .light, intensity: 0.6) : nil
+        }
+        .task(id: reduceMotion) { await play() }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Sag einfach, was du brauchst.")
+                .font(.title2.weight(.bold))
+            Text("Nenn dazu den Laden. Marqet sortiert schon beim Sprechen auf deine Listen, zum Beispiel so:")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    // MARK: Stores
+
+    /// Own stores first; without any, the chains Marqet knows, so the row is never empty.
+    private var storeChips: [Store] {
+        let own = session.options.filter { !$0.isNew }.map(\.store)
+        return Array((own.isEmpty ? session.options.map(\.store) : own).prefix(8))
+    }
+
+    private var hasOwnStores: Bool { session.options.contains { !$0.isNew } }
+
+    private var storesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(hasOwnStores ? "Meine Läden" : "Läden, die Marqet kennt")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
+                .accessibilityAddTraits(.isHeader)
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 8) {
+                    ForEach(storeChips) { store in
+                        StoreChip(store: store)
                     }
-                    .accessibilityHidden(true)
-                    Text("Nenn einen Laden, und seine Liste erscheint.")
-                        .font(.footnote)
-                        .foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 4)
+            }
+            .scrollIndicators(.hidden)
+            .scrollClipDisabled()
+
+            VStack(alignment: .leading, spacing: 6) {
+                if let newChain = session.options.first(where: \.isNew)?.name, hasOwnStores {
+                    hint("Auch neue Läden wie \(newChain) – sie werden beim Hinzufügen angelegt.", symbol: "plus.circle")
+                }
+                hint(withoutStoreText, symbol: "tray")
+            }
+            .padding(.horizontal, 4)
+            .padding(.top, 2)
+        }
+    }
+
+    /// Where an item without a store goes (`AppModel.placement`): the list the user came from,
+    /// otherwise the store it was bought at last time, otherwise the inbox.
+    private var withoutStoreText: LocalizedStringKey {
+        if case .store(let id)? = session.defaultPage, let store = model.stores.first(where: { $0.id == id }) {
+            return "Ohne Laden landet es auf der Liste von \(store.name)."
+        }
+        return "Ohne Laden landet es dort, wo du es zuletzt gekauft hast, sonst in der Inbox."
+    }
+
+    private func hint(_ text: LocalizedStringKey, symbol: String) -> some View {
+        Label {
+            Text(text).fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: symbol)
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+
+    // MARK: Helpers
+
+    private func exampleStore(key: String) -> Store? {
+        session.options.first { $0.store.catalogKey == key }?.store
+    }
+
+    private func shows(_ step: Step) -> Bool { revealed >= step.rawValue }
+
+    private func play() async {
+        guard !reduceMotion else {
+            revealed = Step.allCases.count
+            return
+        }
+        revealed = 0
+        for step in Step.allCases {
+            // The phrases take a breath before they come, the answers follow quickly.
+            let delay: Duration = switch step {
+            case .firstPhrase: .milliseconds(250)
+            case .firstList, .secondList: .milliseconds(420)
+            case .pause: .milliseconds(500)
+            case .secondPhrase: .milliseconds(450)
+            case .stores: .milliseconds(450)
+            }
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled else { return }
+            withAnimation(.spring(duration: 0.55, bounce: 0.25)) { revealed = step.rawValue }
+        }
+    }
+}
+
+/// Something one could say, as an outgoing message: accent color, tail at the bottom right.
+private struct SpeechBubble: View {
+    let text: LocalizedStringKey
+    let color: Color
+
+    var body: some View {
+        Text(text)
+            .font(.body)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(
+                color,
+                in: UnevenRoundedRectangle(
+                    topLeadingRadius: 22, bottomLeadingRadius: 22, bottomTrailingRadius: 6, topTrailingRadius: 22,
+                    style: .continuous
+                )
+            )
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(.leading, 56)
+    }
+}
+
+/// What a phrase turns into: a small list card with the store's badge, name and the items,
+/// quantities in the same pills as the rows that build up while speaking.
+private struct ExampleList: View {
+    struct Item: Hashable {
+        let name: String
+        let quantity: String?
+    }
+
+    let store: Store?
+    let fallbackName: String
+    let items: [Item]
+
+    private var name: String { store?.name ?? fallbackName }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Group {
+                if let store {
+                    StoreBadge(store: store, size: 30)
+                } else {
+                    Image(systemName: "storefront")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 30, height: 30)
+                        .background(Color(.tertiarySystemFill), in: .circle)
                 }
             }
+            VStack(alignment: .leading, spacing: 3) {
+                Text(name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(store?.readableColor ?? .primary)
+                HStack(spacing: 6) {
+                    ForEach(items, id: \.self) { item in
+                        HStack(spacing: 4) {
+                            if let quantity = item.quantity {
+                                Text(quantity)
+                                    .font(.caption.weight(.medium).monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 1)
+                                    .background(Color(.tertiarySystemFill), in: .capsule)
+                            }
+                            Text(item.name)
+                                .font(.subheadline)
+                        }
+                        if item != items.last {
+                            Text("·").foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+                .lineLimit(1)
+            }
+        }
+        .padding(.leading, 8)
+        .padding(.trailing, 16)
+        .padding(.vertical, 8)
+        .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 18, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 10, y: 3)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Kommt auf die Liste \(name): \(spokenItems)"))
+    }
+
+    private var spokenItems: String {
+        items.map { [$0.quantity, $0.name].compactMap { $0 }.joined(separator: " ") }.joined(separator: ", ")
+    }
+}
+
+/// "kurze Pause" between the phrases, like the time stamps between messages.
+private struct PauseDivider: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            line
+            Label("Kurze Pause – neuer Gedanke", systemImage: "pause.fill")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .layoutPriority(1)
+            line
+        }
+        .padding(.horizontal, 12)
+    }
+
+    private var line: some View {
+        Capsule()
+            .fill(Color(.separator))
+            .frame(height: 1)
+            .frame(maxWidth: 48)
+    }
+}
+
+/// A store the dictation listens for: badge and name in a capsule.
+private struct StoreChip: View {
+    let store: Store
+
+    var body: some View {
+        HStack(spacing: 7) {
+            StoreBadge(store: store, size: 24)
+            Text(store.name)
+                .font(.subheadline.weight(.medium))
+                .lineLimit(1)
+        }
+        .padding(.leading, 5)
+        .padding(.trailing, 12)
+        .padding(.vertical, 5)
+        .background(Color(.secondarySystemGroupedBackground), in: .capsule)
+        .overlay(Capsule().strokeBorder(store.color.opacity(0.35), lineWidth: 1))
+    }
+}
+
+/// Fades a step of the intro in from an edge; it keeps its space, so nothing jumps.
+private struct Reveal: ViewModifier {
+    let isVisible: Bool
+    let from: Edge
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isVisible ? 1 : 0)
+            .offset(x: isVisible ? 0 : (from == .trailing ? 70 : from == .leading ? -70 : 0),
+                    y: isVisible ? 0 : (from == .bottom ? 10 : 0))
+            .scaleEffect(isVisible ? 1 : 0.94, anchor: from == .trailing ? .trailing : .center)
+    }
+}
+
+/// Review without entries: nothing was understood.
+private struct NothingRecognizedHint: View {
+    var body: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "text.badge.xmark")
+                .font(.system(size: 40))
+                .foregroundStyle(.secondary)
+            Text("Keine Einträge erkannt")
+                .font(.headline)
+            Text("Tippe auf „Weitersprechen“ und versuch es noch einmal.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)

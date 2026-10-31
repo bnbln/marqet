@@ -11,6 +11,46 @@
         }
       }
     },
+    "10 Eier vom **Markt**" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 eggs from the **market**"
+          }
+        }
+      }
+    },
+    "Bei **Rewe** 500 g Hackfleisch und Zwiebeln" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At **Rewe** 500 g ground beef and onions"
+          }
+        }
+      }
+    },
+    "Eier" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eggs"
+          }
+        }
+      }
+    },
+    "Auch neue Läden wie %@ – sie werden beim Hinzufügen angelegt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New stores like %@ work too – they’re created when you add."
+          }
+        }
+      }
+    },
     "„%@“ gelöscht" : {
       "localizations" : {
         "en" : {
@@ -99,6 +139,16 @@
         }
       }
     },
+    "Hackfleisch" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ground beef"
+          }
+        }
+      }
+    },
     "%@ hinzufügen" : {
 
     },
@@ -128,12 +178,42 @@
         }
       }
     },
+    "Kommt auf die Liste %@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Goes on the %1$@ list: %2$@"
+          }
+        }
+      }
+    },
     "%@ kommt später" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ comes later"
+          }
+        }
+      }
+    },
+    "Läden, die Marqet kennt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stores Marqet knows"
+          }
+        }
+      }
+    },
+    "Kurze Pause – neuer Gedanke" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Short pause – new thought"
           }
         }
       }
@@ -148,12 +228,52 @@
         }
       }
     },
+    "Nenn dazu den Laden. Marqet sortiert schon beim Sprechen auf deine Listen, zum Beispiel so:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add where you’ll buy it. Marqet sorts it onto your lists while you speak, like this:"
+          }
+        }
+      }
+    },
     "%@ nochmal kaufen" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buy %@ again"
+          }
+        }
+      }
+    },
+    "Sag einfach, was du brauchst." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just say what you need."
+          }
+        }
+      }
+    },
+    "Ohne Laden landet es auf der Liste von %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a store, it goes on the %@ list."
+          }
+        }
+      }
+    },
+    "Ohne Laden landet es dort, wo du es zuletzt gekauft hast, sonst in der Inbox." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a store, it goes where you bought it last time, otherwise to the Inbox."
           }
         }
       }
@@ -4600,6 +4720,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Official offer pages of the retailers"
+          }
+        }
+      }
+    },
+    "Zwiebeln" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onions"
           }
         }
       }

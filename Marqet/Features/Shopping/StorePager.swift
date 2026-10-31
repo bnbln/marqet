@@ -73,7 +73,9 @@ struct StorePager: View {
             }
             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
             // The card under a dragged item holds still – items only move inside their store.
-            .scrollDisabled(model.isDraggingItem)
+            // Also while an item is edited inline: a sideways drag in its text field (moving the
+            // cursor or selecting) would page away and end the editing.
+            .scrollDisabled(model.isDraggingItem || model.editingItemID != nil)
             .scrollIndicators(.hidden)
             .scrollClipDisabled()
             // The scroll view is narrower than the screen; its edge effect would draw a box under the bar.

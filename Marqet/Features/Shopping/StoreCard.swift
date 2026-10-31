@@ -209,7 +209,10 @@ struct StoreCard: View {
                                 .listRowSeparatorTint(Color(.separator).opacity(0.4))
                                 // The drag of the list's reordering; side by side it can also
                                 // leave the list for another card.
-                                .itemProvider { NSItemProvider(object: item.id as NSString) }
+                                // Not while its title is being edited: holding inside the
+                                // text field moves the cursor there, it must not lift the row.
+                                .itemProvider(model.editingItemID == item.id ? nil : { NSItemProvider(object: item.id as NSString) } as (() -> NSItemProvider?)?)
+                                .moveDisabled(model.editingItemID == item.id)
                         }
                     }
                     // Hold and drag: the other rows make room, the item takes its place on drop;
@@ -242,7 +245,9 @@ struct StoreCard: View {
             .scrollEdgeEffectHidden(true, for: model.composerTarget != nil ? [.top, .bottom] : .top)
             // The List's own scroll view consumes taps before its background sees them.
             // A parent tap handles unused white space; row buttons keep their own actions.
-            .onTapGesture(perform: handleBackgroundTap)
+            // Off while an item is edited inline: the tap would compete with the text field,
+            // so taps there could not place the cursor (e.g. to fix the first letter).
+            .gesture(TapGesture().onEnded(handleBackgroundTap), including: model.editingItemID == nil ? .all : .subviews)
             .scrollIndicators(.visible)
             // Every card blurs its list progressively above the bottom controls (mic, add, dots,
             // triage), which float unblurred on top. The bar reserves the space and drives the effect.
@@ -783,15 +788,20 @@ struct ItemRow: View {
         .sensoryFeedback(trigger: item.isCompleted) { old, new in
             !old && new ? .impact(weight: .heavy, intensity: 0.9) : nil
         }
+        // No menu while editing: a long press in the text field moves the cursor (loupe) and
+        // selects text. With the menu it opened the menu instead, which also took the focus
+        // and ended editing with a half-edited title.
         .contextMenu {
-            #if DEBUG
-            // `-no-item-menu`: synthesized simulator touches cannot turn the menu into a drag.
-            if !ProcessInfo.processInfo.arguments.contains("-no-item-menu") {
+            if !isEditing {
+                #if DEBUG
+                // `-no-item-menu`: synthesized simulator touches cannot turn the menu into a drag.
+                if !ProcessInfo.processInfo.arguments.contains("-no-item-menu") {
+                    ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+                }
+                #else
                 ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
+                #endif
             }
-            #else
-            ItemContextMenu(item: item, onEdit: startEditing, onEditNote: { isEditingNote = true })
-            #endif
         }
         .sheet(isPresented: $isEditingNote) {
             ItemNoteSheet(item: item)

@@ -1,7 +1,7 @@
 import Foundation
 import MarqetCore
 
-/// Store management: add, plan, hide, rename, reorder, delete (KONZEPT §4.4, §7.2, §7.6).
+/// Store management: add, pin, unpin, rename, reorder, delete (KONZEPT §4.4, §7.2, §7.6).
 extension AppModel {
     var hiddenStores: [Store] {
         let deck = deck
@@ -18,7 +18,7 @@ extension AppModel {
     @discardableResult
     func addStore(from entry: StoreCatalog.Entry, planned: Bool = true) -> Store {
         if let existing = stores.first(where: { $0.catalogKey == entry.key }) {
-            if planned { plan(existing.id) }
+            if planned { pin(existing.id) }
             return existing
         }
         var store = entry.makeStore(sortIndex: nextSortIndex)
@@ -33,7 +33,7 @@ extension AppModel {
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return nil }
         if let existing = stores.first(where: { ItemKeyNormalizer.storeNameKey($0.name) == ItemKeyNormalizer.storeNameKey(name) }) {
-            plan(existing.id)
+            pin(existing.id)
             return existing
         }
         let store = Store(
@@ -55,16 +55,18 @@ extension AppModel {
         return !key.isEmpty && stores.contains { $0.id != id && ItemKeyNormalizer.storeNameKey($0.name) == key }
     }
 
-    /// Keeps an (empty) store card on screen until shopped there or removed (KONZEPT §7.2).
-    func plan(_ id: Store.ID) {
+    /// "Anheften": keeps the store's card on screen even without items, until shopped there or
+    /// "Lösen" (KONZEPT §7.2). Pinned = `Store.plannedAt` is set.
+    func pin(_ id: Store.ID) {
         guard let index = stores.firstIndex(where: { $0.id == id }), stores[index].plannedAt == nil else { return }
         recordStoresUndo()
         stores[index].plannedAt = .now
         persist(stores[index])
     }
 
-    /// "Ausblenden" / "Aus Übersicht entfernen": the card goes back to "Weitere Läden".
-    func hide(_ id: Store.ID) {
+    /// "Lösen" / "Ausblenden": the card goes back to "Weitere Läden". The store stays one of
+    /// "Meine Läden" with its branches and loyalty cards – only `deleteStore` removes it.
+    func unpin(_ id: Store.ID) {
         recordStoresUndo()
         let page = PageID.store(id)
         let oldIndex = deck.pages.firstIndex(of: page) ?? 0
@@ -80,6 +82,15 @@ extension AppModel {
             activePage = pages[min(oldIndex, pages.count - 1)]
             pageRequest = activePage
         }
+    }
+
+    func isPinned(_ id: Store.ID) -> Bool {
+        store(id)?.plannedAt != nil
+    }
+
+    /// The "Angeheftet" switch in the store settings.
+    func setPinned(_ pinned: Bool, for id: Store.ID) {
+        if pinned { pin(id) } else { unpin(id) }
     }
 
     /// Color, symbol and type. Renaming goes through `rename(_:to:)` because of the markers.

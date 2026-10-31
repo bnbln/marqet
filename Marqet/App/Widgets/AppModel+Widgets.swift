@@ -287,7 +287,7 @@ extension AppModel {
             activePage = page
             pageRequest = page
         case .map, .unsorted, .store:
-            if let id = page.storeID, !deck.pages.contains(page) { plan(id) }
+            if let id = page.storeID, !deck.pages.contains(page) { pin(id) }
             activePage = page
             pageRequest = page
             focusedPage = page

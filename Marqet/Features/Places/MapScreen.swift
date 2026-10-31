@@ -2,7 +2,8 @@ import MapKit
 import MarqetCore
 import SwiftUI
 
-/// Shopping-list branches first, with optional discovery of other shops in Apple Maps.
+/// "Meine Läden" always: saved branches prominent, other branches of own stores and shops the user
+/// does not have (catalog chains, Apple Maps) muted. "Nur meine Läden" hides the shops.
 struct MapScreen: View {
     let focusedStoreID: Store.ID?
 
@@ -33,7 +34,9 @@ struct MapScreen: View {
     @State private var selection: String?
     /// Zoomed out beyond a city: no searches, only what is already known (in clusters).
     @State private var isTooFarOut = false
-    @AppStorage("mapShowsOnlyStoresWithItems") private var showsOnlyStoresWithItems = true
+    /// `false` (default): own stores plus muted shops around them. A new key on purpose – the old
+    /// "Läden mit Einträgen" default hid even saved branches of stores with an empty list.
+    @AppStorage("mapShowsOnlyMyStores") private var showsOnlyMyStores = false
     @AppStorage("mapShopCategory") private var shopCategory: NearbyShopCategory = .groceries
 
     private static let initialRadius: Double = 2_500
@@ -55,7 +58,8 @@ struct MapScreen: View {
                         // pan working when a finger lands on a pin.
                         Annotation(title(of: pin), coordinate: pin.coordinate.clCoordinate) {
                             // Annotation content does not inherit the environment – pass what the pin shows.
-                            PinView(pin: pin, openCount: pin.store.map { openCounts[$0.id] ?? 0 } ?? 0, chainStore: chainStore(of: pin))
+                            PinView(pin: pin, openCount: pin.store.map { openCounts[$0.id] ?? 0 } ?? 0, chainStore: chainStore(of: pin),
+                                    isMuted: isMuted(pin))
                         }
                         .annotationTitles(showsTitle(of: pin) ? .automatic : .hidden)
                         .tag(marker.id)
@@ -114,7 +118,7 @@ struct MapScreen: View {
                 // Not in App Store screenshots (scripts/screenshots passes `-screenshots`).
                 if ProcessInfo.processInfo.arguments.contains("-demo-map"),
                    !ProcessInfo.processInfo.arguments.contains("-screenshots") {
-                    Text("items=\(showsOnlyStoresWithItems) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) markers=\(markers.count)")
+                    Text("mine=\(showsOnlyMyStores) category=\(shopCategory.rawValue) found=\(found.count) shops=\(discovered.count) pins=\(pins.count) markers=\(markers.count)")
                         .font(.caption2)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(5)
@@ -146,13 +150,15 @@ struct MapScreen: View {
             .task {
                 let origin = await model.updateUserLocation()
                 if let focusedStoreID, let location = model.relevantLocation(of: focusedStoreID) {
+                    // Stay on the store's branch instead of framing the shops found around it.
+                    shouldFrameDiscovery = false
                     fly(to: location.coordinate)
                     scheduleLoad(center: location.coordinate, radius: Self.initialRadius, immediately: true)
                 } else if let origin {
                     scheduleLoad(center: origin, radius: Self.initialRadius, immediately: true)
                 }
             }
-            .onChange(of: showsOnlyStoresWithItems) {
+            .onChange(of: showsOnlyMyStores) {
                 found = []
                 discovered = []
                 shouldFrameDiscovery = true
@@ -163,7 +169,7 @@ struct MapScreen: View {
                 found = []
                 discovered = []
                 shouldFrameDiscovery = true
-                guard !showsOnlyStoresWithItems, let lastLoad, !isTooFarOut else { return }
+                guard !showsOnlyMyStores, let lastLoad, !isTooFarOut else { return }
                 scheduleLoad(center: lastLoad.center, radius: lastLoad.radius, immediately: true)
             }
             .sheet(item: $selectedPin) { pin in
@@ -187,7 +193,7 @@ struct MapScreen: View {
         PinInputs(
             found: found,
             discovered: discovered,
-            showsOnlyStoresWithItems: showsOnlyStoresWithItems,
+            showsOnlyMyStores: showsOnlyMyStores,
             shopCategory: shopCategory,
             locations: model.locations,
             stores: model.stores.map(\.id),
@@ -198,7 +204,7 @@ struct MapScreen: View {
     private struct PinInputs: Equatable {
         let found: [PlaceResult]
         let discovered: [PlaceResult]
-        let showsOnlyStoresWithItems: Bool
+        let showsOnlyMyStores: Bool
         let shopCategory: NearbyShopCategory
         let locations: [StoreLocation]
         let stores: [Store.ID]
@@ -209,12 +215,10 @@ struct MapScreen: View {
         let inputs = pinInputs
         openCounts = inputs.openCounts
         var chains = chainStores
-        pins = model.mapPins(found: found + discovered, includeUnmatched: !showsOnlyStoresWithItems).filter { pin in
-            if showsOnlyStoresWithItems {
-                guard let store = pin.store else { return false }
-                return (inputs.openCounts[store.id] ?? 0) > 0
-            }
-            if let store = pin.store { return shopCategory.includes(store.type) }
+        pins = model.mapPins(found: found + discovered, includeUnmatched: !showsOnlyMyStores).filter { pin in
+            // Own stores always show, whatever the shop category.
+            if pin.store != nil { return true }
+            if showsOnlyMyStores { return false }
             if case .suggestion(_, let key) = pin.kind, let chain = model.catalog?.entry(forKey: key) {
                 if chains[key] == nil { chains[key] = chain.makeStore(sortIndex: 0) }
                 return shopCategory.includes(chain.type)
@@ -234,20 +238,20 @@ struct MapScreen: View {
 
     private var filterMenu: some View {
         Menu {
-            Picker("Anzeigen", selection: $showsOnlyStoresWithItems) {
-                Label("Läden mit Einträgen", systemImage: "checklist").tag(true)
-                Label("Alle Läden", systemImage: "storefront").tag(false)
+            Picker("Anzeigen", selection: $showsOnlyMyStores) {
+                Label("Meine Läden und Geschäfte", systemImage: "storefront").tag(false)
+                Label("Nur meine Läden", systemImage: "star").tag(true)
             }
             Picker("Geschäfte", selection: $shopCategory) {
                 ForEach(NearbyShopCategory.allCases, id: \.self) { category in
                     Text(category.title).tag(category)
                 }
             }
-            .disabled(showsOnlyStoresWithItems)
+            .disabled(showsOnlyMyStores)
         } label: {
             Label("Filter", systemImage: "line.3.horizontal.decrease")
         }
-        .accessibilityValue(showsOnlyStoresWithItems ? String(localized: "Läden mit Einträgen") : shopCategory.title)
+        .accessibilityValue(showsOnlyMyStores ? String(localized: "Nur meine Läden") : shopCategory.title)
     }
 
     private func title(of pin: MapPin) -> String {
@@ -257,6 +261,17 @@ struct MapScreen: View {
     private func chainStore(of pin: MapPin) -> Store? {
         guard case .suggestion(_, let key) = pin.kind else { return nil }
         return chainStores[key]
+    }
+
+    /// Everything that is not a saved branch of an own store recedes: other branches of a store
+    /// that already has a saved one (another Rewe next to the favourite), and shops the user does
+    /// not have. A store without any saved branch shows its found branches in full.
+    private func isMuted(_ pin: MapPin) -> Bool {
+        switch pin.kind {
+        case .saved, .place: false
+        case .suggestion: true
+        case .branch: pin.store.map { !model.locations(of: $0.id).isEmpty } ?? true
+        }
     }
 
     /// Names only for own branches and search results – dozens of labels would cover the map.
@@ -297,7 +312,7 @@ struct MapScreen: View {
         lastLoad = (center, radius)
         isLoading = true
         defer { isLoading = false }
-        if !showsOnlyStoresWithItems {
+        if !showsOnlyMyStores {
             let shops = (try? await model.placeSearch.shops(near: center, category: shopCategory)) ?? []
             guard !Task.isCancelled else { return }
             discovered = shops
@@ -311,7 +326,7 @@ struct MapScreen: View {
             }
         }
         var results: [PlaceResult] = []
-        for store in model.storesForBranchSearch(onlyWithItems: showsOnlyStoresWithItems).filter({ showsOnlyStoresWithItems || shopCategory.includes($0.type) }) {
+        for store in model.storesForBranchSearch(onlyWithItems: false) {
             guard !Task.isCancelled else { return }
             let chain = store.catalogKey.flatMap { model.catalog?.entry(forKey: $0) }
             results += (try? await model.placeSearch.branches(of: store, chain: chain, near: center, radius: radius)) ?? []
@@ -338,7 +353,8 @@ struct MapScreen: View {
     /// Stores with open list items, nearest branch first, with distance – tap to fly there.
     @ViewBuilder
     private func storeStrip(pins: [MapPin]) -> some View {
-        let nearest = nearestPinPerStore(pins)
+        // Only stores with something to buy: the strip is the shopping route, not a store list.
+        let nearest = nearestPinPerStore(pins.filter { pin in pin.store.map { (openCounts[$0.id] ?? 0) > 0 } ?? false })
         if !nearest.isEmpty {
             let routeStops = model.shoppingRouteStops(from: pins)
             let routeURL = model.mapsRouteURL(for: routeStops)
@@ -435,6 +451,8 @@ private struct PinView: View {
     let openCount: Int
     /// The chain as a store, for suggestion pins.
     let chainStore: Store?
+    /// Not one of the user's saved branches: smaller and faded, so own stores stand out.
+    let isMuted: Bool
 
     var body: some View {
         switch pin.kind {
@@ -448,13 +466,15 @@ private struct PinView: View {
             }
         case .branch:
             if let store = pin.store {
-                StoreBadge(store: store, size: 30)
-                    .shadow(radius: 2, y: 1)
+                StoreBadge(store: store, size: isMuted ? 24 : 30)
+                    .opacity(isMuted ? 0.55 : 1)
+                    .overlay(alignment: .topTrailing) { if !isMuted { CountBadge(count: openCount) } }
+                    .shadow(radius: isMuted ? 0 : 2, y: 1)
             }
         case .suggestion:
             if let chainStore {
-                StoreBadge(store: chainStore, size: 28)
-                    .opacity(0.55)
+                StoreBadge(store: chainStore, size: 24)
+                    .opacity(0.45)
                     .overlay(alignment: .bottomTrailing) {
                         Image(systemName: "plus.circle.fill")
                             .font(.caption)

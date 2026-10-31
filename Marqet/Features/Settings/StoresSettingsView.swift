@@ -1,7 +1,8 @@
 import MarqetCore
 import SwiftUI
 
-/// "Läden verwalten": order, edit, delete (KONZEPT §7.6, §4.4).
+/// "Meine Läden": every store the user saved – pinned or not – with order, edit, delete
+/// (KONZEPT §7.6, §4.4). The one place to manage stores; the last card only lists those without a card.
 struct StoresSettingsView: View {
     @Environment(AppModel.self) private var model
     @State private var showsAddStore = false
@@ -22,6 +23,13 @@ struct StoresSettingsView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
+                            Spacer(minLength: 0)
+                            if store.plannedAt != nil {
+                                Image(systemName: "pin.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .accessibilityLabel("Angeheftet")
+                            }
                         }
                     }
                 }
@@ -30,13 +38,13 @@ struct StoresSettingsView: View {
                     pendingDelete = offsets.first.map { model.sortedStores[$0] }
                 }
             } footer: {
-                Text("Die Reihenfolge hier ist die Reihenfolge der Cards.")
+                Text("Die Reihenfolge hier ist die Reihenfolge der Cards. Angeheftete Läden bleiben als Card sichtbar, auch ohne Einträge.")
             }
             Section {
                 Button("Laden hinzufügen", systemImage: "plus") { showsAddStore = true }
             }
         }
-        .navigationTitle("Läden")
+        .navigationTitle("Meine Läden")
         .toolbar { EditButton() }
         .sheet(isPresented: $showsAddStore) {
             AddStoreSheet(opensComposer: false)
@@ -86,6 +94,15 @@ struct StoreEditView: View {
                 }
             } footer: {
                 Text("Beim Umbenennen passt Marqet die Zeile „🛒 \(store.name)“ in allen offenen Einträgen an.")
+            }
+
+            Section {
+                Toggle("Angeheftet", isOn: Binding(
+                    get: { model.isPinned(store.id) },
+                    set: { model.setPinned($0, for: store.id) }
+                ))
+            } footer: {
+                Text("Angeheftet bleibt die Card sichtbar, auch wenn nichts auf der Liste steht. Gelöst bleibt der Laden bei deinen Läden, mit Filialen und Kundenkarten.")
             }
 
             Section("Art") {

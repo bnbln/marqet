@@ -75,7 +75,7 @@ struct SettingsView: View {
                     NavigationLink {
                         StoresSettingsView()
                     } label: {
-                        LabeledContent("Läden verwalten", value: "\(model.stores.count)")
+                        LabeledContent("Meine Läden", value: "\(model.stores.count)")
                     }
                     NavigationLink {
                         LoyaltyCardsSettingsView()

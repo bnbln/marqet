@@ -2,7 +2,8 @@ import MapKit
 import MarqetCore
 import SwiftUI
 
-/// First page of the deck: a still map with the saved branches of stores that have open items.
+/// First page of the deck: a still map with the saved branches of all own stores ("Meine Läden");
+/// stores with open items stand out with their count.
 /// Tapping it zooms into the full map (`MapScreen`), like a store card into its full screen.
 /// The header sits on top like the inbox's, so the map fills the rest of the card.
 struct MapCard: View {
@@ -14,19 +15,18 @@ struct MapCard: View {
     )
 
     var body: some View {
-        let pins = model.mapPins(found: []).filter { pin in
-            pin.store.map { model.openItemCount(of: $0.id) > 0 } ?? false
-        }
+        let pins = model.mapPins(found: [])
+        let storesWithItems = Set(pins.compactMap(\.store?.id).filter { model.openItemCount(of: $0) > 0 })
         Button { model.focus(.map) } label: {
             VStack(spacing: 0) {
-                header(pins: pins)
+                header(storeCount: storesWithItems.count, hasBranches: !pins.isEmpty)
                 if model.userLocation != nil {
                     Map(position: $position, interactionModes: []) {
                         UserAnnotation()
                         ForEach(pins) { pin in
                             if let store = pin.store {
                                 Annotation(store.name, coordinate: pin.coordinate.clCoordinate) {
-                                    StoreBadge(store: store, size: 30)
+                                    StoreBadge(store: store, size: storesWithItems.contains(store.id) ? 30 : 22)
                                         .padding(2)
                                         .background(.white, in: .circle)
                                         .shadow(radius: 2, y: 1)
@@ -61,9 +61,8 @@ struct MapCard: View {
     }
 
     /// White, unlike the store cards' colored gradient: this card has no store tint of its own.
-    private func header(pins: [MapPin]) -> some View {
-        let storeCount = Set(pins.compactMap(\.store?.id)).count
-        return HStack(spacing: 14) {
+    private func header(storeCount: Int, hasBranches: Bool) -> some View {
+        HStack(spacing: 14) {
             Image(systemName: "map.fill")
                 .font(.system(size: 20, weight: .semibold))
                 .frame(width: 44, height: 44)
@@ -72,7 +71,7 @@ struct MapCard: View {
                 Text("In der Nähe")
                     .font(.title2.bold())
                     .lineLimit(1)
-                Text(subtitle(storeCount: storeCount))
+                Text(subtitle(storeCount: storeCount, hasBranches: hasBranches))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -91,9 +90,9 @@ struct MapCard: View {
         .background(Color(.secondarySystemGroupedBackground))
     }
 
-    private func subtitle(storeCount: Int) -> LocalizedStringKey {
+    private func subtitle(storeCount: Int, hasBranches: Bool) -> LocalizedStringKey {
         switch storeCount {
-        case 0: "Filialen deiner Läden in der Nähe"
+        case 0: hasBranches ? "Deine gespeicherten Filialen" : "Filialen deiner Läden in der Nähe"
         case 1: "1 Laden mit offenen Einträgen"
         default: "\(storeCount) Läden mit offenen Einträgen"
         }

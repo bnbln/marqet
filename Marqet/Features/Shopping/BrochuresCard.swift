@@ -13,10 +13,18 @@ struct BrochuresCard: View {
     /// (KONZEPT §6.3: same "pull up to focus" gesture as the store cards).
     @State private var isDraggingShelf = false
 
+    /// Brochures of "Meine Läden" first, then all other chains – each group nearest first
+    /// (alphabetical without a location).
     private var entries: [StoreCatalog.Entry] {
+        let ownKeys = Set(model.stores.compactMap(\.catalogKey))
         let alphabetical = (model.catalog?.entries(for: model.region) ?? [])
             .filter { $0.leafletURL != nil }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        return byDistance(alphabetical.filter { ownKeys.contains($0.key) })
+            + byDistance(alphabetical.filter { !ownKeys.contains($0.key) })
+    }
+
+    private func byDistance(_ alphabetical: [StoreCatalog.Entry]) -> [StoreCatalog.Entry] {
         guard model.userLocation != nil else { return alphabetical }
         return alphabetical.enumerated().sorted { lhs, rhs in
             let left = distance(for: lhs.element)

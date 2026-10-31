@@ -659,7 +659,7 @@ final class AppModel {
         dismissBriefing()
         var page = page
         if page == .more { page = .unsorted }
-        if let id = page.storeID { plan(id) }
+        if let id = page.storeID { pin(id) }
         // Full screen shows the target card, so new items never land on a card out of sight.
         if focusedPage != nil, focusedPage != page { focusedPage = page }
         composerTarget = page

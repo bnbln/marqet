@@ -118,12 +118,12 @@
         }
       }
     },
-    "%@ ist geplant, die Liste ist noch leer." : {
+    "%@ ist angeheftet, die Liste ist noch leer." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ is planned, the list is still empty."
+            "value" : "%@ is pinned, the list is still empty."
           }
         }
       }
@@ -242,6 +242,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld"
+          }
+        }
+      }
+    },
+    "%lld anheften" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin %lld"
           }
         }
       }
@@ -522,16 +532,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld open items move to the inbox. Learned assignments for this store are lost."
-          }
-        }
-      }
-    },
-    "%lld planen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan %lld"
           }
         }
       }
@@ -944,6 +944,16 @@
         }
       }
     },
+    "Alle Läden anzeigen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All Stores"
+          }
+        }
+      }
+    },
     "Alle Läden mit offenen Einträgen auf einen Blick." : {
       "localizations" : {
         "en" : {
@@ -1124,6 +1134,36 @@
         }
       }
     },
+    "Angeheftet" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinned"
+          }
+        }
+      }
+    },
+    "Angeheftet bleibt die Card sichtbar, auch wenn nichts auf der Liste steht. Gelöst bleibt der Laden bei deinen Läden, mit Filialen und Kundenkarten." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When pinned, the card stays visible even with nothing on the list. Unpinned, the store stays among your stores, with its branches and loyalty cards."
+          }
+        }
+      }
+    },
+    "Anheften" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pin"
+          }
+        }
+      }
+    },
     "Anzeigen" : {
       "localizations" : {
         "en" : {
@@ -1277,16 +1317,6 @@
         }
       }
     },
-    "Aus Übersicht entfernen" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove from Overview"
-          }
-        }
-      }
-    },
     "Ausblenden" : {
       "localizations" : {
         "en" : {
@@ -1313,6 +1343,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Selected"
+          }
+        }
+      }
+    },
+    "Auswählen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
           }
         }
       }
@@ -1768,16 +1808,6 @@
         }
       }
     },
-    "Deine Läden" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your Stores"
-          }
-        }
-      }
-    },
     "Deine Ladenkarten sind gerade nach %@ sortiert. Sobald du hier ziehst, gilt deine eigene Reihenfolge." : {
       "localizations" : {
         "en" : {
@@ -1794,6 +1824,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Your lists stay in Apple Reminders. Marqet keeps stores and loyalty cards on this device."
+          }
+        }
+      }
+    },
+    "Deine gespeicherten Filialen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your saved branches"
           }
         }
       }
@@ -1900,6 +1940,16 @@
         }
       }
     },
+    "Die Reihenfolge hier ist die Reihenfolge der Cards. Angeheftete Läden bleiben als Card sichtbar, auch ohne Einträge." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is the order of the cards. Pinned stores keep their card, even without items."
+          }
+        }
+      }
+    },
     "Die aktuellen Prospekte deiner Läden." : {
       "localizations" : {
         "en" : {
@@ -1988,16 +2038,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "The order here is also the order of your store cards."
-          }
-        }
-      }
-    },
-    "Die Reihenfolge hier ist die Reihenfolge der Cards." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The order here is the order of the cards."
           }
         }
       }
@@ -2483,6 +2523,16 @@
         }
       }
     },
+    "Entdecken" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover"
+          }
+        }
+      }
+    },
     "Entfernen" : {
       "localizations" : {
         "en" : {
@@ -2834,12 +2884,12 @@
         }
       }
     },
-    "geplant" : {
+    "angeheftet" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "planned"
+            "value" : "pinned"
           }
         }
       }
@@ -2870,6 +2920,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estimated guide price: %@"
+          }
+        }
+      }
+    },
+    "Gespeichert, gerade ohne Card. Antippen, um etwas einzutragen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved, currently without a card. Tap to add something."
           }
         }
       }
@@ -3034,6 +3094,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "In the store, in the order of your route, better with every trip."
+          }
+        }
+      }
+    },
+    "In deiner Nähe, noch nicht bei deinen Läden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nearby, not among your stores yet."
           }
         }
       }
@@ -3602,16 +3672,6 @@
         }
       }
     },
-    "Läden verwalten" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manage Stores"
-          }
-        }
-      }
-    },
     "Laden zuordnen" : {
       "localizations" : {
         "en" : {
@@ -3799,6 +3859,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delete"
+          }
+        }
+      }
+    },
+    "Lösen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpin"
           }
         }
       }
@@ -4017,22 +4087,32 @@
         }
       }
     },
-    "Mehrere Läden planen" : {
+    "Mehrere Läden auf einmal anheften" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plan Several Stores"
+            "value" : "Pin several stores at once"
           }
         }
       }
     },
-    "Mehrfachauswahl beenden" : {
+    "Meine Läden" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "End Multiple Selection"
+            "value" : "My Stores"
+          }
+        }
+      }
+    },
+    "Meine Läden und Geschäfte" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Stores and Shops"
           }
         }
       }
@@ -4384,6 +4464,26 @@
         }
       }
     },
+    "Noch nicht bei deinen Läden." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not among your stores yet."
+          }
+        }
+      }
+    },
+    "Noch nicht bei deinen Läden. Nächste Filiale %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not among your stores yet. Nearest branch %@."
+          }
+        }
+      }
+    },
     "Noch nicht in deinen Läden" : {
       "localizations" : {
         "en" : {
@@ -4430,6 +4530,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add Note"
+          }
+        }
+      }
+    },
+    "Nur meine Läden" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only My Stores"
           }
         }
       }
@@ -4853,6 +4963,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Leaflet %@"
+          }
+        }
+      }
+    },
+    "Prospekt ansehen" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Brochure"
           }
         }
       }

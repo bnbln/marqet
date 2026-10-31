@@ -151,6 +151,31 @@ struct VoiceParsingTests {
         ])
     }
 
+    @Test func storeAfterItsItemBindsOnlyToIt() {
+        // "Brötchen, HDMI-Kabel von Mediamarkt, Kuchen, Milch, Butter" – only the cable goes to Mediamarkt.
+        let lexicon = SpokenStoreLexicon(stores: [(name: "MediaMarkt", spellings: ["Media Markt"]), (name: "Rewe", spellings: [])])
+        let expected = [
+            SpokenEntry(name: "Brötchen"),
+            SpokenEntry(name: "HDMI-Kabel", storeName: "MediaMarkt"),
+            SpokenEntry(name: "Kuchen"),
+            SpokenEntry(name: "Milch"),
+            SpokenEntry(name: "Butter"),
+        ]
+        #expect(VoiceRuleParser.parse("Brötchen, HDMI-Kabel von Mediamarkt, Kuchen, Milch, Butter.", lexicon: lexicon) == expected)
+        // The same with a pause after every item.
+        #expect(VoiceRuleParser.parse("Brötchen. HDMI-Kabel von Mediamarkt. Kuchen. Milch, Butter.", lexicon: lexicon) == expected)
+    }
+
+    @Test func announcedStoreStillCoversTheEnumeration() {
+        let entries = VoiceRuleParser.parse("Bei Rewe Milch, Butter. Eier.", lexicon: lexicon)
+        #expect(entries.map(\.storeName) == ["Rewe", "Rewe", "Rewe"])
+    }
+
+    @Test func explicitContinuationFollowsATrailingStore() {
+        let entries = VoiceRuleParser.parse("Eier vom Markt. Und Butter. Ich brauche noch Salz, Zucker vom Markt, Mehl.", lexicon: lexicon)
+        #expect(entries.map(\.storeName) == ["Markt", "Markt", nil, "Markt", nil])
+    }
+
     @Test func hyphenatedCompoundEndsAnEnumerationWithoutCommas() {
         let entries = VoiceRuleParser.parse("Brötchen HDMI-Kabel", lexicon: lexicon)
         #expect(entries.map(\.name) == ["Brötchen", "HDMI-Kabel"])
@@ -273,6 +298,20 @@ struct VoiceParsingTests {
         draft.move("milch", to: .inbox)
         draft.merge([], origin: .model, transcriptLength: 20, isComplete: true)
         #expect(draft.entries.map(\.id) == ["milch"])
+    }
+
+    @Test func gluedItemsDisappearWhenTheyAreHeardApart() {
+        var draft = VoiceDraft()
+        // An early pass (here the model on a volatile transcript) heard "Milchbutter".
+        draft.merge([SpokenEntry(name: "Kuchen"), SpokenEntry(name: "Milchbutter")], origin: .model, transcriptLength: 20, isComplete: true)
+        draft.merge([SpokenEntry(name: "Kuchen"), SpokenEntry(name: "Milch"), SpokenEntry(name: "Butter")], origin: .rules, transcriptLength: 26, isComplete: true)
+        #expect(draft.entries.map(\.id) == ["kuchen", "milch", "butter"])
+    }
+
+    @Test func concatenation() {
+        #expect(VoiceDraft.isConcatenation("milchbutter", of: ["kuchen", "milch", "butter"]))
+        #expect(!VoiceDraft.isConcatenation("milch", of: ["milch", "butter"]))
+        #expect(!VoiceDraft.isConcatenation("kuchenbutter", of: ["kuchen", "milch", "butter"]))
     }
 
     @Test func duplicatesGetOwnRows() {

@@ -22,15 +22,24 @@ public enum VoiceLanguage: Sendable {
 /// Sentences split at `.!?;`, clauses at commas, colons and connectors ("und", "sowie",
 /// "genau wie"). Where an item's store comes from, in this order:
 /// 1. its own clause ("Zwiebeln vom Markt"),
-/// 2. another clause of its sentence – the one before first ("10 Eier, die will ich auf dem Markt kaufen"),
+/// 2. another clause of its sentence: one before that opens with the store ("Bei Rewe Milch, Butter")
+///    or names nothing else ("…, die will ich auf dem Markt kaufen, genau wie Suppengrün"); or one after
+///    that names nothing else ("10 Eier, die will ich auf dem Markt kaufen") or ends the enumeration
+///    ("Milch, Butter und Eier bei Rewe"),
 /// 3. the next sentence, if that one names only a store ("Ich brauche Milch. Die hole ich bei Rewe."),
 /// 4. the sentence before, if this one continues it ("Und Butter.", "Genau wie Suppengrün.") or
 ///    if that one only announced a store ("Bei Rewe brauche ich einiges. Milch, Butter.").
+///
+/// A store named after its item binds to that item: in "Brötchen, HDMI-Kabel von Mediamarkt, Kuchen"
+/// neither the bread rolls nor the cake go to Mediamarkt.
 public enum VoiceRuleParser {
     public static func parse(_ transcript: String, lexicon: SpokenStoreLexicon, language: VoiceLanguage = .german) -> [SpokenEntry] {
         var entries: [SpokenEntry] = []
         /// Last store named in the previous sentence.
         var carriedStore: String?
+        /// That store was announced ("Bei Rewe Milch.") rather than named after its item
+        /// ("HDMI-Kabel von Mediamarkt.") – only then does a bare enumeration inherit it.
+        var carriedIsOpen = false
         /// Announced by a sentence without items, for the sentences that follow.
         var announcedStore: String?
         /// Indices in `entries` of the previous sentence's items without a store.
@@ -42,7 +51,9 @@ public enum VoiceRuleParser {
             // "Butter." after "Bei Rewe Milch." – the transcriber sets a period at every pause, so a
             // bare enumeration continues the sentence before; "Ich brauche Zahnpasta." does not.
             let isBare = sentenceStore == nil && clauses.allSatisfy { $0.fillerCount == 0 }
-            let continues = opensWithContinuation(sentence, language: language) || isBare
+            let opensContinued = opensWithContinuation(sentence, language: language)
+            let continues = opensContinued || isBare
+            let lastItemClause = clauses.lastIndex(where: { !$0.items.isEmpty })
             let sentenceStart = entries.count
             var open: [Int] = []
 
@@ -54,9 +65,18 @@ public enum VoiceRuleParser {
                     entries[entries.count - 1].name += ", " + item.name.lowercased()
                     continue
                 }
-                let preceding = clauses[..<index].last(where: { $0.store != nil })?.store
-                let following = clauses[(index + 1)...].first(where: { $0.store != nil })?.store
-                let continued = (continues || (index == 0 && clause.continues)) ? carriedStore : nil
+                // "HDMI-Kabel von Mediamarkt, Kuchen": a store after its item does not reach forward –
+                // unless the clause explicitly continues it ("Eier vom Markt, genau wie Suppengrün").
+                let preceding = clauses[..<index].last(where: { $0.store != nil })
+                    .flatMap { $0.carriesForward || clause.continues ? $0.store : nil }
+                // "Brötchen, HDMI-Kabel von Mediamarkt, Kuchen": a store in the middle of an enumeration
+                // belongs to its own item; at its end ("Milch, Butter bei Rewe") to the whole enumeration.
+                let following = clauses.indices[(index + 1)...].first(where: { clauses[$0].store != nil })
+                    .flatMap { next in
+                        clauses[next].items.isEmpty || next == lastItemClause ? clauses[next].store : nil
+                    }
+                let inheritsCarried = opensContinued || (isBare && carriedIsOpen) || (index == 0 && clause.continues)
+                let continued = inheritsCarried ? carriedStore : nil
                 let store = clause.store ?? preceding ?? following ?? continued ?? announcedStore
                 for item in clause.items {
                     if store == nil { open.append(entries.count) }
@@ -77,6 +97,7 @@ public enum VoiceRuleParser {
                     announcedStore = store
                 }
                 carriedStore = store
+                carriedIsOpen = clauses.last(where: { $0.store != nil })?.carriesForward ?? false
             } else if hasItems, !continues, announcedStore == nil {
                 // A fresh sentence without a store ends the thought of the one before.
                 carriedStore = nil
@@ -153,6 +174,12 @@ public enum VoiceRuleParser {
         var continues: Bool
         /// Words besides store and item ("ich brauche") – a clause without any is a bare enumeration.
         var fillerCount = 0
+        /// The store comes before the item ("Bei Rewe Milch"), not after it ("Milch von Rewe").
+        var storeLeads = false
+
+        /// Its store also applies to the clauses after it: announced up front, or named on its own
+        /// ("die will ich auf dem Markt kaufen") – not when it follows its own item.
+        var carriesForward: Bool { store != nil && (items.isEmpty || storeLeads) }
     }
 
     private static func clauses(in sentence: [Token], lexicon: SpokenStoreLexicon, language: VoiceLanguage) -> [Clause] {
@@ -241,7 +268,16 @@ public enum VoiceRuleParser {
         for mention in mentions.reversed() { remaining.removeSubrange(mention.range) }
         let words = remaining.filter { !fillerWords.contains($0.folded) }
         let fillerCount = remaining.filter { fillerWords.contains($0.folded) && !interjections.contains($0.folded) }.count
-        return Clause(store: mentions.first?.name, items: items(from: words, language: language), continues: continues, fillerCount: fillerCount)
+        let storeLeads = mentions.first.map { mention in
+            tokens[..<mention.range.lowerBound].allSatisfy { fillerWords.contains($0.folded) }
+        } ?? false
+        return Clause(
+            store: mentions.first?.name,
+            items: items(from: words, language: language),
+            continues: continues,
+            fillerCount: fillerCount,
+            storeLeads: storeLeads
+        )
     }
 
     // MARK: Items & quantities

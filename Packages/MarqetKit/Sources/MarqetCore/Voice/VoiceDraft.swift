@@ -52,10 +52,12 @@ public struct VoiceDraft: Hashable, Sendable {
     ///     "doch keine Milch"), except those heard after its transcript or touched by the user.
     public mutating func merge(_ parsed: [SpokenEntry], origin: Origin, transcriptLength: Int, isComplete: Bool) {
         var seenIDs = Set<String>()
+        var seenKeys: [String] = []
         var occurrences: [String: Int] = [:]
         for spoken in parsed {
             let key = spoken.identityKey
             guard !key.isEmpty else { continue }
+            seenKeys.append(key)
             let occurrence = occurrences[key, default: 0]
             occurrences[key] = occurrence + 1
             let id = occurrence == 0 ? key : "\(key)#\(occurrence)"
@@ -80,6 +82,14 @@ public struct VoiceDraft: Hashable, Sendable {
                 entries.append(entry)
             }
         }
+        // "Milchbutter" from a pass that heard "Milch Butter" as one item, while this pass reads
+        // "Milch" and "Butter": the merged row is the same words twice, whoever found it.
+        entries.removeAll { entry in
+            !seenIDs.contains(entry.id)
+                && entry.storeOverride == nil
+                && entry.isSelected
+                && Self.isConcatenation(Self.baseKey(of: entry.id), of: seenKeys)
+        }
         guard isComplete else { return }
         entries.removeAll { entry in
             !seenIDs.contains(entry.id)
@@ -89,6 +99,24 @@ public struct VoiceDraft: Hashable, Sendable {
                 // Rules only drop their own guesses; model-confirmed rows need the model to go.
                 && (origin == .model || entry.origin == .rules)
         }
+    }
+
+    /// "milch#1" → "milch".
+    private static func baseKey(of id: String) -> String {
+        id.split(separator: "#", maxSplits: 1).first.map(String.init) ?? id
+    }
+
+    /// `key` is two or more neighboring keys of `keys` written together ("milch" + "butter").
+    public static func isConcatenation(_ key: String, of keys: [String]) -> Bool {
+        for start in keys.indices {
+            var joined = keys[start]
+            for next in keys.indices[(start + 1)...] {
+                joined += keys[next]
+                if joined == key { return true }
+                if joined.count >= key.count { break }
+            }
+        }
+        return false
     }
 
     public mutating func toggle(_ id: Entry.ID) {

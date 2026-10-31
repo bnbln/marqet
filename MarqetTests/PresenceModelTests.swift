@@ -128,7 +128,7 @@ struct PresenceModelTests {
         let model = try await makeModel()
         let lidl = model.addStore(from: try #require(model.catalog?.entry(forKey: "lidl")), planned: false)
         #expect(!model.storesWorthAStop.contains(lidl.id))
-        model.plan(lidl.id)
+        model.pin(lidl.id)
         #expect(model.storesWorthAStop.contains(lidl.id))
         #expect(model.storesWorthAStop.contains(try store(model, "dm").id))
     }

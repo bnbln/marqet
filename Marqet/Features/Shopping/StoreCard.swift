@@ -419,7 +419,7 @@ struct StoreCard: View {
                     .font(.title3.bold())
                     .multilineTextAlignment(.center)
                 if let store {
-                    Button("Ausblenden") { model.hide(store.id) }
+                    Button("Ausblenden") { model.unpin(store.id) }
                         .buttonStyle(.bordered)
                         .tint(readableTint)
                 }
@@ -464,7 +464,7 @@ struct StoreCard: View {
                     }
                     Text("Leer")
                         .font(.title3.bold())
-                    Button("Ausblenden") { model.hide(store.id) }
+                    Button("Ausblenden") { model.unpin(store.id) }
                         .buttonStyle(.bordered)
                 }
             }
@@ -636,8 +636,12 @@ struct StoreActionsMenu<MenuLabel: View>: View {
                 if store.type.showsCategorySections {
                     Button("Abschnitte sortieren", systemImage: "arrow.up.arrow.down") { showsSectionOrder = true }
                 }
-                if items.isEmpty {
-                    Button("Aus Übersicht entfernen", systemImage: "eye.slash") { model.hide(store.id) }
+                if store.plannedAt != nil {
+                    Button("Lösen", systemImage: "pin.slash") { model.unpin(store.id) }
+                } else if items.isEmpty {
+                    Button("Ausblenden", systemImage: "eye.slash") { model.unpin(store.id) }
+                } else {
+                    Button("Anheften", systemImage: "pin") { model.pin(store.id) }
                 }
             }
         } label: {

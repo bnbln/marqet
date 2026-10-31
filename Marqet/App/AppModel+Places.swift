@@ -203,7 +203,7 @@ extension AppModel {
     func addStore(from place: PlaceResult) -> Store? {
         let store: Store?
         if let existing = existingStore(for: place) {
-            plan(existing.id)
+            pin(existing.id)
             store = existing
         } else if let chain = chain(of: place) {
             store = addStore(from: chain)

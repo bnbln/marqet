@@ -29,7 +29,7 @@ struct BriefingCard: View {
                         } label: {
                             HStack(spacing: 6) {
                                 StoreBadge(store: line.store, size: 24)
-                                Text(line.openCount > 0 ? "\(line.openCount)" : String(localized: "geplant"))
+                                Text(line.openCount > 0 ? "\(line.openCount)" : String(localized: "angeheftet"))
                                     .font(.subheadline.weight(.semibold))
                                     .monospacedDigit()
                             }

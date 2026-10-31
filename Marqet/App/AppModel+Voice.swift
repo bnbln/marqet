@@ -103,7 +103,7 @@ extension AppModel {
             let page: PageID
             switch placement(of: entry, options: options, defaultPage: defaultPage).choice {
             case .store(let id):
-                plan(id)
+                pin(id)
                 page = .store(id)
             case .catalog(let key):
                 if let id = createdStores[key] {

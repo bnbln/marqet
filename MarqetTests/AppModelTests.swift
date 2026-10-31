@@ -82,14 +82,28 @@ struct AppModelTests {
         #expect(model.recentlyCompleted.map(\.title) == ["Milch"])
     }
 
-    @Test func plannedStoreStaysAndHideRemovesIt() async throws {
+    @Test func pinnedStoreStaysAndUnpinRemovesOnlyTheCard() async throws {
         let model = try await makeModel()
         let dm = try catalogStore(model, "dm")
         #expect(model.deck.pages == [.map, .brochures, .unsorted, .more])
-        model.plan(dm.id)
+        model.pin(dm.id)
         #expect(model.deck.pages == [.map, .brochures, .unsorted, .store(dm.id), .more])
-        model.hide(dm.id)
+        model.unpin(dm.id)
         #expect(model.deck.pages == [.map, .brochures, .unsorted, .more])
+        // Unpinned stays one of "Meine Läden", now listed on the last card.
+        #expect(model.stores.contains { $0.id == dm.id })
+        #expect(model.hiddenStores.map(\.id) == [dm.id])
+    }
+
+    @Test func pinSwitchFollowsTheCard() async throws {
+        let model = try await makeModel()
+        let dm = try catalogStore(model, "dm")
+        model.setPinned(true, for: dm.id)
+        #expect(model.isPinned(dm.id))
+        #expect(model.deck.pages.contains(.store(dm.id)))
+        model.setPinned(false, for: dm.id)
+        #expect(!model.isPinned(dm.id))
+        #expect(!model.deck.pages.contains(.store(dm.id)))
     }
 
     // MARK: M5 – store management
@@ -381,7 +395,7 @@ struct AppModelTests {
     @Test func composerTargetStaysOnScreenWhenEmptied() async throws {
         let model = try await makeModel()
         let dm = try catalogStore(model, "dm")
-        model.hide(dm.id)
+        model.unpin(dm.id)
         model.startComposer(on: .store(dm.id))
         #expect(model.deck.pages.contains(.store(dm.id)))
         model.endComposer()

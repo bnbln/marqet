@@ -60,7 +60,7 @@ extension AppModel {
                 ? String(localized: "1 Eintrag für \(names).")
                 : String(localized: "\(total) Einträge für \(names)."))
         } else {
-            sentences.append(String(localized: "\(names) ist geplant, die Liste ist noch leer."))
+            sentences.append(String(localized: "\(names) ist angeheftet, die Liste ist noch leer."))
         }
         if let nearest = lines.min(by: { (travelMinutes(to: $0.store.id) ?? .infinity) < (travelMinutes(to: $1.store.id) ?? .infinity) }),
            lines.count > 1, let distance = distanceText(to: nearest.store.id) {

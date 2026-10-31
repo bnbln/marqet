@@ -126,7 +126,7 @@ struct AddStoreSheet: View {
         if addedHere.remove(existing.id) != nil {
             Task { await model.deleteStore(existing.id) }
         } else {
-            model.hide(existing.id)
+            model.unpin(existing.id)
         }
     }
 

@@ -34,11 +34,33 @@ struct PurchaseTests {
         return condition()
     }
 
-    func makeManager() -> PurchaseManager {
-        PurchaseManager { [probe] in probe.entitled = $0 }
+    func makeManager(productID: String = PurchaseManager.proProductID) -> PurchaseManager {
+        PurchaseManager(productID: productID) { [probe] in probe.entitled = $0 }
     }
 
-    @Test func productLoadsAsFamilyShareableNonConsumable() async throws {
+    /// Whether StoreKit testing serves the Pro product from `Marqet.storekit`. Until Pro exists in
+    /// App Store Connect it does not (also not locally), so the purchase flow tests are skipped then.
+    static func storeKitServesPro() async -> Bool {
+        guard let session = try? SKTestSession(configurationFileNamed: "Marqet") else { return false }
+        session.disableDialogs = true
+        let products = try? await Product.products(for: [PurchaseManager.proProductID])
+        return products?.isEmpty == false
+    }
+
+    nonisolated static let needsProProduct = ConditionTrait.enabled("StoreKit liefert noch kein Marqet-Pro-Produkt") {
+        await storeKitServesPro()
+    }
+
+    @Test func missingProductShowsNotYetAvailableAndStaysLocked() async {
+        let manager = makeManager(productID: "app.marqet.Marqet.missing")
+        await manager.start()
+        #expect(manager.product == nil)
+        #expect(manager.state == .unavailable)
+        #expect(await manager.purchase() == false)
+        #expect(!probe.entitled)
+    }
+
+    @Test(needsProProduct) func productLoadsAsFamilyShareableNonConsumable() async throws {
         let manager = makeManager()
         await manager.loadProduct()
         let product = try #require(manager.product)
@@ -47,7 +69,7 @@ struct PurchaseTests {
         #expect(product.isFamilyShareable)
     }
 
-    @Test func purchaseUnlocksAndRefundLocksAgain() async throws {
+    @Test(needsProProduct) func purchaseUnlocksAndRefundLocksAgain() async throws {
         let manager = makeManager()
         await manager.start()
         #expect(!probe.entitled)
@@ -61,7 +83,7 @@ struct PurchaseTests {
         #expect(await eventually { !probe.entitled })
     }
 
-    @Test func askToBuyStaysPendingAndLocked() async throws {
+    @Test(needsProProduct) func askToBuyStaysPendingAndLocked() async throws {
         session.askToBuyEnabled = true
         let manager = makeManager()
         await manager.start()
@@ -70,7 +92,7 @@ struct PurchaseTests {
         #expect(!probe.entitled)
     }
 
-    @Test func existingPurchaseIsFoundAtLaunch() async throws {
+    @Test(needsProProduct) func existingPurchaseIsFoundAtLaunch() async throws {
         try await session.buyProduct(identifier: PurchaseManager.proProductID)
         let manager = makeManager()
         await manager.start()

@@ -28,9 +28,10 @@ print(phones[-1]["udid"])')}"
 xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
 # EventKit integration tests need Reminders access; without it they are skipped, not failed.
 xcrun simctl privacy "$DEVICE_ID" grant reminders app.marqet.Marqet 2>/dev/null || true
-xcodebuild test \
-    -project Marqet.xcodeproj -scheme Marqet \
-    -destination "platform=iOS Simulator,id=$DEVICE_ID" \
-    -derivedDataPath .build/DerivedData \
-    -quiet
+XCODEBUILD=(-project Marqet.xcodeproj -scheme Marqet
+    -destination "platform=iOS Simulator,id=$DEVICE_ID"
+    -derivedDataPath .build/DerivedData)
+xcodebuild build-for-testing "${XCODEBUILD[@]}" -quiet
+# Not quiet, so failing expectations show up in the log. The app speaks German first, and so do its tests.
+xcodebuild test-without-building "${XCODEBUILD[@]}" -testLanguage de -testRegion DE
 echo "✔ All checks passed"

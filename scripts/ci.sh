@@ -30,7 +30,12 @@ xcrun simctl boot "$DEVICE_ID" 2>/dev/null || true
 xcrun simctl privacy "$DEVICE_ID" grant reminders app.marqet.Marqet 2>/dev/null || true
 XCODEBUILD=(-project Marqet.xcodeproj -scheme Marqet
     -destination "platform=iOS Simulator,id=$DEVICE_ID"
-    -derivedDataPath .build/DerivedData)
+    -derivedDataPath .build/DerivedData
+    # Content-addressed cache outside DerivedData, so CI can keep it between runs.
+    COMPILATION_CACHE_ENABLE_CACHING=YES
+    COMPILATION_CACHE_CAS_PATH="$PWD/.build/CompilationCache"
+    # Nobody browses the index of a CI build.
+    COMPILER_INDEX_STORE_ENABLE=NO)
 xcodebuild build-for-testing "${XCODEBUILD[@]}" -quiet
 # Not quiet, so failing expectations show up in the log. The app speaks German first, and so do its tests.
 xcodebuild test-without-building "${XCODEBUILD[@]}" -testLanguage de -testRegion DE

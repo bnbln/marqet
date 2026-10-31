@@ -44,10 +44,11 @@ extension FoundationModelsService {
                         options: GenerationOptions(samplingMode: .greedy)
                     )
                     let valid = Set(choices)
-                    let heard = Set(VoiceTokenizer.words(in: transcript))
+                    let spokenWords = VoiceTokenizer.words(in: transcript)
+                    let heard = Set(spokenWords)
                     for try await snapshot in stream {
                         let entries = Self.entries(in: snapshot.rawContent, validStores: valid)
-                        continuation.yield(entries.filter { Self.wasSpoken($0, heard: heard) }
+                        continuation.yield(entries.filter { Self.wasSpoken($0, heard: spokenWords) }
                             .map { Self.droppingUnspokenDetail(from: $0, heard: heard) })
                     }
                     continuation.finish()
@@ -69,12 +70,14 @@ extension FoundationModelsService {
         - Gesprochene Eigenschaften bleiben beim Artikel, nach einem Komma: „Milch laktosefrei“ → „Milch, laktosefrei“.
           Erfinde keine Eigenschaften, die nicht gesagt wurden.
         - Übernimm Mengen und Einheiten wie gesprochen und rechne nichts um.
-        - „laden“ ist der Laden, bei dem der Artikel gekauft werden soll. Ein Laden gilt für die Artikel seines
-          Satzes, auch wenn er erst danach genannt wird („10 Eier, die will ich auf dem Markt kaufen“).
+        - „laden“ ist der Laden, bei dem der Artikel gekauft werden soll. Ein Laden direkt hinter einem Artikel gilt
+          nur für diesen Artikel („HDMI-Kabel von Mediamarkt, Kuchen“ → Kuchen ohne Laden). Am Ende einer Aufzählung
+          gilt er für die ganze Aufzählung („Milch, Butter und Eier bei Rewe“), ebenso ein eigener Satzteil
+          („10 Eier, die will ich auf dem Markt kaufen“).
         - Ein Satz, der nur einen Laden nennt („Die hole ich bei Rewe.“), gilt für die Artikel des Satzes davor.
         - Ein Punkt steht auch dort, wo eine Sprechpause war. Ein Laden in einem Satz mit eigenen Artikeln gilt nicht
-          rückwirkend für den Satz davor: „Brötchen. HDMI-Kabel beim Mediamarkt.“ → Brötchen (\(noStore)),
-          HDMI-Kabel (Mediamarkt).
+          rückwirkend für den Satz davor.
+        - Jeder gesagte Artikel ist genau ein Eintrag: „Milch, Butter“ sind zwei Einträge, nie zusätzlich „Milchbutter“.
         - Ein Laden, der vorab angekündigt wird („Bei Rewe brauche ich einiges.“), gilt für die folgenden Artikel,
           bis ein anderer Laden genannt wird. Ebenso Sätze mit „und“, „auch“, „genau wie“ oder reine Aufzählungen.
         - Ohne erkennbaren Laden: „\(noStore)“. Erfinde keine Läden.
@@ -82,8 +85,9 @@ extension FoundationModelsService {
         Läden: \(stores.joined(separator: ", "))
 
         Beispiel: „Ich brauche 10 Eier und will sie auf dem Markt kaufen, genau wie Suppengrün. Bei Rewe Hackfleisch.
-        Ich brauche noch Milch. Die hole ich bei Aldi.“
-        → Eier (10, Markt), Suppengrün (Markt), Hackfleisch (Rewe), Milch (Aldi)
+        Ich brauche noch Milch. Die hole ich bei Aldi. Brot. Batterien von Mediamarkt, Kuchen.“
+        → Eier (10, Markt), Suppengrün (Markt), Hackfleisch (Rewe), Milch (Aldi), Brot (\(noStore)),
+        Batterien (Mediamarkt), Kuchen (\(noStore))
         """
     }
 
@@ -97,12 +101,14 @@ extension FoundationModelsService {
         - Spoken properties stay with the item, after a comma: “lactose-free milk” → “Milk, lactose-free”.
           Never add properties that were not said.
         - Keep quantities and units as spoken (“two pounds” → “2 lb”) and never convert them.
-        - “laden” is the store where the item should be bought. A store applies to the items of its sentence,
-          even when it is named after them (“10 eggs, I'll get them at the market”).
+        - “laden” is the store where the item should be bought. A store right after an item applies to that item
+          only (“HDMI cable from Mediamarkt, cake” → cake without store). At the end of an enumeration it applies to
+          the whole enumeration (“milk, butter and eggs at Rewe”), and so does a clause of its own
+          (“10 eggs, I'll get them at the market”).
         - A sentence that only names a store (“Get them at Rewe.”) applies to the items of the sentence before.
         - A period also marks a pause in speech. A store in a sentence with items of its own never applies back to
-          the sentence before: “Bread rolls. HDMI cable at Mediamarkt.” → Bread rolls (\(noStore)),
-          HDMI cable (Mediamarkt).
+          the sentence before.
+        - Every spoken item is exactly one entry: “milk, butter” are two entries, never also “milkbutter”.
         - A store announced first (“At Rewe I need a few things.”) applies to the following items until another
           store is named. So do sentences starting with “and”, “also”, “as well as” and bare enumerations.
         - Without a recognizable store: “\(noStore)”. Never invent stores. Store names stay as listed.
@@ -115,10 +121,17 @@ extension FoundationModelsService {
         """
     }
 
-    /// An entry needs a word the user said (compared by its first four letters: "Eiern" ~ "Eier").
-    private static func wasSpoken(_ entry: SpokenEntry, heard: Set<String>) -> Bool {
+    /// An entry needs a word the user said (compared by its first four letters: "Eiern" ~ "Eier"),
+    /// and none of its words may be several spoken words glued together: "Milchbutter" from
+    /// "Milch, Butter" shares "milc" with "Milch" but was never said.
+    private static func wasSpoken(_ entry: SpokenEntry, heard: [String]) -> Bool {
+        let words = VoiceTokenizer.words(in: entry.name)
+        let glued = words.contains { word in
+            !heard.contains(word) && VoiceDraft.isConcatenation(word, of: heard)
+        }
+        guard !glued else { return false }
         let stems = Set(heard.map { String($0.prefix(4)) })
-        return VoiceTokenizer.words(in: entry.name).contains { $0.count >= 3 && stems.contains(String($0.prefix(4))) }
+        return words.contains { $0.count >= 3 && stems.contains(String($0.prefix(4))) }
     }
 
     /// "Kartoffeln, mehligkochend" stays only if "mehligkochend" was said – the small model

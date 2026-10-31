@@ -26,7 +26,6 @@ struct StoreCard: View {
     /// Top edge of each category title row in the list, for the pinned title.
     @State private var titleOffsets: [ItemCategory: CGFloat] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.horizontalSizeClass) private var sizeClass
     private var isTyping: Bool { model.composerTarget != nil || model.editingItemID != nil }
 
     private var keyboardInset: CGFloat {
@@ -75,14 +74,10 @@ struct StoreCard: View {
             }
         }
         .modifier(CardZoomSource(page: page, namespace: isExpanded ? nil : zoomNamespace))
-        // iPad and the open Duo: items dragged from another card move to this store
-        // (KONZEPT-DUO-IPAD §4.2). On the iPhone a drag stays inside its store.
+        // Items dragged from another card move to this store, or back to the inbox
+        // (KONZEPT-DUO-IPAD §4.2). Catches drops on the header and on an empty card.
         .dropDestination(for: String.self) { ids, _ in
-            guard sizeClass == .regular else { return false }
-            let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store?.id }
-            guard !moved.isEmpty else { return false }
-            Task { for item in moved { await model.assign(item, to: store) } }
-            return true
+            receiveDrop(of: ids)
         }
         .animation(reduceMotion ? nil : .easeOut(duration: 0.38), value: model.hasLoadedItems)
         .onChange(of: model.hasLoadedItems, initial: true) { old, loaded in
@@ -223,11 +218,11 @@ struct StoreCard: View {
                         guard let store, let placement = CardLine.placement(afterMoving: source, to: destination, in: lines) else { return }
                         model.arrangeItem(placement.item, into: placement.category, order: placement.order, in: store.id)
                     })
-                    // An item from another card (iPad, open Duo, KONZEPT-DUO-IPAD §4.2).
+                    // An item from another card (KONZEPT-DUO-IPAD §4.2). Over the rows the list
+                    // takes the drop itself, so the card's own destination never sees it: this one
+                    // has to handle the inbox (`store == nil`) as well.
                     .dropDestination(for: String.self) { ids, _ in
-                        guard sizeClass == .regular, let store else { return }
-                        let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store.id }
-                        Task { for item in moved { await model.assign(item, to: store) } }
+                        _ = receiveDrop(of: ids)
                     }
                 }
                 completedSection
@@ -293,6 +288,16 @@ struct StoreCard: View {
                 }
             }
         }
+    }
+
+    /// Moves items dragged in from another card to this card's store (`nil`: the inbox).
+    /// Items already on this card are left alone; their reordering goes through `onMove`.
+    private func receiveDrop(of ids: [String]) -> Bool {
+        let moved = model.items.filter { ids.contains($0.id) && $0.storeID != store?.id }
+        guard !moved.isEmpty else { return false }
+        let target = store
+        Task { for item in moved { await model.assign(item, to: target) } }
+        return true
     }
 
     // MARK: Category titles

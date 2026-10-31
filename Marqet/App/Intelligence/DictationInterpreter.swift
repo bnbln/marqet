@@ -72,6 +72,9 @@ extension FoundationModelsService {
         - „laden“ ist der Laden, bei dem der Artikel gekauft werden soll. Ein Laden gilt für die Artikel seines
           Satzes, auch wenn er erst danach genannt wird („10 Eier, die will ich auf dem Markt kaufen“).
         - Ein Satz, der nur einen Laden nennt („Die hole ich bei Rewe.“), gilt für die Artikel des Satzes davor.
+        - Ein Punkt steht auch dort, wo eine Sprechpause war. Ein Laden in einem Satz mit eigenen Artikeln gilt nicht
+          rückwirkend für den Satz davor: „Brötchen. HDMI-Kabel beim Mediamarkt.“ → Brötchen (\(noStore)),
+          HDMI-Kabel (Mediamarkt).
         - Ein Laden, der vorab angekündigt wird („Bei Rewe brauche ich einiges.“), gilt für die folgenden Artikel,
           bis ein anderer Laden genannt wird. Ebenso Sätze mit „und“, „auch“, „genau wie“ oder reine Aufzählungen.
         - Ohne erkennbaren Laden: „\(noStore)“. Erfinde keine Läden.
@@ -97,6 +100,9 @@ extension FoundationModelsService {
         - “laden” is the store where the item should be bought. A store applies to the items of its sentence,
           even when it is named after them (“10 eggs, I'll get them at the market”).
         - A sentence that only names a store (“Get them at Rewe.”) applies to the items of the sentence before.
+        - A period also marks a pause in speech. A store in a sentence with items of its own never applies back to
+          the sentence before: “Bread rolls. HDMI cable at Mediamarkt.” → Bread rolls (\(noStore)),
+          HDMI cable (Mediamarkt).
         - A store announced first (“At Rewe I need a few things.”) applies to the following items until another
           store is named. So do sentences starting with “and”, “also”, “as well as” and bare enumerations.
         - Without a recognizable store: “\(noStore)”. Never invent stores. Store names stay as listed.

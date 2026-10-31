@@ -139,6 +139,62 @@ struct VoiceParsingTests {
         #expect(entries.map(\.title) == ["Rote Bete", "Frische Milch", "Kinder Riegel", "500 g Butter", "Zwiebeln"])
     }
 
+    // MARK: Pauses
+
+    @Test func pauseKeepsLaterStoreWithItsOwnItem() {
+        // "Brötchen [Pause] HDMI-Kabel beim Mediamarkt": the pause becomes a period.
+        let lexicon = SpokenStoreLexicon(stores: [(name: "MediaMarkt", spellings: ["Media Markt"])])
+        let entries = VoiceRuleParser.parse("Brötchen. HDMI-Kabel beim Mediamarkt.", lexicon: lexicon)
+        #expect(entries == [
+            SpokenEntry(name: "Brötchen"),
+            SpokenEntry(name: "HDMI-Kabel", storeName: "MediaMarkt"),
+        ])
+    }
+
+    @Test func hyphenatedCompoundEndsAnEnumerationWithoutCommas() {
+        let entries = VoiceRuleParser.parse("Brötchen HDMI-Kabel", lexicon: lexicon)
+        #expect(entries.map(\.name) == ["Brötchen", "HDMI-Kabel"])
+    }
+
+    @Test func pauseBetweenWordsEndsTheSentence() {
+        let runs = [
+            TimedText("Brötchen", start: 0.2, end: 0.8),
+            TimedText(" "),
+            TimedText("HDMI", start: 2.1, end: 2.4),
+            TimedText("-"),
+            TimedText("Kabel", start: 2.4, end: 2.8),
+            TimedText(" "),
+            TimedText("beim", start: 2.9, end: 3.1),
+            TimedText(" "),
+            TimedText("Mediamarkt", start: 3.1, end: 3.7),
+        ]
+        let marked = PauseMarker.mark(runs, after: nil)
+        #expect(marked.text == "Brötchen. HDMI-Kabel beim Mediamarkt")
+        #expect(!marked.startsAfterPause)
+        #expect(marked.lastEnd == 3.7)
+    }
+
+    @Test func pauseTurnsACommaIntoAPeriod() {
+        let runs = [TimedText("Brötchen,", start: 0, end: 0.6), TimedText(" HDMI-Kabel", start: 1.8, end: 2.5)]
+        #expect(PauseMarker.mark(runs, after: nil).text == "Brötchen. HDMI-Kabel")
+    }
+
+    @Test func quickEnumerationHasNoPause() {
+        let runs = [
+            TimedText("Milch", start: 0, end: 0.4), TimedText(" "),
+            TimedText("Butter", start: 0.7, end: 1.1), TimedText(" "),
+            TimedText("Eier", start: 1.4, end: 1.7),
+        ]
+        #expect(PauseMarker.mark(runs, after: nil).text == "Milch Butter Eier")
+    }
+
+    @Test func pauseBeforeANewResult() {
+        let marked = PauseMarker.mark([TimedText("HDMI-Kabel", start: 3, end: 3.6)], after: 1.2)
+        #expect(marked.startsAfterPause)
+        #expect(PauseMarker.join(PauseMarker.endingSentence("Brötchen"), marked.text) == "Brötchen. HDMI-Kabel")
+        #expect(PauseMarker.endingSentence("Brötchen. ") == "Brötchen.")
+    }
+
     // MARK: English
 
     @Test func englishDictation() {

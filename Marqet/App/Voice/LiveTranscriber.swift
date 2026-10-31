@@ -1,5 +1,6 @@
 @preconcurrency import AVFoundation
 import Foundation
+import MarqetCore
 import Speech
 
 /// Live, on-device transcription of the microphone (KONZEPT §3.3).
@@ -27,13 +28,15 @@ final class LiveTranscriber {
     struct Transcript: Equatable {
         var finalized = ""
         var volatile = ""
-        var full: String { Self.join(finalized, volatile) }
+        /// The user paused before the volatile tail: the finalized text ends its sentence there.
+        var volatileFollowsPause = false
+        var full: String { Self.join(finalized, volatile, afterPause: volatileFollowsPause) }
 
         /// Segments arrive without reliable spacing: "kaufen." + "Ah, und" → "kaufen. Ah, und".
-        static func join(_ head: String, _ tail: String) -> String {
-            guard let last = head.last, let first = tail.first else { return head + tail }
-            if last.isWhitespace || first.isWhitespace || ".,!?;:".contains(first) { return head + tail }
-            return head + " " + tail
+        /// After a pause the head ends its sentence: "Brötchen" + "HDMI-Kabel" → "Brötchen. HDMI-Kabel".
+        static func join(_ head: String, _ tail: String, afterPause: Bool = false) -> String {
+            let tailIsEmpty = tail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            return PauseMarker.join(afterPause && !tailIsEmpty ? PauseMarker.endingSentence(head) : head, tail)
         }
     }
 
@@ -48,9 +51,14 @@ final class LiveTranscriber {
     private var resultsTask: Task<Void, Never>?
     private var levelTask: Task<Void, Never>?
     private var module: (any SpeechModule)?
+    /// Audio time at which the last finalized word ended, to find a pause before the next result.
+    private var lastFinalizedEnd: Double?
+    /// "Weitersprechen": the text heard before ended with the stop button – a pause by definition.
+    private var resumesAfterPause: Bool
 
     init(transcript: Transcript = Transcript()) {
         self.transcript = transcript
+        resumesAfterPause = !transcript.full.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     // MARK: Preparation
@@ -63,9 +71,23 @@ final class LiveTranscriber {
     func prepare(locale preferred: Locale, progress: @escaping @MainActor (Double) -> Void) async throws {
         let module: any SpeechModule
         if SpeechTranscriber.isAvailable, let locale = await SpeechTranscriber.supportedLocale(equivalentTo: preferred) {
-            module = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
+            // Word timings reveal pauses the transcriber did not punctuate (`PauseMarker`).
+            let preset = SpeechTranscriber.Preset.progressiveTranscription
+            module = SpeechTranscriber(
+                locale: locale,
+                transcriptionOptions: preset.transcriptionOptions,
+                reportingOptions: preset.reportingOptions,
+                attributeOptions: preset.attributeOptions.union([.audioTimeRange])
+            )
         } else if let locale = await DictationTranscriber.supportedLocale(equivalentTo: preferred) {
-            module = DictationTranscriber(locale: locale, preset: .progressiveShortDictation)
+            let preset = DictationTranscriber.Preset.progressiveShortDictation
+            module = DictationTranscriber(
+                locale: locale,
+                contentHints: preset.contentHints,
+                transcriptionOptions: preset.transcriptionOptions,
+                reportingOptions: preset.reportingOptions,
+                attributeOptions: preset.attributeOptions.union([.audioTimeRange])
+            )
         } else {
             throw Failure.unsupportedLanguage
         }
@@ -122,8 +144,9 @@ final class LiveTranscriber {
         try? await analyzer?.finalizeAndFinishThroughEndOfInput()
         await resultsTask?.value
         if !transcript.volatile.isEmpty {
-            transcript.finalized = Transcript.join(transcript.finalized, transcript.volatile)
+            transcript.finalized = transcript.full
             transcript.volatile = ""
+            transcript.volatileFollowsPause = false
             onTranscript?(transcript)
         }
         analyzer = nil
@@ -139,6 +162,7 @@ final class LiveTranscriber {
     /// Keeps the text heard so far and listens again ("Weitersprechen").
     func resetVolatile() {
         transcript.volatile = ""
+        transcript.volatileFollowsPause = false
     }
 
     private func stopAudio() async {
@@ -158,7 +182,7 @@ final class LiveTranscriber {
             resultsTask = Task { [weak self] in
                 do {
                     for try await result in transcriber.results {
-                        self?.receive(String(result.text.characters), isFinal: result.isFinal)
+                        self?.receive(Self.timedRuns(of: result.text), isFinal: result.isFinal)
                     }
                 } catch {}
             }
@@ -166,19 +190,36 @@ final class LiveTranscriber {
             resultsTask = Task { [weak self] in
                 do {
                     for try await result in transcriber.results {
-                        self?.receive(String(result.text.characters), isFinal: result.isFinal)
+                        self?.receive(Self.timedRuns(of: result.text), isFinal: result.isFinal)
                     }
                 } catch {}
             }
         }
     }
 
-    private func receive(_ text: String, isFinal: Bool) {
+    /// The result's runs with their audio time ranges, where the transcriber reports them.
+    nonisolated private static func timedRuns(of text: AttributedString) -> [TimedText] {
+        text.runs.map { run in
+            let piece = String(text[run.range].characters)
+            guard let range = run.audioTimeRange, range.start.seconds.isFinite, range.end.seconds.isFinite else {
+                return TimedText(piece)
+            }
+            return TimedText(piece, start: range.start.seconds, end: range.end.seconds)
+        }
+    }
+
+    private func receive(_ runs: [TimedText], isFinal: Bool) {
+        let marked = PauseMarker.mark(runs, after: lastFinalizedEnd)
+        let afterPause = marked.startsAfterPause || (resumesAfterPause && lastFinalizedEnd == nil)
         if isFinal {
-            transcript.finalized = Transcript.join(transcript.finalized, text)
+            transcript.finalized = Transcript.join(transcript.finalized, marked.text, afterPause: afterPause)
             transcript.volatile = ""
+            transcript.volatileFollowsPause = false
+            if let end = marked.lastEnd { lastFinalizedEnd = end }
+            if !marked.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { resumesAfterPause = false }
         } else {
-            transcript.volatile = text
+            transcript.volatile = marked.text
+            transcript.volatileFollowsPause = afterPause
         }
         onTranscript?(transcript)
     }
